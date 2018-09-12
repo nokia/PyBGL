@@ -1,0 +1,8 @@
+build
+data
+dist
+pybgl.egg-info
+*.pyc
+*.swp
+*.swo
+.ipynb_checkpoints
