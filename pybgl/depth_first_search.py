@@ -16,7 +16,7 @@ __license__    = "BSD-3"
 
 from collections           import deque
 from pybgl.graph           import Graph, EdgeDescriptor, out_edges, target, vertices
-from pybgl.graph_traversal import WHITE, GRAY, BLACK, init_pmap_color
+from pybgl.graph_traversal import WHITE, GRAY, BLACK
 from pybgl.property_map    import ReadWritePropertyMap, make_assoc_property_map
 
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -25,7 +25,7 @@ from pybgl.property_map    import ReadWritePropertyMap, make_assoc_property_map
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 class DefaultDepthFirstSearchVisitor():
-    def __init__(self): super(DefaultDepthFirstSearchVisitor, self).__init__()
+    def __init__(self): super().__init__()
     def start_vertex(self, s :int, g :Graph): pass
     def discover_vertex(self, u :int, g :Graph): pass
     def examine_edge(self, e :EdgeDescriptor, g :Graph): pass
@@ -39,19 +39,15 @@ def depth_first_search(
     g :Graph,
     pmap_vcolor :ReadWritePropertyMap,
     vis         = DefaultDepthFirstSearchVisitor(),
-    # N.B: The following parameters doe not exists in libboost:
-    if_push     = None, # if_push(e :EdgeDecriptor) -> bool returns True iff e is relevant
-    out_edges   = out_edges,
-    target      = target,
-    init_pmap   = True
+    # N.B: The following parameter does not exist in libboost:
+    if_push     = None # if_push(e :EdgeDecriptor, g :Graph) -> bool returns True iff e is relevant
 ):
-    if init_pmap: init_pmap_color(pmap_vcolor, g)
     if not if_push: if_push = (lambda e, g: True)
 
     vis.start_vertex(s, g)
     pmap_vcolor[s] = GRAY
     vis.discover_vertex(s, g)
-    u_edges = [e for e in out_edges(s, g)]
+    u_edges = [e for e in out_edges(s, g) if if_push(e, g)]
     stack = deque([(s, 0, len(u_edges))])
 
     while stack:
@@ -78,7 +74,7 @@ def depth_first_search(
                 u = v
                 pmap_vcolor[u] = GRAY
                 vis.discover_vertex(u, g)
-                u_edges = [e for e in out_edges(u, g)]
+                u_edges = [e for e in out_edges(u, g) if if_push(e, g)]
                 i = 0
                 n = len(u_edges)
             else:
@@ -97,14 +93,9 @@ def depth_first_search_graph(
     pmap_vcolor :ReadWritePropertyMap,
     vis       = DefaultDepthFirstSearchVisitor(),
     # N.B: The following parameters doe not exists in libboost:
-    if_push   = None, # if_push(e :EdgeDecriptor) -> bool returns True iff e is relevant
-    out_edges = out_edges,
-    target    = target,
-    init_pmap = True,
+    if_push   = None # if_push(e :EdgeDecriptor) -> bool returns True iff e is relevant
 ):
-    if init_pmap:
-        init_pmap_color(pmap_vcolor, g)
     for u in vertices(g):
         if pmap_vcolor[u] == WHITE:
-            depth_first_search(u, g, pmap_vcolor, vis, if_push, out_edges, target, False)
+            depth_first_search(u, g, pmap_vcolor, vis, if_push)
 

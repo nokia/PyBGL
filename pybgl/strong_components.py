@@ -18,7 +18,7 @@ __license__    = "BSD-3"
 
 
 import sys
-from collections                import deque
+from collections                import defaultdict, deque
 
 from pybgl.depth_first_search   import DefaultDepthFirstSearchVisitor, depth_first_search_graph
 from pybgl.graph                import DirectedGraph, out_edges, target, vertices
@@ -45,9 +45,7 @@ class TarjanVisitor(DefaultDepthFirstSearchVisitor):
         pmap_component,
         pmap_root,
         pmap_discover_time,
-        stack,
-        out_edges = out_edges,
-        target    = target
+        stack
     ):
         self.m_total              = 0                  # Number of strongly connected components
         self.m_pmap_component     = pmap_component     # Map vertex with its component id
@@ -55,8 +53,6 @@ class TarjanVisitor(DefaultDepthFirstSearchVisitor):
         self.m_pmap_discover_time = pmap_discover_time # Map vertex with its iteration number
         self.m_stack              = stack              # Stack of visited vertices
         self.m_dfs_time           = 0                  # Iteration number
-        self.m_out_edges          = out_edges          # out_edges(e, g) primitive
-        self.m_target             = target             # target(e, g) primitive
 
     @property
     def total(self) -> int:
@@ -73,8 +69,8 @@ class TarjanVisitor(DefaultDepthFirstSearchVisitor):
         return u if self.m_pmap_discover_time[u] < self.m_pmap_discover_time[v] else v
 
     def finish_vertex(self, u :int, g :DirectedGraph):
-        for e in self.m_out_edges(u, g):
-            v = self.m_target(e, g)
+        for e in out_edges(u, g):
+            v = target(e, g)
             if self.m_pmap_component[v] == INFINITY:
                 # u is attached to the "lowest" root among the root of u and v
                 self.m_pmap_root[u] = self.discover_min(
@@ -94,13 +90,11 @@ class TarjanVisitor(DefaultDepthFirstSearchVisitor):
 
 def strong_components(
     g :DirectedGraph,
-    pmap_component :ReadWritePropertyMap,
-    out_edges = out_edges,
-    target = target
+    pmap_component :ReadWritePropertyMap
 ) -> int:
-    map_vcolor        = {u : WHITE for u in vertices(g)}
-    map_root          = {u : 0     for u in vertices(g)}
-    map_discover_time = {u : 0     for u in vertices(g)}
+    map_vcolor        = defaultdict(int)
+    map_root          = defaultdict(int)
+    map_discover_time = defaultdict(int)
 
     pmap_vcolor        = make_assoc_property_map(map_vcolor)
     pmap_root          = make_assoc_property_map(map_root)
@@ -111,12 +105,10 @@ def strong_components(
         pmap_component,
         pmap_root,
         pmap_discover_time,
-        stack,
-        out_edges,
-        target
+        stack
     )
 
-    depth_first_search_graph(g, pmap_vcolor, vis, None, out_edges, target)
+    depth_first_search_graph(g, pmap_vcolor, vis, None)
 
     return vis.total
 

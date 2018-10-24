@@ -21,7 +21,7 @@ from pybgl.graph    import DirectedGraph, \
 class IncidenceGraph(DirectedGraph):
     def __init__(self, directed = None):
         self.m_in_adjacencies = dict()
-        super(IncidenceGraph, self).__init__(directed)
+        super().__init__(directed)
 
     @property
     def adjacencies(self) -> dict:
@@ -32,12 +32,12 @@ class IncidenceGraph(DirectedGraph):
         return self.m_in_adjacencies
 
     def add_vertex(self) -> int:
-        u = super(IncidenceGraph, self).add_vertex()
+        u = super().add_vertex()
         self.in_adjacencies[u] = dict()
         return u
 
     def add_edge(self, u :int, v :int) -> tuple: # (EdgeDescriptor, bool)
-        (e, added) = super(IncidenceGraph, self).add_edge(u, v)
+        (e, added) = super().add_edge(u, v)
         if added:
             v_in_adjs = self.in_adjacencies[v]
             is_new = u not in v_in_adjs
@@ -52,11 +52,11 @@ class IncidenceGraph(DirectedGraph):
         es = {e for e in out_edges(u, self)}
         for e in es:
             remove_edge(e, self)
-        super(IncidenceGraph, self).remove_vertex(u)
+        super().remove_vertex(u)
         del self.in_adjacencies[u]
 
     def remove_edge(self, e :EdgeDescriptor):
-        super(IncidenceGraph, self).remove_edge(e)
+        super().remove_edge(e)
         u = e.m_source
         v = e.m_target
         n = e.m_distinguisher

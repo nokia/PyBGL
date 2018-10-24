@@ -67,7 +67,7 @@ def read_graphviz_vis(iterable, vis :GraphvizVisitor):
 
 class ReadGraphvizVisitor(GraphvizVisitor):
     def __init__(self, g :Graph):
-        super(ReadGraphvizVisitor, self).__init__()
+        super().__init__()
         self.m_g = g
         self.m_aliases = dict()
 
@@ -123,7 +123,7 @@ def read_graphviz(iterable, g :Graph, vis = None):
 
 class ReadGraphvizDpVisitor(ReadGraphvizVisitor):
     def __init__(self, g, dpv :dict, dpe :dict):
-        super(ReadGraphvizDpVisitor, self).__init__(g)
+        super().__init__(g)
         self.m_dpv = dpv
         self.m_dpe = dpe
 

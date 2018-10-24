@@ -64,16 +64,18 @@ class AssocPropertyMap(ReadWritePropertyMap):
         print(pmap['a']) # Returns 8
         print(pmap['b']) # Returns 0, like in C++ (no KeyError)
     """
-    def __init__(self, d :dict, default = None):
-        assert isinstance(d, dict), "Invalid parameter: d = %s (%s) must be a dict" % (d, type(d))
+    def __init__(self, d :defaultdict, default = None):
+        assert isinstance(d, (defaultdict, dict)), "Invalid parameter: d = %s (%s) must be a defaultdict" % (d, type(d))
         self.m_d = d
         self.m_default = default
 
     def get(self, k):
-        if isinstance(self.m_d, defaultdict):
-            return self.m_d[k]
-        else:
+        # The following test ensures compatibility with normal dict.
+        # Since defaultdict inherits dict, the following test is a little bit weird...
+        if not isinstance(self.m_d, defaultdict) and isinstance(self.m_d, dict):
             return self.m_d.get(k, self.m_default)
+        else:
+            return self.m_d[k]
 
     def put(self, k, v):
         self.m_d[k] = v
@@ -82,7 +84,7 @@ class AssocPropertyMap(ReadWritePropertyMap):
         print("/!\\ WARNING: You're not supposed to delete keys in property maps /!\\")
         del self.m_d[k]
 
-def make_assoc_property_map(d :dict, default = None):
+def make_assoc_property_map(d :defaultdict, default = None):
     return AssocPropertyMap(d, default)
 
 class IdentityPropertyMap(ReadPropertyMap):

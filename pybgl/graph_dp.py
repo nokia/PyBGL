@@ -12,11 +12,20 @@ __email__      = "marc-olivier.buob@nokia-bell-labs.com"
 __copyright__  = "Copyright (C) 2018, Nokia"
 __license__    = "BSD-3"
 
-from .graph         import default_graphviz_style, DirectedGraph, edges, Graph, source, target, vertices
+from .graph         import DirectedGraph, graphviz_arc, graphviz_type, edges, Graph, source, target, vertices
 from .property_map  import get
 
 class GraphDp:
-    def __init__(self, g :Graph, dpv = {}, dpe = {}, dg_default = {}, dv_default = {}, de_default = {}, extra_style = list()):
+    def __init__(
+        self,
+        g :Graph,
+        dpv = dict(),
+        dpe = dict(),
+        dg_default = dict(),
+        dv_default = dict(),
+        de_default = dict(),
+        extra_style = list()
+    ):
         self.m_g = g
         self.m_dpv = dpv                 # Vertex attributes
         self.m_dpe = dpe                 # Edge attributes
@@ -52,20 +61,20 @@ class GraphDp:
         ])
 
         return "%s G {%s %s}" % (
-            self.m_g.s_graphviz_type,
+            graphviz_type(self.m_g),
             graphviz_style,
             "; ".join(
                 [
                     "%s [%s]" % (
                         u,
-                        "; ".join(["%s=\"%s\"" % (k, get(pmap, u)) if k != "label" else "%s=<%s>" % (k, get(pmap, u)) for k, pmap in self.m_dpv.items()])
+                        "; ".join(["%s=\"%s\"" % (k, pmap[u]) if k != "label" else "%s=<%s>" % (k, pmap[u]) for k, pmap in self.m_dpv.items()])
                     ) for u in vs
                 ] + [
                     "%s %s %s [%s]" % (
                         source(e, self.m_g),
-                        DirectedGraph.s_graphviz_arc,
+                        graphviz_arc(self.m_g),
                         target(e, self.m_g),
-                        "; ".join(["%s=\"%s\"" % (k, get(pmap, e)) if k != "label" else "%s=<%s>" % (k, get(pmap, e)) for k, pmap in self.m_dpe.items()])
+                        "; ".join(["%s=\"%s\"" % (k, pmap[e]) if k != "label" else "%s=<%s>" % (k, pmap[e]) for k, pmap in self.m_dpe.items()])
                     ) for e in es
                 ]
             )

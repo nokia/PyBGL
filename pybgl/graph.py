@@ -55,6 +55,15 @@ def default_graphviz_style() -> str:
             "node[color = %(FG_COLOR)s fontcolor = %(FG_COLOR)s]; " \
             "edge[color = %(FG_COLOR)s fontcolor = %(FG_COLOR)s]; " % locals()
 
+def is_directed(g) -> bool:
+    return g.directed
+
+def graphviz_type(g) -> str:
+    return "digraph" if is_directed(g) else "graph"
+
+def graphviz_arc(g) -> str:
+    return "->" if is_directed(g) else "--"
+
 class Graph:
     def __init__(self, directed = None, num_vertices = 0):
         assert isinstance(directed, bool)
@@ -117,49 +126,56 @@ class Graph:
         if graphviz_style == None:
             graphviz_style = default_graphviz_style()
         return "%(type)s G {%(style)s %(arcs)s}" % {
-            "style" : default_graphviz_style(),
-            "type" : self.s_graphviz_type,
-            "arcs" : "; ".join([
-                    "%s %s %s" % (
-                        source(e, self),
-                        self.s_graphviz_arc,
-                        target(e, self)
-                    ) for e in self.edges()
-                ])
+            "style"    : graphviz_style,
+            "type"     : graphviz_type(self),
+            "vertices" : "; ".join(["%s" % u for u in self.vertices()]),
+            "arcs"     : "; ".join([
+                            "%s %s %s" % (
+                                source(e, self),
+                                graphviz_arc(self),
+                                target(e, self)
+                            ) for e in self.edges()
+                        ])
         }
 
+    def vertices(self):
+        return self.adjacencies.keys()
+
+    def source(self, e :EdgeDescriptor):
+        return e.m_source
+
+    def target(self, e :EdgeDescriptor):
+        return e.m_target
+
 def source(e :EdgeDescriptor, g :Graph):
-    return e.m_source
+    #return e.m_source
+    return g.source(e)
 
 def target(e :EdgeDescriptor, g :Graph):
-    return e.m_target
+    #return e.m_target
+    return g.target(e)
 
 #-------------------------------------------------------------------
 # Directed graph
 #-------------------------------------------------------------------
 
 class DirectedGraph(Graph):
-    s_graphviz_type = "digraph"
-    s_graphviz_arc = "->"
-
     def __init__(self, num_vertices = 0):
-        super(DirectedGraph, self).__init__(True, num_vertices)
+        super().__init__(True, num_vertices)
 
 #-------------------------------------------------------------------
 # Undirected graph
 #-------------------------------------------------------------------
 
 class UndirectedGraph(Graph):
-    s_graphviz_type = "graph"
-    s_graphviz_arc  = "--"
+    # The reverse are automatically added/inserted.
 
     def __init__(self, num_vertices = 0):
-        super(UndirectedGraph, self).__init__(False, num_vertices)
-        # Convention: an (u, v) edge is only stored in self.m_adjacencies[u]
+        super().__init__(False, num_vertices)
 
     def add_edge(self, u :int, v :int) -> tuple:
         (u, v) = (min(u, v), max(u, v))
-        (e, added) = super(UndirectedGraph, self).add_edge(u, v)
+        (e, added) = super().add_edge(u, v)
         if added:
             n = e.m_distinguisher
             if u not in self.m_adjacencies[v].keys():
@@ -168,11 +184,17 @@ class UndirectedGraph(Graph):
         return (e, added)
 
     def out_edges(self, u :int):
-        return (EdgeDescriptor(min(u, v), max(u, v), n) for v, s in self.adjacencies.get(u, dict()).items() for n in s)
+        # source(e, g) and target(e, g) impose to returns (u, v)-like
+        # EdgeDescriptors.
+        return (
+            EdgeDescriptor(u, v, n) \
+            for v, s in self.adjacencies.get(u, dict()).items() \
+            for n in s
+        )
 
     def remove_edge(self, e :EdgeDescriptor):
-        super(UndirectedGraph, self).remove_edge(e)
-        # Remove reverse adjacency
+        super().remove_edge(e)
+        # Remove the reverse adjacency
         u = source(e, self)
         v = target(e, self)
         v = max(u, v)
@@ -191,14 +213,14 @@ class UndirectedGraph(Graph):
             v = target(e, self)
             n = e.m_distinguisher
             self.m_adjacencies[v][u].remove(n)
-        super(UndirectedGraph, self).remove_vertex(u)
+        super().remove_vertex(u)
 
 #-------------------------------------------------------------------
 # Common methods
 #-------------------------------------------------------------------
 
 def vertices(g :Graph):
-    return g.adjacencies.keys()
+    return g.vertices()
 
 def num_vertices(g :Graph) -> int:
     return len(vertices(g))

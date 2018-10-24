@@ -11,13 +11,12 @@ __copyright__  = "Copyright (C) 2018, Nokia"
 __license__    = "BSD-3"
 
 import sys
-from pybgl.graph           import Graph, edges, target, out_edges, vertices
-from pybgl.graph_traversal import DefaultBFSVisitor, WHITE, GRAY, BLACK
-from pybgl.property_map    import ReadPropertyMap, ReadWritePropertyMap, get, make_assoc_property_map, put
+from pybgl.breadth_first_search import DefaultBreadthFirstSearchVisitor
+from pybgl.graph                import Graph, edges, target, out_edges, vertices
+from pybgl.graph_traversal      import WHITE, GRAY, BLACK
+from pybgl.property_map         import ReadPropertyMap, ReadWritePropertyMap, get, make_assoc_property_map, put
 
-# TODO should be based on pybgl.breadth_first_search
-
-class DijkstraVisitor(DefaultBFSVisitor):
+class DijkstraVisitor(DefaultBreadthFirstSearchVisitor):
     pass
 
 def dijkstra_shortest_paths(
