@@ -32,4 +32,10 @@ def ipynb_display_graph(g):
     """
     html(dotstr_to_html(g.to_dot()))
 
+def display_svg(svg, filename_svg):
+    with open(filename_svg, "w") as f:
+        print(svg, file = f)
+        html("<a href='%s' target='_blank'>View</a>" % filename_svg)
+    html(svg)
+
 
