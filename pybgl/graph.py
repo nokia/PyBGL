@@ -10,6 +10,15 @@ __email__      = "marc-olivier.buob@nokia-bell-labs.com"
 __copyright__  = "Copyright (C) 2018, Nokia"
 __license__    = "BSD-3"
 
+def __len_gen__(gen) -> int:
+    """
+    Get the "length" of a generator.
+    """
+    # __len_gen__(gen) is faster and consumes less memory than len([for x in gen])
+    n = 0
+    for x in gen: n += 1
+    return n
+
 #-------------------------------------------------------------------
 # EdgeDescriptor
 #-------------------------------------------------------------------
@@ -83,8 +92,14 @@ class Graph:
         self.m_id += 1
         return u
 
+    def num_vertices(self):
+        return __len_gen__(self.vertices())
+
     def remove_vertex(self, u :int):
         del self.adjacencies[u]
+
+    def vertices(self):
+        return self.adjacencies.keys()
 
     @property
     def adjacencies(self) -> dict:
@@ -116,6 +131,9 @@ class Graph:
                 #if not bool(adjs_u):
                 #    del self.adjacencies[u]
 
+    def num_edges(self):
+        return __len_gen__(self.edges())
+
     def out_edges(self, u :int):
         return (EdgeDescriptor(u, v, n) for v, s in self.adjacencies.get(u, dict()).items() for n in s)
 
@@ -138,9 +156,6 @@ class Graph:
                         ])
         }
 
-    def vertices(self):
-        return self.adjacencies.keys()
-
     def source(self, e :EdgeDescriptor):
         return e.m_source
 
@@ -148,11 +163,9 @@ class Graph:
         return e.m_target
 
 def source(e :EdgeDescriptor, g :Graph):
-    #return e.m_source
     return g.source(e)
 
 def target(e :EdgeDescriptor, g :Graph):
-    #return e.m_target
     return g.target(e)
 
 #-------------------------------------------------------------------
@@ -223,7 +236,7 @@ def vertices(g :Graph):
     return g.vertices()
 
 def num_vertices(g :Graph) -> int:
-    return len(vertices(g))
+    return g.num_vertices()
 
 def add_vertex(g :Graph) -> int:
     return g.add_vertex()
@@ -234,14 +247,8 @@ def remove_vertex(u :int, g :Graph):
 def edges(g :Graph):
     return g.edges()
 
-def __len_gen__(gen) -> int:
-    # __len_gen__(gen) is faster and consumes less memory than len([for x in gen])
-    n = 0
-    for x in gen: n += 1
-    return n
-
 def num_edges(g :Graph) -> int:
-    return __len_gen__(edges(g))
+    return g.num_edges()
 
 def add_edge(u :int, v :int, g :Graph) -> EdgeDescriptor:
     return g.add_edge(u, v)
