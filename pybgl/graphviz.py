@@ -172,10 +172,10 @@ def run_graphviz(s_dot, layout_engine = "dot", format = "svg") -> bytes:
     """
     cmd = ['dot', '-T' + format, '-K', layout_engine]
     dot = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-    stdoutdata, stderrdata = dot.communicate(s_dot.encode('utf-8'))
+    stdoutdata, stderrdata = dot.communicate(s_dot.encode("utf-8"))
     status = dot.wait()
     if status == 0:
-        return stdoutdata
+        return stdoutdata.decode("utf-8")
     else:
         fstr = "dot returned {}\n[==== stderr ====]\n{}"
         error(fstr.format(status, stderrdata.decode('utf-8')))
@@ -215,18 +215,16 @@ def write_graphviz(s_dot :str, filename, format = "svg", engine = "dot") -> bool
     else:
         return write_graphviz_impl(s_dot, f_img, format, engine)
 
-def dotstr_to_html(dotstr :str, engine = "dot") -> str:
+def dotstr_to_html(s_dot :str, engine = "dot") -> str:
     """
     Convert a dot string to a html string.
     Args:
-        dotstr: A dot string.
+        s_dot: A dot string.
         engine: A graphviz engine (e.g. "dot", "fdp", "neato", ...).
     Returns:
         The corresponding HTML string.
     """
-    s = str(run_graphviz(dotstr, engine))
-    ret = re.match(RE_GRAPHVIZ_SVG, s).group(1)
-    return ret.replace("\\n", "")
+    return run_graphviz(s_dot, engine)
 
 def graph_to_html(g, engine = "dot") -> str:
     """
@@ -237,5 +235,5 @@ def graph_to_html(g, engine = "dot") -> str:
     Returns:
         The corresponding HTML string.
     """
-    dotstr = g.to_dot()
-    return dotstr_to_html(dotstr, engine)
+    s_dot = g.to_dot()
+    return dotstr_to_html(s_dot, engine)
