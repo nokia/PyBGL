@@ -15,7 +15,8 @@ __copyright__  = "Copyright (C) 2018, Nokia"
 __license__    = "BSD-3"
 
 from collections           import deque
-from pybgl.graph           import Graph, EdgeDescriptor, out_edges, target
+from pybgl.graph           import Graph, EdgeDescriptor, out_edges, source, target
+from pybgl.incidence_graph import in_edges
 from pybgl.graph_traversal import WHITE, GRAY, BLACK
 from pybgl.property_map    import ReadWritePropertyMap
 
@@ -43,8 +44,12 @@ def breadth_first_search_graph(
     pmap_vcolor :ReadWritePropertyMap,
     vis         = DefaultBreadthFirstSearchVisitor(),
     # N.B: The following parameter does not exist in libboost:
-    if_push     = None # if_push(e :EdgeDecriptor, g :Graph) -> bool returns True iff e is relevant
+    if_push     = None, # if_push(e :EdgeDecriptor, g :Graph) -> bool returns True iff e is relevant
+    forward     = True  # allows to go through an IncidenceGraph backward
 ):
+    out_edges = out_edges if forward else in_edges
+    target    = target    if forward else source
+
     if not if_push: if_push = (lambda e, g: True)
 
     stack = deque()
@@ -81,7 +86,8 @@ def breadth_first_search(
     pmap_vcolor :ReadWritePropertyMap,
     vis         = DefaultBreadthFirstSearchVisitor(),
     # N.B: The following parameters doe not exists in libboost:
-    if_push     = None # if_push(e :EdgeDecriptor) -> bool returns True iff e is relevant
+    if_push     = None, # if_push(e :EdgeDecriptor) -> bool returns True iff e is relevant
+    forward     = True
 ):
-    breadth_first_search_graph(g, {s}, pmap_vcolor, vis, if_push)
+    breadth_first_search_graph(g, {s}, pmap_vcolor, vis, if_push, forward)
 
