@@ -59,7 +59,7 @@ class GraphDp:
             GraphDp.default_to_dot("edge",  self.m_de_default),
             ""
         ])
-        
+
         return "%s G {%s %s}" % (
             graphviz_type(self.m_g),
             graphviz_style,
