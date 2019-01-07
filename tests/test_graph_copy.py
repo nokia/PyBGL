@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 #
 # Authors:
@@ -138,5 +138,3 @@ def test_graph_copy():
         (test_graph_copy_small, (100, )),
     ])
 
-if __name__ == '__main__':
-    sys.exit(test_graph_copy())

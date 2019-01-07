@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 #
 # Authors:
@@ -34,7 +34,7 @@ def test_make_func_property_map():
     pmap_rot13 = make_func_property_map(rot13)
     check_rot13(pmap_rot13)
 
-def test_make_assoc_property_map(with_dict):
+def _test_make_assoc_property_map(with_dict :bool):
     # Build the underlying dictionnary
     d = dict() if with_dict else defaultdict(str) # Here we use str instead of chr, because chr() does not exists!
 
@@ -49,9 +49,7 @@ def test_make_assoc_property_map(with_dict):
     # This is the behavior we expect (std::map<K, V> in C++ ~ defaultdict(V) in python).
     x = pmap_rot13['!']
 
-print("Running test_make_func_property_map()")
-test_make_func_property_map()
-for b in [False, True]:
-    print("Running test_make_assoc_property_map(%s)" % b)
-    test_make_assoc_property_map(b)
+def test_make_assoc_property_map():
+    for b in [False, True]:
+        _test_make_assoc_property_map(b)
 

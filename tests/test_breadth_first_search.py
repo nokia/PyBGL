@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 #
 # Authors:
@@ -72,4 +72,3 @@ def test_all():
             # Finally, all vertices should all be BLACK
             for u in vertices(g):
                 assert map_color[u] == BLACK
-test_all()
