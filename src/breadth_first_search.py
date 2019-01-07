@@ -47,8 +47,8 @@ def breadth_first_search_graph(
     if_push     = None, # if_push(e :EdgeDecriptor, g :Graph) -> bool returns True iff e is relevant
     forward     = True  # allows to go through an IncidenceGraph backward
 ):
-    out_edges = out_edges if forward else in_edges
-    target    = target    if forward else source
+    _out_edges = out_edges if forward else in_edges
+    _target    = target    if forward else source
 
     if not if_push: if_push = (lambda e, g: True)
 
@@ -62,8 +62,8 @@ def breadth_first_search_graph(
         u = stack.pop()
 
         vis.examine_vertex(u, g)
-        for e in out_edges(u, g):
-            v = target(e, g)
+        for e in _out_edges(u, g):
+            v = _target(e, g)
             vis.examine_edge(e, g)
             color_v = pmap_vcolor[v]
             if color_v == WHITE:
