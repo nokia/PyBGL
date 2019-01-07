@@ -1,8 +1,12 @@
 build
 data
+debian
+deb_dist
 dist
 pybgl.egg-info
 *.pyc
 *.swp
 *.swo
-.ipynb_checkpoints
+*.tar.gz
+.minifoldrc
+.pytest_cache

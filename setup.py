@@ -4,35 +4,42 @@
 # Usage:
 #     python3 setup.py install
 #     python3 setup.py bdist_rpm
-#
 
 import os
-from platform   import dist
 from setuptools import find_packages, setup
 
-__version__ = (0, 9, 2)
+__version__        = (0, 9, 2)
 
-distribution, _, _ = dist()
-ROOT_PATH          = os.path.abspath(os.path.dirname(__file__))
-long_description   = open(os.path.join(ROOT_PATH, "README.rst")).read()
+README = ""
+try:
+    with open("README.rst") as f_readme:
+        README = f_readme.read()
+except:
+    pass
+
+HISTORY = ""
+try:
+    with open("HISTORY.rst") as f_history:
+        HISTORY = f_history.read()
+except:
+    pass
+
+LONG_DESCRIPTION = "%s\n\n%s" % (README, HISTORY)
+
+# Copy is only triggered if the file does not yet exists.
+
 setup(
     name             = "pybgl",
     version          = ".".join(["%s" % x for x in __version__]),
     description      = "pybgl",
-    long_description = long_description,
+    long_description = LONG_DESCRIPTION,
     author           = "Marc-Olivier Buob",
     author_email     = "marc-olivier.buob@nokia-bell-labs.com",
-    url              = "https://github.com/nokia/PyBGL",
+    url              = "http://github.com/nokia/pybgl",
     license          = "BSD-3",
     zip_safe         = False,
-    packages         = find_packages(),
-    package_dir      = {'pybgl' : 'pybgl'},
-    # Those python modules must be manually installed using easy_install
-    #install_requires = ["cfgparse"],
-    options = {
-        'bdist_rpm':{
-            'post_install'      : 'post_install',
-            'post_uninstall'    : 'post_uninstall'
-        }
-    },
+    packages         = ["pybgl"],
+    package_dir      = {"pybgl" : "src/"},
+    requires         = ["typing"],
+    test_suite       = "tests",
 )
