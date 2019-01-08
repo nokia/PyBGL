@@ -5,7 +5,7 @@
 #     python3 setup.py install
 #     python3 setup.py bdist_rpm
 
-from setuptools import setup
+from setuptools import find_packages, setup
 
 __version__        = (0, 9, 2)
 
@@ -37,7 +37,7 @@ setup(
     url              = "http://github.com/nokia/pybgl",
     license          = "BSD-3",
     zip_safe         = False,
-    packages         = ["pybgl"],
+    packages         = find_packages(),
     package_dir      = {"pybgl" : "src/"},
     requires         = ["typing"],
     test_suite       = "tests",
