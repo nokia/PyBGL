@@ -37,7 +37,7 @@ setup(
     url              = "http://github.com/nokia/pybgl",
     license          = "BSD-3",
     zip_safe         = False,
-    packages         = find_packages(),
+    packages         = ["pybgl"],
     package_dir      = {"pybgl" : "src/"},
     requires         = ["typing"],
     test_suite       = "tests",
