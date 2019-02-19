@@ -8,7 +8,7 @@ import json
 from pybgl.graph        import DirectedGraph, add_edge, edges, num_edges, num_vertices, source, target, vertices
 from pybgl.graph_dp     import GraphDp
 from pybgl.graphviz     import read_graphviz
-from pybgl.property_map import make_assoc_property_map
+from pybgl.property_map import make_assoc_property_map, make_func_property_map
 
 def make_g() -> DirectedGraph:
     g = DirectedGraph(3)
@@ -30,9 +30,11 @@ def make_gdp2() -> GraphDp:
         g,
         dpv = {
             "label" : make_assoc_property_map(vlabel),
+            "color" : make_func_property_map(lambda q: "red" if q % 2 else "green"),
         },
         dpe = {
             "label" : make_assoc_property_map(elabel),
+            "color" : make_func_property_map(lambda e: "red" if target(e, g) % 2 else "green"),
         }
     )
     return gdp
@@ -55,6 +57,8 @@ def test_graph_dp_dot():
 def test_graph_dp_json():
     for gdp in make_gdps():
         s_json = gdp.to_json()
+        print(s_json)
         # Try to load json
         json.loads(s_json)
 
+test_graph_dp_json()

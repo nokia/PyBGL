@@ -114,7 +114,7 @@ class GraphDp:
             "vertices" : "[\n        %s\n    ]" % ", ".join([
                     JSON_NODE_FORMAT % {
                         "id" : u,
-                        "attributes" : "\n,".join([
+                        "attributes" : ",\n            ".join([
                             "\"%s\" : \"%s\"" % (k, pmap[u]) for k, pmap in self.m_dpv.items()
                         ]),
                         "sep" : "," if self.m_dpv else "",
@@ -124,7 +124,7 @@ class GraphDp:
                     JSON_EDGE_FORMAT % {
                         "source" : source(e, self.m_g),
                         "target" : target(e, self.m_g),
-                        "attributes" : ",\n\t\t%s".join([
+                        "attributes" : ",\n            ".join([
                             "\"%s\" : \"%s\"" % (k, pmap[e]) for k, pmap in self.m_dpe.items()
                         ]),
                         "sep" : "," if self.m_dpv else "",
