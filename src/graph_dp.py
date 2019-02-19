@@ -15,6 +15,24 @@ __license__    = "BSD-3"
 from .graph         import DirectedGraph, graphviz_arc, graphviz_type, edges, Graph, source, target, vertices
 from .property_map  import get
 
+JSON_GRAPH_FORMAT = """{
+    "graph_type" : "%(graph_type)s",
+    "vertices" : %(vertices)s,
+    "edges" : %(edges)s
+}"""
+
+JSON_NODE_FORMAT = """{
+            "id" : %(id)s%(sep)s
+            %(attributes)s
+        }"""
+
+JSON_EDGE_FORMAT = """{
+            "source" : %(source)s,
+            "target" : %(target)s%(sep)s
+            %(attributes)s
+        }"""
+
+
 class GraphDp:
     def __init__(
         self,
@@ -79,3 +97,41 @@ class GraphDp:
                 ]
             )
         )
+
+    def to_json(self, vs = None, es = None) -> str:
+        if vs == None: vs = vertices(self.m_g)
+        if es == None: es = edges(self.m_g)
+#        graphviz_style = ("%s;" % "; ".join(self.m_extra_style)) if self.m_extra_style else ""
+#        graphviz_style += "; ".join([
+#            GraphDp.default_to_dot("graph", self.m_dg_default),
+#            GraphDp.default_to_dot("node",  self.m_dv_default),
+#            GraphDp.default_to_dot("edge",  self.m_de_default),
+#            ""
+#        ])
+
+        return JSON_GRAPH_FORMAT % {
+            "graph_type" : graphviz_type(self.m_g),
+            "vertices" : "[\n        %s\n    ]" % ", ".join([
+                    JSON_NODE_FORMAT % {
+                        "id" : u,
+                        "attributes" : "\n,".join([
+                            "\"%s\" : \"%s\"" % (k, pmap[u]) for k, pmap in self.m_dpv.items()
+                        ]),
+                        "sep" : "," if self.m_dpv else "",
+                    } for u in vs
+                ]),
+            "edges" : "[\n        %s\n    ]" % ", ".join([
+                    JSON_EDGE_FORMAT % {
+                        "source" : source(e, self.m_g),
+                        "target" : target(e, self.m_g),
+                        "attributes" : ",\n\t\t%s".join([
+                            "\"%s\" : \"%s\"" % (k, pmap[e]) for k, pmap in self.m_dpe.items()
+                        ]),
+                        "sep" : "," if self.m_dpv else "",
+                    } for e in es
+                ]
+            )
+        }
+
+
+
