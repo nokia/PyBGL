@@ -184,8 +184,10 @@ def run_graphviz(s_dot, layout_engine = "dot", format = "svg") -> bytes:
 
 def dot_to_svg(s_dot :str, layout_engine = "dot", format = "svg") -> str:
     bytes_img = run_graphviz(s_dot, layout_engine, format)
-    if bytes_img:
+    if isinstance(bytes_img, bytes): # This should no more occur
         return bytes_img.decode("utf-8")
+    elif isinstance(bytes_img, str):
+        return bytes_img
     return None
 
 # TODO Swap format / engine parameters
