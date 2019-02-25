@@ -39,4 +39,15 @@ class ClosedTime(ClosedOperator):
         super().__init__(infty)
     def impl(self, x, y):
         return x * y
-
+    
+class ClosedMax(ClosedOperator):
+    def __init__(self, infty = sys.maxsize):
+        super().__init__(infty)
+    def impl(self, x, y):
+        return max(x, y)
+    
+class ClosedMin(ClosedOperator):
+    def __init__(self, infty = sys.maxsize):
+        super().__init__(infty)
+    def impl(self, x, y):
+        return min(x, y)
