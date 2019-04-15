@@ -35,20 +35,28 @@ class AggregatedVisitor:
                 getattr(vis, method_name)(*args)
         return wrapper
 
+    @staticmethod
+    def type_to_key(vis):
+        return ("%s" % type(vis)).split("'")[1]
+
+    def keys(self) -> set:
+        """
+        Returns:
+            The set of keys that could be used with self.get()
+        """
+        return {AggregatedVisitor.type_to_key(vis) for vis in self.m_visitors}
+
     def get(self, key, ret_if_not_found = None):
         """
         Retrieve a specific visitor.
         """
-        def type_to_key(vis):
-            return ("%s" % type(vis)).split("'")[1]
-
         for vis in self.m_visitors:
-            if type_to_key(vis) == key:
+            if AggregatedVisitor.type_to_key(vis) == key:
                 return vis
         print(
             "AggregatedVisitor: key %s not found: valid keys are: %s" % (
                 key,
-                {"%s" % type_to_key(vis) for vis in self.m_visitors}
+                {"%s" % AggregatedVisitor.type_to_key(vis) for vis in self.m_visitors}
             )
         )
         return ret_if_not_found
