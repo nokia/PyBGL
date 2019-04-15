@@ -187,7 +187,8 @@ def dot_to_svg(s_dot :str, layout_engine = "dot", format = "svg") -> str:
     if isinstance(bytes_img, bytes): # This should no more occur
         return bytes_img.decode("utf-8")
     elif isinstance(bytes_img, str):
-        return bytes_img
+        i = bytes_img.find("<svg")
+        return bytes_img[i:]
     return None
 
 # TODO Swap format / engine parameters
