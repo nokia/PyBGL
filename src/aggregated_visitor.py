@@ -60,3 +60,6 @@ class AggregatedVisitor:
             )
         )
         return ret_if_not_found
+
+    def append(self, vis):
+        self.m_visitors.append(vis)
