@@ -72,9 +72,11 @@ class Automaton(DirectedGraph):
             if a in adj_q.keys():
                 del adj_q[a]
 
-    def sigma(self, q :int = None) -> set:
-        return {a for a in self.m_adjacencies.get(q, dict()).keys()} if q is not None \
-          else {a for q in vertices(self) for a in self.m_adjacencies.get(q, dict()).keys()}
+    def sigma(self, q :int) -> set:
+        return {a for a in self.m_adjacencies.get(q, dict()).keys()} if q is not None else set()
+
+    def alphabet(self) -> set:
+        return {a for q in vertices(self) for a in self.m_adjacencies.get(q, dict()).keys()}
 
     def edges(self):
         return (
@@ -139,13 +141,13 @@ def add_edge(q :int, r :int, a :chr, g :Automaton) -> tuple:
 def edge(q :int, r: int, a :chr, g :Automaton) -> tuple:
     return g.edge(q, r, a)
 
-def sigma(q :int, g:Automaton) -> set:
+def sigma(q :int, g :Automaton) -> set:
     return g.sigma(q)
 
 def alphabet(g:Automaton) -> set:
-    return g.sigma(None)
+    return g.alphabet()
 
-def is_initial(q :int, g:Automaton) -> bool:
+def is_initial(q :int, g :Automaton) -> bool:
     return g.is_initial(q)
 
 def initial(g :Automaton) -> int:

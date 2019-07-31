@@ -73,3 +73,13 @@ def test_accepts():
     assert accepts("aaaba", G1) == False
     assert accepts("aaabaa", G1) == True
     assert accepts("aaabaabb", G1) == True
+
+def test_sigma():
+    assert sigma(0, G1) == {"a", "b"}
+    assert sigma(1, G3) == set()
+    assert sigma(None, G1) == set()
+
+def test_alphabet():
+    assert alphabet(G1) == {"a", "b"}
+    assert alphabet(G2) == {"a", "b"}
+    assert alphabet(G3) == {"a", "b"}
