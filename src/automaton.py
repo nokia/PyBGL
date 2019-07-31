@@ -11,8 +11,9 @@ from collections import defaultdict
 
 # NB: pybgl.graph.edge and pybgl.graph.add_edge are not imported because their signature is different
 from pybgl.graph import \
-    DirectedGraph, add_vertex, source, out_degree, target, vertices,\
-    EdgeDescriptor, edges, remove_edge
+    DirectedGraph, EdgeDescriptor, \
+    add_vertex, edges, num_edges, num_vertices, out_degree, \
+    remove_vertex, remove_edge, source, target, vertices
 from pybgl.graph import \
     graphviz_arc, graphviz_type, vertices
 from pybgl.property_map import make_assoc_property_map
