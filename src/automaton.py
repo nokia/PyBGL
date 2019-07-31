@@ -12,7 +12,7 @@ from collections import defaultdict
 # NB: pybgl.graph.edge and pybgl.graph.add_edge are not imported because their signature is different
 from pybgl.graph import \
     DirectedGraph, EdgeDescriptor, \
-    add_vertex, edge, edges, num_edges, num_vertices,\
+    add_edge, add_vertex, edge, edges, num_edges, num_vertices,\
     out_degree, out_edges\
     remove_vertex, remove_edge, source, target, vertices
 from pybgl.graph import \
