@@ -13,7 +13,7 @@ from collections import defaultdict
 from pybgl.graph import \
     DirectedGraph, EdgeDescriptor, \
     add_edge, add_vertex, edge, edges, num_edges, num_vertices,\
-    out_degree, out_edges\
+    out_degree, out_edges,\
     remove_vertex, remove_edge, source, target, vertices
 from pybgl.graph import \
     graphviz_arc, graphviz_type, vertices
