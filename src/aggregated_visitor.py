@@ -20,7 +20,7 @@ class AggregatedVisitor:
         Args:
             visitors: A list of visitors exposing the same callbacks.
         """
-        self.visitors = visitors
+        self.m_visitors = visitors
 
     def __getattr__(self, method_name :str):
         """
