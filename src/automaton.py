@@ -12,7 +12,8 @@ from collections import defaultdict
 # NB: pybgl.graph.edge and pybgl.graph.add_edge are not imported because their signature is different
 from pybgl.graph import \
     DirectedGraph, EdgeDescriptor, \
-    add_vertex, edges, num_edges, num_vertices, out_degree, \
+    add_vertex, edge, edges, num_edges, num_vertices,\
+    out_degree, out_edges\
     remove_vertex, remove_edge, source, target, vertices
 from pybgl.graph import \
     graphviz_arc, graphviz_type, vertices
@@ -38,7 +39,7 @@ class Automaton(DirectedGraph):
             self.m_pmap_final = pmap_final
 
     def delta(self, q :int, a :chr) -> int:
-        return self.m_adjacencies.get(q, dict()).get(a)
+        return self.m_adjacencies.get(q, dict()).get(a, BOTTOM)
 
     def add_edge(self, q :int, r :int, a :chr) -> tuple:
         assert q is not None
