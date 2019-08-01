@@ -128,11 +128,13 @@ class Automaton(DirectedGraph):
     def to_dot(self, graphviz_style :str = None) -> str:
         if graphviz_style == None:
             graphviz_style = self.make_graphviz_style()
-        return "%(type)s G {  %(style)s  %(vertices)s;\n  %(edges)s;\n}" % {
+        return "%(type)s G {  %(style)s  %(vertices)s%(sep1)s  %(edges)s%(sep2)s\n}" % {
             "style"    : graphviz_style,
             "type"     : graphviz_type(self),
-            "vertices" : ";\n  ".join(["  %s" % self.vertex_to_graphviz(u) for u in self.vertices()]),
-            "edges"    : ";\n  ".join(["  %s" % self.edge_to_graphviz(e)   for e in self.edges()]),
+            "vertices" : ";\n  ".join(["  %s" % self.vertex_to_graphviz(u) for u in vertices(self)]),
+            "sep1"     : ";" if num_vertices(self) else "",
+            "edges"    : ";\n  ".join(["  %s" % self.edge_to_graphviz(e)   for e in edges(self)]),
+            "sep2"     : ";" if num_edges(self) else "",
         }
 
 def add_edge(q :int, r :int, a :chr, g :Automaton) -> tuple:
@@ -151,7 +153,7 @@ def is_initial(q :int, g :Automaton) -> bool:
     return g.is_initial(q)
 
 def initial(g :Automaton) -> int:
-    return g.m_q0
+    return g.initial()
 
 def is_final(q :int, g:Automaton) -> bool:
     return g.is_final(q)
