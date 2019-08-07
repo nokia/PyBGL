@@ -98,7 +98,7 @@ def graph_copy(
     starting from a given source node.
     Args:
         s: The VertexDescriptor of the source node.
-        g: A empty Graph instance.
+        g: A Graph instance.
         pmap_vrelevant: A ReadPropertyMap{VertexDescriptor : bool} which indicates
             for each vertex whether if it must be duped or not.
             Only used if vis == None.
