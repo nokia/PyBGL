@@ -23,9 +23,6 @@ FG_COLOR = "black"
 BG_COLOR = "transparent"
 BOTTOM   = None
 
-def label(e :EdgeDescriptor, g) -> chr:
-    return e.m_distinguisher
-
 class Automaton(DirectedGraph):
     # Convention: EdgeDescriptor(q, r, a)
     # Convention: self.m_adjacencies[q][a] == r
@@ -97,6 +94,9 @@ class Automaton(DirectedGraph):
     def is_initial(self, q :int) -> bool:
         return self.m_q0 == q
 
+    def label(self, e :EdgeDescriptor) -> chr:
+        return e.m_distinguisher
+
     def set_final(self, q :int, is_final :bool = True):
         self.m_pmap_final[q] = is_final
 
@@ -157,6 +157,9 @@ def initial(g :Automaton) -> int:
 
 def is_final(q :int, g:Automaton) -> bool:
     return g.is_final(q)
+
+def label(e :EdgeDescriptor, g) -> chr:
+    return g.label(e)
 
 def set_final(q :int, g :Automaton, is_final :bool = True):
     g.set_final(q, is_final)
