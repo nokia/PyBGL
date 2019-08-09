@@ -64,7 +64,7 @@ class Automaton(DirectedGraph):
     def remove_edge(self, e :EdgeDescriptor):
         q = source(e, self)
         a = label(e, self)
-        adj_q = self.m_adjacencies[q]
+        adj_q = self.m_adjacencies.get(q)
         if adj_q:
             if a in adj_q.keys():
                 del adj_q[a]
