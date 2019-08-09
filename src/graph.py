@@ -140,6 +140,23 @@ class Graph:
     def edges(self):
         return (EdgeDescriptor(u, v, n) for u, vs in self.adjacencies.items() for v, s in vs.items() for n in s)
 
+    def edge(self, u :int, v :int) -> tuple:
+        """
+        Retrieve the edge from a vertex u to vertex v.
+        Args:
+            u: The source of the edge.
+            v: The target of the edge.
+        Returns:
+            (e, True) if it exists a single edge from u to v,
+            (None, False) otherwise.
+        """
+        ret = (None, False)
+        candidates_edges = {e for e in out_edges(u, self) if target(e, self) == v}
+        if len(candidates_edges) == 1:
+            ret = (candidates_edges.pop(), True)
+        return ret
+
+
     def to_dot(self, graphviz_style = None) -> str:
         if graphviz_style == None:
             graphviz_style = default_graphviz_style()
@@ -279,10 +296,4 @@ def edge(u :int, v :int, g :Graph) -> tuple:
         (e, True) if it exists a single edge from u to v,
         (None, False) otherwise.
     """
-    ret = (None, False)
-    candidates_edges = {e for e in out_edges(u, g) if target(e, g) == v}
-    if len(candidates_edges) == 1:
-        ret = (candidates_edges.pop(), True)
-    return ret
-
-
+    return g.edge(u, v)
