@@ -12,6 +12,7 @@ from pybgl.automaton import \
     final, initial, is_complete, is_deterministic, is_final, is_finite, is_initial, \
     is_minimal, label, make_automaton, num_edges, num_vertices, set_final, sigma, \
     remove_edge, remove_vertex, source, target, vertices
+from pybgl.graphviz import graph_to_html
 
 G1 = make_automaton(
     [
@@ -187,3 +188,6 @@ def test_automaton_remove_vertex():
     print(g.adjacencies)
     assert num_vertices(g) == 0
     assert num_edges(g) == 0
+
+def test_automaton_graphviz():
+    svg = graph_to_html(G1)
