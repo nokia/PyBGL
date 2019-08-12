@@ -49,10 +49,11 @@ class IncidenceGraph(DirectedGraph):
         return (e, added)
 
     def remove_vertex(self, u :int):
-        es = {e for e in out_edges(u, self)}
-        for e in es:
+        for e in [e for e in in_edges(u, self)]:
             remove_edge(e, self)
-        super().remove_vertex(u)
+        for e in [e for e in out_edges(u, self)]:
+            remove_edge(e, self)
+        del self.adjacencies[u]
         del self.in_adjacencies[u]
 
     def remove_edge(self, e :EdgeDescriptor):

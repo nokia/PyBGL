@@ -96,6 +96,11 @@ class Graph:
         return __len_gen__(self.vertices())
 
     def remove_vertex(self, u :int):
+        # Remove in-edges related to u
+        for e in [e for e in edges(self)]:
+            if u == target(e, self):
+                remove_edge(e, self)
+        # Remove u and its out-edges
         del self.adjacencies[u]
 
     def vertices(self):
@@ -165,12 +170,12 @@ class Graph:
             "type"     : graphviz_type(self),
             "vertices" : "; ".join(["%s" % u for u in self.vertices()]),
             "arcs"     : "; ".join([
-                            "%s %s %s" % (
-                                source(e, self),
-                                graphviz_arc(self),
-                                target(e, self)
-                            ) for e in self.edges()
-                        ])
+                "%s %s %s" % (
+                    source(e, self),
+                    graphviz_arc(self),
+                    target(e, self)
+                ) for e in self.edges()
+            ])
         }
 
     def source(self, e :EdgeDescriptor):
@@ -224,12 +229,12 @@ class UndirectedGraph(Graph):
 
     def remove_edge(self, e :EdgeDescriptor):
         super().remove_edge(e)
-        # Remove the reverse adjacency
         u = source(e, self)
         v = target(e, self)
-        v = max(u, v)
-        n = e.m_distinguisher
-        self.m_adjacencies[v][u].remove(n)
+        if u != v:
+            # Remove the reverse adjacency
+            n = e.m_distinguisher
+            self.m_adjacencies[v][u].remove(n)
 
     def in_edges(self, u :int):
         return self.out_edges(u)
@@ -238,12 +243,9 @@ class UndirectedGraph(Graph):
         return (EdgeDescriptor(u, v, n) for u, vs in self.adjacencies.items() for v, s in vs.items() for n in s if u <= v)
 
     def remove_vertex(self, u):
-        # Clear reverse adjacencies
-        for e in self.out_edges(u):
-            v = target(e, self)
-            n = e.m_distinguisher
-            self.m_adjacencies[v][u].remove(n)
-        super().remove_vertex(u)
+        for e in [e for e in out_edges(u, self)]:
+            remove_edge(e, self)
+        del self.m_adjacencies[u]
 
 #-------------------------------------------------------------------
 # Common methods
