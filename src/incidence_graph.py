@@ -24,10 +24,6 @@ class IncidenceGraph(DirectedGraph):
         super().__init__(directed)
 
     @property
-    def adjacencies(self) -> dict:
-        return self.m_adjacencies
-
-    @property
     def in_adjacencies(self) -> dict:
         return self.m_in_adjacencies
 
