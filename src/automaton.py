@@ -161,6 +161,9 @@ def is_final(q :int, g:Automaton) -> bool:
 def label(e :EdgeDescriptor, g) -> chr:
     return g.label(e)
 
+def set_initial(q :int, g :Automaton, is_initial :bool = True):
+    g.set_initial(q, is_initial)
+
 def set_final(q :int, g :Automaton, is_final :bool = True):
     g.set_final(q, is_final)
 

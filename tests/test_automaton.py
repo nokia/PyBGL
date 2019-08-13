@@ -10,7 +10,7 @@ __license__    = "BSD-3"
 from pybgl.automaton import \
     BOTTOM, Automaton, accepts, add_edge, add_vertex, alphabet, delta, edge, \
     final, initial, is_complete, is_deterministic, is_final, is_finite, is_initial, \
-    is_minimal, label, make_automaton, num_edges, num_vertices, set_final, sigma, \
+    is_minimal, label, make_automaton, num_edges, num_vertices, set_initial, set_final, sigma, \
     remove_edge, remove_vertex, source, target, vertices
 from pybgl.graphviz import graph_to_html
 
@@ -53,6 +53,24 @@ def test_automaton_initial():
 
 def test_automaton_final():
     assert final(G1) == {1}
+
+def test_automaton_set_initial():
+    g = Automaton()
+    q = add_vertex(g)
+    assert is_initial(q, g)
+    set_initial(q, g)
+    assert is_initial(q, g)
+    set_initial(q, g, False)
+    assert not is_initial(q, g)
+
+def test_automaton_set_final():
+    g = Automaton()
+    q = add_vertex(g)
+    assert not is_final(q, g)
+    set_final(q, g)
+    assert is_initial(q, g)
+    set_final(q, g, False)
+    assert not is_final(q, g)
 
 def test_automaton_alphabet():
     assert alphabet(G1) == {"a", "b"}
