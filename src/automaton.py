@@ -191,10 +191,10 @@ def is_complete(g) -> bool:
 def is_minimal(g) -> bool:
     return True # Hardcoded, not implemented
 
-def make_automaton(transitions :list, q0n :int = 0, final_states :set = set()):
+def make_automaton(transitions :list, q0n :int = 0, final_states :set = set(), AutomatonClass = Automaton):
     vertex_names = sorted(list({qn for (qn, rn, a) in transitions} | {rn for (qn, rn, a) in transitions}))
     map_vertices = {qn : q for (q, qn) in enumerate(vertex_names)}
-    g = Automaton(len(vertex_names))
+    g = AutomatonClass(len(vertex_names))
     for (qn, rn, a) in transitions:
         q = map_vertices[qn]
         r = map_vertices[rn]
