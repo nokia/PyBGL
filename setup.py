@@ -38,7 +38,7 @@ setup(
     license          = "BSD-3",
     zip_safe         = False,
     packages         = ["pybgl"],
-    package_dir      = {"pybgl" : "src/"},
+    package_dir      = {"pybgl" : "src"},
     requires         = ["typing"],
     test_suite       = "tests",
 )
