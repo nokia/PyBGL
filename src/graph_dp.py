@@ -12,8 +12,8 @@ __email__      = "marc-olivier.buob@nokia-bell-labs.com"
 __copyright__  = "Copyright (C) 2018, Nokia"
 __license__    = "BSD-3"
 
-from .graph         import DirectedGraph, graphviz_arc, graphviz_type, edges, Graph, source, target, vertices
-from .property_map  import get
+from copy   import copy
+from .graph import DirectedGraph, GraphvizStyle, graphviz_arc, graphviz_type, edges, Graph, source, target, vertices
 
 JSON_GRAPH_FORMAT = """{
     "graph_type" : "%(graph_type)s",
@@ -39,18 +39,23 @@ class GraphDp:
         g :Graph,
         dpv = dict(),
         dpe = dict(),
-        dg_default = dict(),
-        dv_default = dict(),
-        de_default = dict(),
-        extra_style = list()
+        dg_default  :dict = None,
+        dv_default  :dict = None,
+        de_default  :dict = None,
+        extra_style :list = None
     ):
         self.m_g = g
         self.m_dpv = dpv                 # Vertex attributes
         self.m_dpe = dpe                 # Edge attributes
-        self.m_dg_default = dg_default   # Graph attributes
-        self.m_dv_default = dv_default   # Vertex default attributes
-        self.m_de_default = de_default   # Edge default attributes
-        self.m_extra_style = extra_style # Extra style (splines etc)
+#        self.m_dg_default = dg_default   # Graph attributes
+#        self.m_dv_default = dv_default   # Vertex default attributes
+#        self.m_de_default = de_default   # Edge default attributes
+#        self.m_extra_style = extra_style # Extra style (splines etc)
+        gs = GraphvizStyle()
+        self.m_dg_default  = copy(gs.graph)
+        self.m_dv_default  = copy(gs.node)
+        self.m_de_default  = copy(gs.edge)
+        self.m_extra_style = copy(gs.extra_style)
 
     def get_dpv(self) -> dict: return self.m_dpv
     def get_dpe(self) -> dict: return self.m_dpve

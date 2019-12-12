@@ -57,12 +57,57 @@ class EdgeDescriptor:
 # Generic graph
 #-------------------------------------------------------------------
 
+from pybgl.singleton import Singleton
+
+class GraphvizStyle(metaclass=Singleton):
+    graph = {
+        "fontcolor" : "black",
+        "bgcolor"   : "transparent",
+        "rankdir"   : "LR",
+    }
+    node = {
+        "color"     : "black",
+        "fontcolor" : "black",
+        "shape"     : "circle",
+    }
+    edge = {
+        "color"     : "black",
+        "fontcolor" : "black",
+    }
+    extra_style = list() # splines, etc
+
+    @staticmethod
+    def set_fg_color(color):
+        GraphvizStyle.graph["fontcolor"] = color
+        GraphvizStyle.node["color"]      = color
+        GraphvizStyle.node["fontcolor"]  = color
+        GraphvizStyle.edge["color"]      = color
+        GraphvizStyle.edge["fontcolor"]  = color
+
+    @staticmethod
+    def set_bg_color(color):
+        GraphvizStyle.graph["bgcolor"] = color
+
+    @staticmethod
+    def attributes_to_dot(prefix :str, d :dict) -> str:
+        return "%s [%s]; " % (
+            prefix,
+            "; ".join([
+                "%s=\"%s\"" % (k, v) for k, v in d.items()
+            ])
+        ) if d else ""
+
+    def __str__(self) -> str:
+        return "".join(
+            [
+                GraphvizStyle.attributes_to_dot("graph", GraphvizStyle.graph),
+                GraphvizStyle.attributes_to_dot("node",  GraphvizStyle.node),
+                GraphvizStyle.attributes_to_dot("edge",  GraphvizStyle.edge)
+            ] + GraphvizStyle.extra_style
+        )
+
 def default_graphviz_style() -> str:
-    FG_COLOR = "black"
-    BG_COLOR = "transparent"
-    return "graph[bgcolor = %(BG_COLOR)s fontcolor = %(FG_COLOR)s rankdir = LR]; " \
-            "node[color = %(FG_COLOR)s fontcolor = %(FG_COLOR)s]; " \
-            "edge[color = %(FG_COLOR)s fontcolor = %(FG_COLOR)s]; " % locals()
+    return str(GraphvizStyle())
 
 def is_directed(g) -> bool:
     return g.directed
@@ -161,20 +206,21 @@ class Graph:
             ret = (candidates_edges.pop(), True)
         return ret
 
-
     def to_dot(self, graphviz_style = None) -> str:
         if graphviz_style == None:
             graphviz_style = default_graphviz_style()
-        return "%(type)s G {%(style)s %(arcs)s}" % {
-            "style"    : graphviz_style,
+        return "%(type)s G {%(graph)s}" % {
             "type"     : graphviz_type(self),
-            "vertices" : "; ".join(["%s" % u for u in self.vertices()]),
-            "arcs"     : "; ".join([
-                "%s %s %s" % (
-                    source(e, self),
-                    graphviz_arc(self),
-                    target(e, self)
-                ) for e in self.edges()
+            "graph"    : "; ".join([
+                graphviz_style,
+                "; ".join(["%s" % u for u in self.vertices()]),
+                "; ".join([
+                    "%s %s %s" % (
+                        source(e, self),
+                        graphviz_arc(self),
+                        target(e, self)
+                    ) for e in self.edges()
+                ])
             ])
         }
 

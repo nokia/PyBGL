@@ -12,7 +12,7 @@ from collections import defaultdict
 # NB: pybgl.graph.edge and pybgl.graph.add_edge are not imported because their signature is different
 from pybgl.graph import \
     DirectedGraph, EdgeDescriptor, \
-    add_edge, add_vertex, edge, edges, num_edges, num_vertices,\
+    add_edge, add_vertex, default_graphviz_style, edge, edges, num_edges, num_vertices,\
     out_degree, out_edges,\
     remove_vertex, remove_edge, source, target, vertices
 from pybgl.graph import \
@@ -103,14 +103,6 @@ class Automaton(DirectedGraph):
     def is_final(self, q :int) -> bool:
         return self.m_pmap_final[q]
 
-    def make_graphviz_style(self, fg_color :str = FG_COLOR, bg_color :str = BG_COLOR) -> str:
-        return """
-        rankdir = LR
-        graph [bgcolor = %(bg_color)s fontcolor = %(fg_color)s rankdir = LR];
-        node  [shape = "circle" color = %(fg_color)s fontcolor = %(fg_color)s];
-        edge  [color = %(fg_color)s fontcolor = %(fg_color)s];
-        """ % locals()
-
     def vertex_to_graphviz(self, u :int) -> str:
         return "%s [shape=\"%s\"]" % (
             u,
@@ -127,7 +119,7 @@ class Automaton(DirectedGraph):
 
     def to_dot(self, graphviz_style :str = None) -> str:
         if graphviz_style == None:
-            graphviz_style = self.make_graphviz_style()
+            graphviz_style = default_graphviz_style()
         return "%(type)s G {  %(style)s  %(vertices)s%(sep1)s  %(edges)s%(sep2)s\n}" % {
             "style"    : graphviz_style,
             "type"     : graphviz_type(self),
