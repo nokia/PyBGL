@@ -40,7 +40,6 @@ INFINITY = sys.maxsize
 #      orders the component IDs according to >=.
 
 class TarjanVisitor(DefaultDepthFirstSearchVisitor):
-
     def __init__(self,
         pmap_component,
         pmap_root,
@@ -78,7 +77,6 @@ class TarjanVisitor(DefaultDepthFirstSearchVisitor):
                     self.m_pmap_root[v]
                 )
 
-
         if self.m_pmap_root[u] == u:
             # The vertices stacked since u belong to the same component of u.
             while True:
@@ -109,6 +107,4 @@ def strong_components(
     )
 
     depth_first_search_graph(g, pmap_vcolor, vis, None)
-
     return vis.total
-

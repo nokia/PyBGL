@@ -90,7 +90,7 @@ class GraphvizStyle(metaclass=Singleton):
 
     @staticmethod
     def attributes_to_dot(prefix :str, d :dict) -> str:
-        return "%s [%s]; " % (
+        return "%s [%s]" % (
             prefix,
             "; ".join([
                 "%s=\"%s\"" % (k, v) for k, v in d.items()
@@ -98,7 +98,7 @@ class GraphvizStyle(metaclass=Singleton):
         ) if d else ""
 
     def __str__(self) -> str:
-        return "".join(
+        return "; ".join(
             [
                 GraphvizStyle.attributes_to_dot("graph", GraphvizStyle.graph),
                 GraphvizStyle.attributes_to_dot("node",  GraphvizStyle.node),

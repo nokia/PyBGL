@@ -19,8 +19,6 @@ from pybgl.graph import \
     graphviz_arc, graphviz_type, vertices
 from pybgl.property_map import make_assoc_property_map
 
-FG_COLOR = "black"
-BG_COLOR = "transparent"
 BOTTOM   = None
 
 class Automaton(DirectedGraph):
