@@ -17,7 +17,7 @@ from pybgl.graph import \
     remove_vertex, remove_edge, source, target, vertices
 from pybgl.graph import \
     graphviz_arc, graphviz_type, vertices
-from pybgl.property_map import make_assoc_property_map
+from pybgl.property_map import ReadPropertyMap, make_assoc_property_map, make_func_property_map
 
 BOTTOM   = None
 
@@ -184,7 +184,14 @@ def is_complete(g) -> bool:
 def is_minimal(g) -> bool:
     return True # Hardcoded, not implemented
 
-def make_automaton(transitions :list, q0n :int = 0, final_states :set = set(), AutomatonClass = Automaton):
+def make_automaton(
+    transitions  :list,
+    q0n          :int = 0,
+    pmap_vfinal  :ReadPropertyMap = None,
+    AutomatonClass = Automaton
+):
+    if not pmap_vfinal:
+        pmap_vfinal = make_func_property_map(lambda q: True)
     vertex_names = sorted(list({qn for (qn, rn, a) in transitions} | {rn for (qn, rn, a) in transitions}))
     map_vertices = {qn : q for (q, qn) in enumerate(vertex_names)}
     g = AutomatonClass(len(vertex_names))
@@ -196,6 +203,6 @@ def make_automaton(transitions :list, q0n :int = 0, final_states :set = set(), A
     g.set_initial(q0)
     for q in vertices(g):
         qn = vertex_names[q]
-        if qn in final_states:
+        if pmap_vfinal[qn]:
             set_final(q, g)
     return g

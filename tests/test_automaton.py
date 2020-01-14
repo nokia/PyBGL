@@ -13,39 +13,45 @@ from pybgl.automaton import \
     is_minimal, label, make_automaton, num_edges, num_vertices, set_initial, set_final, sigma, \
     remove_edge, remove_vertex, source, target, vertices
 from pybgl.graphviz import graph_to_html
+from pybgl.property_map import make_func_property_map
 
 G1 = make_automaton(
     [
         (0, 0, 'a'), (0, 1, 'b'),
         (1, 2, 'a'), (1, 1, 'b'),
         (2, 1, 'a'), (2, 1, 'b'),
-    ], 0, {1}
+    ], 0,
+    make_func_property_map(lambda q: q in {1})
 )
 
 G2 = make_automaton(
     [
         (0, 0, 'a'), (0, 1, 'b'),
-    ], 0, {1}
+    ], 0,
+    make_func_property_map(lambda q: q in {1})
 )
 
 G3 = make_automaton(
     [
         (0, 0, 'a'), (0, 1, 'b'),
-    ], 0, {}
+    ], 0,
+    make_func_property_map(lambda q: False)
 )
 
 G4 = make_automaton(
     [
         (0, 0, 'a'), (0, 1, 'b'),
         (1, 1, 'b'), (1, 0, 'a')
-    ], 0, {1}
+    ], 0,
+    make_func_property_map(lambda q: q in {1})
 )
 
 G5 = make_automaton(
     [
         (0, 0, 'a'), (0, 1, 'b'),
         (1, 1, 'b'), (1, 0, 'a')
-    ], 0, {}
+    ], 0,
+    make_func_property_map(lambda q: False)
 )
 
 def test_automaton_initial():
@@ -162,7 +168,7 @@ def test_remove_edge():
         (2, 1, 'a'), (2, 1, 'b'),
     ]
 
-    g = make_automaton(transitions, 0, {1})
+    g = make_automaton(transitions, 0, make_func_property_map(lambda q: q in {1}))
     n = num_edges(g)
     assert n == 6
     for (u, v, a) in transitions:
@@ -183,7 +189,8 @@ def test_automaton_remove_vertex():
             (0, 0, 'c'),
             (1, 0, 'c'),
             (2, 2, 'c')
-        ], 0, {1}
+        ], 0,
+        make_func_property_map(lambda q: q in {1})
     )
     assert num_vertices(g) == 3
     assert num_edges(g) == 9
