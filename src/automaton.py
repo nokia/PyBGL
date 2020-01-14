@@ -191,7 +191,7 @@ def make_automaton(
     AutomatonClass = Automaton
 ):
     if not pmap_vfinal:
-        pmap_vfinal = make_assoc_property_map(defaultdict(True))
+        pmap_vfinal = make_assoc_property_map(defaultdict(False))
     vertex_names = sorted(list({qn for (qn, rn, a) in transitions} | {rn for (qn, rn, a) in transitions}))
     map_vertices = {qn : q for (q, qn) in enumerate(vertex_names)}
     g = AutomatonClass(len(vertex_names))
