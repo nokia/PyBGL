@@ -52,10 +52,10 @@ class GraphDp:
 #        self.m_de_default = de_default   # Edge default attributes
 #        self.m_extra_style = extra_style # Extra style (splines etc)
         gs = GraphvizStyle()
-        self.m_dg_default  = copy(gs.graph)
-        self.m_dv_default  = copy(gs.node)
-        self.m_de_default  = copy(gs.edge)
-        self.m_extra_style = copy(gs.extra_style)
+        self.m_dg_default  = dg_default  if dg_default  else copy(gs.graph)
+        self.m_dv_default  = dv_default  if dv_default  else copy(gs.node)
+        self.m_de_default  = de_default  if de_default  else copy(gs.edge)
+        self.m_extra_style = extra_style if extra_style else copy(gs.extra_style)
 
     def get_dpv(self) -> dict: return self.m_dpv
     def get_dpe(self) -> dict: return self.m_dpve
