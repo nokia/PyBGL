@@ -19,7 +19,7 @@ from pybgl.graph import \
     graphviz_arc, graphviz_type, vertices
 from pybgl.property_map import ReadPropertyMap, make_assoc_property_map
 
-BOTTOM   = None
+BOTTOM = None
 
 class Automaton(DirectedGraph):
     # Convention: EdgeDescriptor(q, r, a)
@@ -45,9 +45,7 @@ class Automaton(DirectedGraph):
         return (EdgeDescriptor(q, r, a), True)
 
     def edge(self, q :int, r :int, a :chr) -> tuple:
-        assert q is not None
-        # It may be useful to consider (q, BOTTOM, a), see parallel_walk algorithm and tree_edge
-        #assert r is not None
+        assert q is not BOTTOM
         return (EdgeDescriptor(q, r, a), True) if q is not None and r == self.delta(q, a) else (None, False)
 
     def in_edges(self, q :int):
