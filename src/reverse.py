@@ -21,7 +21,7 @@ def reverse_graph(g :IncidenceGraph):
         setattr(g, a, getattr(g, b))
         setattr(g, b, a_bak)
 
-    assert isinstance(g, IncidenceGraph)
+    assert g.in_edges
     swap(g, "source", "target")
     swap(g, "in_edges", "out_edges")
 
