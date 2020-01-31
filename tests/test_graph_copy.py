@@ -12,10 +12,9 @@ from pybgl.graphviz             import dotstr_to_html
 from pybgl.html                 import html
 from pybgl.ipynb                import in_ipynb
 from pybgl.property_map         import make_assoc_property_map, make_func_property_map
-from pybgl.test_common          import run_tests
 from pybgl.graph_copy           import graph_copy
 
-def test_graph_copy_small(threshold :int = 50):
+def _test_graph_copy_small(threshold :int = 50):
     g = DirectedGraph(5)
     (e01, _) = add_edge(0, 1, g)
     (e02, _) = add_edge(0, 2, g)
@@ -124,17 +123,6 @@ def test_graph_copy_small(threshold :int = 50):
           Obtained: %s
         """ % (expected_num_edges, num_edges(g_dup))
 
-#--------------------------------------------------
-# Main program
-#--------------------------------------------------
-
-def test_graph_copy():
-    """
-    Runs the suite test related to CorrelationReverser* classes.
-    """
-    run_tests([
-        (test_graph_copy_small, (0,   )),
-        (test_graph_copy_small, (50,  )),
-        (test_graph_copy_small, (100, )),
-    ])
-
+def test_graph_copy_small():
+    for threshold in [0, 50, 100]:
+        _test_graph_copy_small(threshold)
