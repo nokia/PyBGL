@@ -36,32 +36,28 @@ JSON_EDGE_FORMAT = """{
 class GraphDp:
     def __init__(
         self,
-        g :Graph,
-        dpv = dict(),
-        dpe = dict(),
-        dg_default  :dict = None,
-        dv_default  :dict = None,
-        de_default  :dict = None,
-        extra_style :list = None
+        g   :Graph,
+        dpv :dict = None, # Vertex attributes
+        dpe :dict = None, # Edge attributes
+        dg  :dict = None, # Graph attributes
+        dv  :dict = None, # Vertex default attributes
+        de  :dict = None, # Edge default attributes
+        extra_style :list = None  # Extra style (splines etc)
     ):
-        self.m_g = g
-        self.m_dpv = dpv                 # Vertex attributes
-        self.m_dpe = dpe                 # Edge attributes
-#        self.m_dg_default = dg_default   # Graph attributes
-#        self.m_dv_default = dv_default   # Vertex default attributes
-#        self.m_de_default = de_default   # Edge default attributes
-#        self.m_extra_style = extra_style # Extra style (splines etc)
+        self.g = g
+        self.dpv = dpv if dpv else dict() # Vertex attributes
+        self.dpe = dpe if dpe else dict() # Edge attributes
         gs = GraphvizStyle()
-        self.m_dg_default  = dg_default  if dg_default  else copy(gs.graph)
-        self.m_dv_default  = dv_default  if dv_default  else copy(gs.node)
-        self.m_de_default  = de_default  if de_default  else copy(gs.edge)
-        self.m_extra_style = extra_style if extra_style else copy(gs.extra_style)
+        self.dg  = dg  if dg  else copy(gs.graph)
+        self.dv  = dv  if dv  else copy(gs.node)
+        self.de  = de  if de  else copy(gs.edge)
+        self.extra_style = extra_style if extra_style else copy(gs.extra_style)
 
-    def get_dpv(self) -> dict: return self.m_dpv
-    def get_dpe(self) -> dict: return self.m_dpve
-    def get_dg_default(self) -> dict: return self.m_dg_default
-    def get_dv_default(self) -> dict: return self.m_dv_default
-    def get_de_default(self) -> dict: return self.m_de_default
+    def get_dpv(self) -> dict: return self.dpv
+    def get_dpe(self) -> dict: return self.dpve
+    def get_dg(self) -> dict: return self.dg
+    def get_dv(self) -> dict: return self.dv
+    def get_de(self) -> dict: return self.de
 
     @staticmethod
     def default_to_dot(prefix :str, d :dict) -> str:
@@ -73,70 +69,60 @@ class GraphDp:
         )
 
     def to_dot(self, vs = None, es = None) -> str:
-        if vs == None: vs = vertices(self.m_g)
-        if es == None: es = edges(self.m_g)
-        graphviz_style = ("%s;" % "; ".join(self.m_extra_style)) if self.m_extra_style else ""
+        if vs == None: vs = vertices(self.g)
+        if es == None: es = edges(self.g)
+        graphviz_style = ("%s;" % "; ".join(self.extra_style)) if self.extra_style else ""
         graphviz_style += "; ".join([
-            GraphDp.default_to_dot("graph", self.m_dg_default),
-            GraphDp.default_to_dot("node",  self.m_dv_default),
-            GraphDp.default_to_dot("edge",  self.m_de_default),
+            GraphDp.default_to_dot("graph", self.dg),
+            GraphDp.default_to_dot("node",  self.dv),
+            GraphDp.default_to_dot("edge",  self.de),
             ""
         ])
 
         return "%s G {%s %s}" % (
-            graphviz_type(self.m_g),
+            graphviz_type(self.g),
             graphviz_style,
             "; ".join(
                 [
                     "%s [%s]" % (
                         u,
-                        "; ".join(["%s=\"%s\"" % (k, pmap[u]) if k != "label" else "%s=<%s>" % (k, pmap[u]) for k, pmap in self.m_dpv.items()])
+                        "; ".join(["%s=\"%s\"" % (k, pmap[u]) if k != "label" else "%s=<%s>" % (k, pmap[u]) for k, pmap in self.dpv.items()])
                     ) for u in vs
                 ] + [
                     "%s %s %s [%s]" % (
-                        source(e, self.m_g),
-                        graphviz_arc(self.m_g),
-                        target(e, self.m_g),
-                        "; ".join(["%s=\"%s\"" % (k, pmap[e]) if k != "label" else "%s=<%s>" % (k, pmap[e]) for k, pmap in self.m_dpe.items()])
+                        source(e, self.g),
+                        graphviz_arc(self.g),
+                        target(e, self.g),
+                        "; ".join(["%s=\"%s\"" % (k, pmap[e]) if k != "label" else "%s=<%s>" % (k, pmap[e]) for k, pmap in self.dpe.items()])
                     ) for e in es
                 ]
             )
         )
 
     def to_json(self, vs = None, es = None) -> str:
-        if vs == None: vs = vertices(self.m_g)
-        if es == None: es = edges(self.m_g)
-#        graphviz_style = ("%s;" % "; ".join(self.m_extra_style)) if self.m_extra_style else ""
-#        graphviz_style += "; ".join([
-#            GraphDp.default_to_dot("graph", self.m_dg_default),
-#            GraphDp.default_to_dot("node",  self.m_dv_default),
-#            GraphDp.default_to_dot("edge",  self.m_de_default),
-#            ""
-#        ])
+        if vs == None: vs = vertices(self.g)
+        if es == None: es = edges(self.g)
 
         return JSON_GRAPH_FORMAT % {
-            "graph_type" : graphviz_type(self.m_g),
+            "graph_type" : graphviz_type(self.g),
             "vertices" : "[\n        %s\n    ]" % ", ".join([
                     JSON_NODE_FORMAT % {
                         "id" : u,
                         "attributes" : ",\n            ".join([
-                            "\"%s\" : \"%s\"" % (k, pmap[u]) for k, pmap in self.m_dpv.items()
+                            "\"%s\" : \"%s\"" % (k, pmap[u]) for k, pmap in self.dpv.items()
                         ]),
-                        "sep" : "," if self.m_dpv else "",
+                        "sep" : "," if self.dpv else "",
                     } for u in vs
                 ]),
             "edges" : "[\n        %s\n    ]" % ", ".join([
                     JSON_EDGE_FORMAT % {
-                        "source" : source(e, self.m_g),
-                        "target" : target(e, self.m_g),
+                        "source" : source(e, self.g),
+                        "target" : target(e, self.g),
                         "attributes" : ",\n            ".join([
-                            "\"%s\" : \"%s\"" % (k, pmap[e]) for k, pmap in self.m_dpe.items()
+                            "\"%s\" : \"%s\"" % (k, pmap[e]) for k, pmap in self.dpe.items()
                         ]),
-                        "sep" : "," if self.m_dpv else "",
+                        "sep" : "," if self.dpv else "",
                     } for e in es
                 ]
             )
         }
-
-
-
