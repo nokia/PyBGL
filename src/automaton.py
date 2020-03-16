@@ -25,6 +25,7 @@ class Automaton(DirectedGraph):
     # Convention: EdgeDescriptor(q, r, a)
     # Convention: self.m_adjacencies[q][a] == r
     def __init__(self, num_vertices :int = 0, q0 :int = 0, pmap_final = None):
+        self.m_in_adjacencies = dict()
         super().__init__(num_vertices)
         self.m_q0 = q0
         if not pmap_final:
@@ -36,34 +37,51 @@ class Automaton(DirectedGraph):
     def delta(self, q :int, a :chr) -> int:
         return self.m_adjacencies.get(q, dict()).get(a, BOTTOM)
 
+    def delta_rev(self, r :int, a :chr) -> set:
+        return self.m_in_adjacencies.get(r, dict()).get(a, set())
+
+    def add_vertex(self) -> int:
+        u = super().add_vertex()
+        self.m_in_adjacencies[u] = dict()
+        return u
+
     def add_edge(self, q :int, r :int, a :chr) -> tuple:
         assert q is not None
         assert r is not None
         if self.delta(q, a):
             return (None, False)
         self.m_adjacencies[q][a] = r
+        if a in self.m_in_adjacencies[r]:
+            self.m_in_adjacencies[r][a].add(q)
+        else:
+            self.m_in_adjacencies[r][a] = {q}
         return (EdgeDescriptor(q, r, a), True)
 
     def edge(self, q :int, r :int, a :chr) -> tuple:
         assert q is not BOTTOM
         return (EdgeDescriptor(q, r, a), True) if q is not None and r == self.delta(q, a) else (None, False)
 
-    def in_edges(self, q :int):
-        raise Exception("Nope.")
+    def in_edges(self, r :int):
+        return (EdgeDescriptor(q, r, a)
+               for a, s in self.m_in_adjacencies[r].get(r, dict()).items()
+               for q in s)
 
     def out_edges(self, q :int):
         return (
-            EdgeDescriptor(q, r, a) \
+            EdgeDescriptor(q, r, a)
             for (a, r) in self.m_adjacencies.get(q, dict()).items()
         )
 
     def remove_edge(self, e :EdgeDescriptor):
         q = source(e, self)
         a = label(e, self)
+        r = target(e, self)
         adj_q = self.m_adjacencies.get(q)
         if adj_q:
             if a in adj_q.keys():
                 del adj_q[a]
+        if a in self.m_in_adjacencies.get(r, dict()):
+            self.m_in_adjacencies.get(r, dict()).get(a, set()).discard(q)
 
     def sigma(self, q :int) -> set:
         return {a for a in self.m_adjacencies.get(q, dict()).keys()} if q is not None else set()
@@ -73,7 +91,7 @@ class Automaton(DirectedGraph):
 
     def edges(self):
         return (
-            EdgeDescriptor(q, r, a) \
+            EdgeDescriptor(q, r, a)
             for (q, adj_q) in self.m_adjacencies.items()
             for (a, r) in adj_q.items()
         )
