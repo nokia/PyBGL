@@ -11,7 +11,7 @@ from pybgl.automaton import \
     BOTTOM, Automaton, accepts, add_edge, add_vertex, alphabet, delta, edge, \
     final, initial, is_complete, is_deterministic, is_final, is_finite, is_initial, \
     is_minimal, label, make_automaton, num_edges, num_vertices, set_initial, set_final, sigma, \
-    remove_edge, remove_vertex, source, target, vertices
+    remove_edge, remove_vertex, source, target, vertices, make_minimal_automaton
 from pybgl.graphviz import graph_to_html
 from pybgl.property_map import make_func_property_map
 
@@ -52,6 +52,64 @@ G5 = make_automaton(
         (1, 1, 'b'), (1, 0, 'a')
     ], 0,
     make_func_property_map(lambda q: False)
+)
+
+G6 = make_automaton(
+    [
+        (0, 1, 'a'), (0, 2, 'b'),
+        (1, 1, 'a'), (1, 3, 'b'),
+        (2, 1, 'a'), (2, 2, 'b'),
+        (3, 1, 'a'), (3, 4, 'b'),
+        (4, 1, 'a'), (4, 2, 'b')
+    ], 0,
+    make_func_property_map(lambda q: q in {4})
+)
+
+G7 = make_automaton(
+    [
+        (0, 1, 'a'), (0, 2, 'b'),
+        (1, 0, 'a'), (1, 3, 'b'),
+        (2, 4, 'a'), (2, 5, 'b'),
+        (3, 4, 'a'), (3, 5, 'b'),
+        (4, 4, 'a'), (4, 5, 'b'),
+        (5, 5, 'a'), (5, 5, 'b')
+    ], 0, make_func_property_map(lambda q: q in {2, 3, 4})
+)
+
+G8 = make_automaton(
+    [
+        (0, 1, 'a'),
+        (1, 2, 'a'),
+        (2, 3, 'a'),
+        (3, 4, 'a'),
+        (4, 5, 'a'),
+        (5, 6, 'a'),
+        (6, 7, 'a'),
+        (7, 8, 'a'),
+        (8, 9, 'a'),
+        (9, 10, 'a'),
+        (10, 11, 'a'),
+        (11, 12, 'a'),
+        (12, 11, 'a')
+    ], 0, make_func_property_map(lambda q: q in {0, 2, 4, 6, 8, 10, 12})
+)
+
+G9 = make_automaton(
+    [
+        (0, 1, 'a'),
+        (1, 2, 'a'),
+        (2, 3, 'a'),
+        (3, 4, 'a'),
+        (4, 5, 'a'),
+        (5, 6, 'a'),
+        (6, 7, 'a'),
+        (7, 8, 'a'),
+        (8, 9, 'a'),
+        (9, 10, 'a'),
+        (10, 11, 'a'),
+        (11, 12, 'a'),
+        (12, 12, 'a')
+    ], 0, make_func_property_map(lambda q: q in {0, 2, 4, 6, 8, 10, 12})
 )
 
 def test_automaton_initial():
@@ -216,3 +274,17 @@ def test_automaton_remove_vertex():
 
 def test_automaton_graphviz():
     svg = graph_to_html(G1)
+
+def test_automaton_make_minimal_automaton():
+    min_G6 = make_minimal_automaton(G6)
+    assert num_vertices(min_G6) == 4
+    assert num_edges(min_G6) == 8
+    min_G7 = make_minimal_automaton(G7)
+    assert num_vertices(min_G7) == 3
+    assert num_edges(min_G7) == 6
+    min_G8 = make_minimal_automaton(G8)
+    assert num_vertices(min_G8) == 2
+    assert num_edges(min_G8) == 2
+    min_G9 = make_minimal_automaton(G9)
+    assert num_vertices(min_G9) == 13
+    assert num_edges(min_G9) == 13

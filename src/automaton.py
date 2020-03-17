@@ -8,6 +8,7 @@ __copyright__  = "Copyright (C) 2018, Nokia"
 __license__    = "BSD-3"
 
 from collections import defaultdict
+from functools import reduce
 
 # NB: pybgl.graph.edge and pybgl.graph.add_edge are not imported because their signature is different
 from pybgl.graph import \
@@ -222,3 +223,52 @@ def make_automaton(
         if pmap_vfinal[qn]:
             set_final(q, g)
     return g
+
+def make_minimal_automaton(g):
+    """
+    Builds the minimal DFA that is equivalent to g and returns it
+    Notation taken from wikipedia description of Hopcroft's algorithm
+    https://en.wikipedia.org/wiki/DFA_minimization#Hopcroft's_algorithm
+    """
+    alphabet = g.alphabet()
+    final_states = {v for v in g.vertices() if g.is_final(v)}
+    P = {frozenset(final_states), frozenset(g.vertices()) - final_states}
+    W = {frozenset(final_states), frozenset(g.vertices()) - final_states}
+    while W != set():
+        A = W.pop()
+        for a in alphabet:
+            X = frozenset(reduce(lambda a, b: a | b, (g.delta_rev(r, a) for r in A)))
+            new_P = set(P)
+            for Y in P:
+                if len(X & Y) > 0 and len(Y - X) > 0:
+                    new_P.remove(Y)
+                    new_P.add(frozenset(X & Y))
+                    new_P.add(frozenset(Y - X))
+                    if Y in W:
+                        W.remove(Y)
+                        W.add(frozenset(X & Y))
+                        W.add(frozenset(Y - X))
+                    elif len(X & Y) <= len(Y - X):
+                        W.add(frozenset(X & Y))
+                    else:
+                        W.add(frozenset(Y - X))
+            P = new_P
+    idx_from_set = {Q: idx for idx, Q in enumerate(list(P))}
+    Q0 = {idx_from_set[Q] for Q in P if any(g.is_initial(q) for q in Q)}.pop()
+    Q_finals = defaultdict(bool,
+                           {idx_from_set[Q]: True if any(g.is_final(q) for q in Q)
+                            else False
+                            for Q in P})
+    min_g = Automaton(
+        len(P),
+        Q0,
+        make_assoc_property_map(Q_finals)
+    )
+    for Q in P:
+        for q in Q:
+            for e in g.out_edges(q):
+                r = target(e, g)
+                a = label(e, g)
+                R = {_ for _ in P if r in _}.pop()
+                min_g.add_edge(idx_from_set[Q], idx_from_set[R], a)
+    return min_g
