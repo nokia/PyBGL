@@ -119,9 +119,10 @@ class Automaton(DirectedGraph):
         return self.m_pmap_final[q]
 
     def vertex_to_graphviz(self, u :int) -> str:
-        return "%s [shape=\"%s\"]" % (
+        return "%s [shape=\"%s\"%s]" % (
             u,
-            "doublecircle" if self.is_final(u) else "circle"
+            "doublecircle" if self.is_final(u) else "circle",
+            ', style=bold' if self.is_initial(u) else ''
         )
 
     def edge_to_graphviz(self, e :EdgeDescriptor) -> str:
