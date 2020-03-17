@@ -288,3 +288,9 @@ def test_automaton_make_minimal_automaton():
     min_G9 = make_minimal_automaton(G9)
     assert num_vertices(min_G9) == 13
     assert num_edges(min_G9) == 13
+
+def test_automaton_delta_rev():
+    assert G6.delta_rev(1, 'a') == {0, 1, 2, 3, 4}
+    assert G6.delta_rev(2, 'b') == {0, 2, 4}
+    assert G6.delta_rev(3, 'a') == set()
+    assert G6.delta_rev(7, 'c') == set()
