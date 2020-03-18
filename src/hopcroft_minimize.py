@@ -81,7 +81,7 @@ def hopcroft_minimize(g : IncidenceAutomaton) -> IncidenceAutomaton:
     for qs in aggregated_states:
         for q in qs:
             for e in out_edges(q, g):
-                r = target(e, g),
+                r = target(e, g)
                 a = label(e, g)
                 rs = {_ for _ in aggregated_states if r in _}.pop()
                 add_edge(map_set_idx[qs], map_set_idx[rs], a, min_g)
