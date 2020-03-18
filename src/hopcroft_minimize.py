@@ -34,9 +34,6 @@ def hopcroft_agglomerate_states(g: IncidenceAutomaton) -> set:
     while wait_list != set():
         current_states = wait_list.pop()
         for a in g_alphabet:
-            print("%s; %s; __" % (current_states, a))
-            print("w:%s" % wait_list)
-            print("agg: %s" % agg_states)
             x = frozenset(reduce(
                 lambda a, b: a | b,
                 (
@@ -44,7 +41,6 @@ def hopcroft_agglomerate_states(g: IncidenceAutomaton) -> set:
                     for r in current_states
                 )
             ))
-            print("x: %s" % x)
             new_agg_states = set(agg_states)
             for y in agg_states:
                 if len(x & y) > 0 and len(y - x) > 0:
