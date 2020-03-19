@@ -4,6 +4,7 @@ PyBGL
 .. _git: https://github.com/nokia/pybgl.git 
 .. _wiki: https://github.com/nokia/pybgl/wiki
 .. _BGL: https://www.boost.org/doc/libs/1_69_0/libs/graph/doc/
+.. python3: http://python.org/
 
 ==================
 Overview
@@ -17,7 +18,7 @@ For more information, visit the wiki_.
 Dependencies
 ==================
 
-Minifold requires `Python 3 <http://python.org/>`.
+Minifold requires Python 3.
 
 For example, under Debian-based distribution, run:
 
