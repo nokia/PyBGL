@@ -1,4 +1,4 @@
-Minifold
+PyBGL
 ==============
 
 .. _git: https://github.com/nokia/pybgl.git 
