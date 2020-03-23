@@ -8,9 +8,9 @@ __copyright__  = "Copyright (C) 2018, Nokia"
 __license__    = "BSD-3"
 
 
-from pybgl.graphviz     import graph_to_html
-from pybgl.property_map import make_func_property_map
-from veggie.incidence_automaton import \
+from pybgl.graphviz             import graph_to_html
+from pybgl.property_map         import make_func_property_map
+from pybgl.incidence_automaton  import \
     BOTTOM, IncidenceAutomaton, accepts, add_edge, add_vertex, alphabet, delta, edge, \
     final, initial, is_complete, is_deterministic, is_final, is_finite, is_initial, \
     in_degree, in_edges, \
