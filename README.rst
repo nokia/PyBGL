@@ -18,7 +18,7 @@ For more information, visit the wiki_.
 Dependencies
 ==================
 
-Minifold requires Python 3.
+PyBGL requires python3_.
 
 For example, under Debian-based distribution, run:
 
