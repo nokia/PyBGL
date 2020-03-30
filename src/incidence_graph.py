@@ -19,9 +19,9 @@ from pybgl.graph    import DirectedGraph, \
     out_degree, out_edges
 
 class IncidenceGraph(DirectedGraph):
-    def __init__(self, directed = None):
+    def __init__(self, num_vertices :int = 0):
         self.m_in_adjacencies = dict()
-        super().__init__(directed)
+        super().__init__(num_vertices)
 
     @property
     def in_adjacencies(self) -> dict:
