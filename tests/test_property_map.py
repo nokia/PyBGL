@@ -6,7 +6,10 @@
 #   Maxime Raynal     <maxime.raynal@nokia.com>
 
 from collections        import defaultdict
-from pybgl.property_map import make_func_property_map, make_assoc_property_map, get, put
+from pybgl.property_map import get, \
+    make_assoc_property_map, \
+    make_constant_property_map, \
+    make_func_property_map
 
 EXPECTED_RESULT = {
     'a': 'n', 'b': 'o', 'c': 'p', 'd': 'q', 'e': 'r', 'f': 's', 'g': 't', 'h': 'u',
@@ -52,4 +55,12 @@ def _test_make_assoc_property_map(with_dict :bool):
 def test_make_assoc_property_map():
     for b in [False, True]:
         _test_make_assoc_property_map(b)
+
+def test_constant_property_map():
+    value = 17
+    pmap = make_constant_property_map(value)
+    for i in range(10):
+        assert pmap[i] == value
+        pmap[i] = value + 1
+        assert pmap[i] == value
 

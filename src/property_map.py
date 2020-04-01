@@ -93,3 +93,13 @@ class IdentityPropertyMap(ReadPropertyMap):
 def identity_property_map():
     return IdentityPropertyMap()
 
+class ConstantPropertyMap(ReadWritePropertyMap):
+    def __init__(self, value):
+        self.m_value = value
+    def get(self, key):
+        return self.m_value
+    def set(self, key, value):
+        pass
+
+def make_constant_property_map(value) -> ConstantPropertyMap:
+    return ConstantPropertyMap(value)
