@@ -10,7 +10,7 @@ __email__      = "marc-olivier.buob@nokia-bell-labs.com"
 __copyright__  = "Copyright (C) 2020, Nokia"
 __license__    = "BSD-3"
 
-from pybgl.automaton import Automaton, is_final
+from pybgl.trie import Trie, is_final
 from pybgl.parallel_breadth_first_search import \
     ParallelBreadthFirstSearchVisitor, parallel_breadth_first_search
 
@@ -26,8 +26,8 @@ class MatchingVisitor(ParallelBreadthFirstSearchVisitor):
         self.update(s1, g1, s2, g2)
 
 def matching(
-    g1 :Automaton,
-    g2 :Automaton,
+    g1 :Trie,
+    g2 :Trie,
     if_push = lambda e1, g1, e2, g2: True,
     vis :MatchingVisitor= None
 ) -> list:
