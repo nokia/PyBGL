@@ -20,11 +20,8 @@ class ContradictionException(Exception):
 
 class DeterministicInclusionVisitor(ParallelBreadthFirstSearchVisitor):
     def __init__(self):
-        self.visited = set()
         self.ret = 0
     def update(self, q1 :int, g1 :Automaton, q2 :int, g2 :Automaton):
-        if (q1, q2) in self.visited:
-            return
         f1 = is_final(q1, g1)
         f2 = is_final(q2, g2)
         if f1 ^ f2:
@@ -33,7 +30,6 @@ class DeterministicInclusionVisitor(ParallelBreadthFirstSearchVisitor):
                 self.ret = ret
             else:
                 raise ContradictionException("Contradiction")
-            self.visited.add((q1, q2))
     def start_vertex(self, s1 :int, g1 :Automaton, s2 :int, g2 :Automaton):
         self.update(s1, g1, s2, g2)
     def discover_vertex(self, q1 :int, g1 :Automaton, q2 :int, g2 :Automaton):
