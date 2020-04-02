@@ -29,7 +29,7 @@ class DeterministicInclusionVisitor(ParallelBreadthFirstSearchVisitor):
             if self.ret == 0:
                 self.ret = ret
             else:
-                raise ContradictionException("Contradiction")
+                raise ContradictionException()
     def start_vertex(self, s1 :int, g1 :Automaton, s2 :int, g2 :Automaton):
         self.update(s1, g1, s2, g2)
     def discover_vertex(self, q1 :int, g1 :Automaton, q2 :int, g2 :Automaton):
@@ -54,9 +54,8 @@ def deterministic_inclusion(
         None otherwise (i.e. L(g1) - L(g2) and L(g2) - L(g1) are
             not empty.
     """
-    if isinstance(g1, str): g1 = make_suffix_trie(w = g1)
-    if isinstance(g2, str): g2 = make_suffix_trie(w = g2)
-    if vis is None: vis = DeterministicInclusionVisitor()
+    if vis is None:
+        vis = DeterministicInclusionVisitor()
     try:
         parallel_breadth_first_search(g1, g2, vis = vis)
     except ContradictionException as e:
