@@ -13,7 +13,6 @@ __license__    = "BSD-3"
 from pybgl.automaton import Automaton, is_final
 from pybgl.parallel_breadth_first_search import \
     ParallelBreadthFirstSearchVisitor, parallel_breadth_first_search
-from pybgl.suffix_trie import make_suffix_trie
 
 class MatchingVisitor(ParallelBreadthFirstSearchVisitor):
     def __init__(self):
@@ -32,8 +31,6 @@ def matching(
     if_push = lambda e1, g1, e2, g2: True,
     vis :MatchingVisitor= None
 ) -> list:
-    if isinstance(g1, str): g1 = make_suffix_trie(w = g1)
-    if isinstance(g2, str): g2 = make_suffix_trie(w = g2)
     if vis is None: vis = MatchingVisitor()
     parallel_breadth_first_search(g1, g2, vis = vis, if_push = if_push)
     return vis.counters
