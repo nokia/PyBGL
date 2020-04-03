@@ -204,3 +204,22 @@ def make_automaton(
         if pmap_vfinal[qn]:
             set_final(q, g)
     return g
+
+def delta_best_effort(g :Automaton, w :str) -> tuple:
+    q = initial(g)
+    if not w:
+        return (q, 0)
+    for (i, a) in enumerate(w):
+        r = delta(q, a, g)
+        if r is BOTTOM:
+            return (q, i)
+        q = r
+    return (q, i + 1)
+
+def automaton_insert_string(g :Automaton, w :str):
+    (q, i) = delta_best_effort(g, w)
+    for a in w[i:]:
+        r = add_vertex(g)
+        add_edge(q, r, a, g)
+        q = r
+    set_final(q, g)
