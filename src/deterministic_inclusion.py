@@ -28,7 +28,7 @@ class DeterministicInclusionVisitor(ParallelBreadthFirstSearchVisitor):
             ret = 1 if f2 else -1
             if self.ret == 0:
                 self.ret = ret
-            else:
+            elif self.ret != ret:
                 raise ContradictionException()
     def start_vertex(self, s1 :int, g1 :Automaton, s2 :int, g2 :Automaton):
         self.update(s1, g1, s2, g2)
