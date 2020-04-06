@@ -13,7 +13,7 @@ __license__    = "BSD-3"
 from pybgl.automaton import \
     BOTTOM, Automaton, DirectedGraph, EdgeDescriptor, \
     accepts, add_edge, add_vertex, add_edge, alphabet, \
-    automaton_insert_string, delta, edge, edges, \
+    automaton_insert_string, delta, edge, edges, initial, \
     is_initial, initial, is_final, is_finite, final, \
     num_edges, num_vertices, out_degree, out_edges, set_initial, set_final, \
     remove_vertex, remove_edge, source, sigma, label, target, vertices
