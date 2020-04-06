@@ -15,7 +15,7 @@ from pybgl.automaton import \
     accepts, add_edge, add_vertex, add_edge, alphabet, \
     automaton_insert_string, delta, edge, edges, \
     is_initial, initial, is_final, is_finite, final, \
-    num_edges, num_vertices, out_degree, out_edges, set_final, \
+    num_edges, num_vertices, out_degree, out_edges, set_initial, set_final, \
     remove_vertex, remove_edge, source, sigma, label, target, vertices
 from pybgl.parallel_breadth_first_search import \
     WHITE, ParallelBreadthFirstSearchVisitor, parallel_breadth_first_search
