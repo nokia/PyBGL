@@ -102,6 +102,9 @@ def depth_first_search_graph(
     vis         :DefaultDepthFirstSearchVisitor = None,
     if_push     :bool = None # if_push(e :EdgeDecriptor) -> bool
 ):
+    if pmap_vcolor is None:
+        map_vcolor = defaultdict(int)
+        pmap_vcolor = make_assoc_property_map(map_vcolor)
     for u in (sources if sources else vertices(g)):
         if pmap_vcolor[u] == WHITE:
             depth_first_search(u, g, pmap_vcolor, vis, if_push)
