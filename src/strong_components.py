@@ -106,5 +106,5 @@ def strong_components(
         stack
     )
 
-    depth_first_search_graph(g, pmap_vcolor, vis, None)
+    depth_first_search_graph(g, vertices(g), pmap_vcolor, vis, None)
     return vis.total

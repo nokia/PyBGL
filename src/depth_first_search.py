@@ -14,10 +14,8 @@ __email__      = "marc-olivier.buob@nokia-bell-labs.com"
 __copyright__  = "Copyright (C) 2018, Nokia"
 __license__    = "BSD-3"
 
-from collections           import deque
-from pybgl.graph           import Graph, EdgeDescriptor, source, target, vertices
-from pybgl.graph           import out_edges as _out_edges, target as _target
-from pybgl.incidence_graph import in_edges
+from collections           import deque, defaultdict
+from pybgl.graph           import Graph, EdgeDescriptor, out_edges, target, vertices
 from pybgl.graph_traversal import WHITE, GRAY, BLACK
 from pybgl.property_map    import ReadWritePropertyMap, make_assoc_property_map
 
@@ -39,16 +37,18 @@ class DefaultDepthFirstSearchVisitor():
 def depth_first_search(
     s :int,
     g :Graph,
-    pmap_vcolor :ReadWritePropertyMap,
-    vis         = DefaultDepthFirstSearchVisitor(),
-    # N.B: The following parameter does not exist in libboost:
-    if_push     = None, # if_push(e :EdgeDecriptor, g :Graph) -> bool returns True iff e is relevant
-    forward     = True  # allows to go through an IncidenceGraph backward
+    pmap_vcolor :ReadWritePropertyMap = None,
+    vis         :DefaultDepthFirstSearchVisitor = None,
+    # N.B: The following parameters does not exist in libboost:
+    if_push     = None # if_push(e :EdgeDecriptor, g :Graph) -> bool returns True iff e is relevant
 ):
-    out_edges = _out_edges if forward else in_edges
-    target    = _target    if forward else source
-
-    if not if_push: if_push = (lambda e, g: True)
+    if pmap_vcolor is None:
+        map_vcolor = defaultdict(int)
+        pmap_vcolor = make_assoc_property_map(map_vcolor)
+    if vis is None:
+        vis = DefaultDepthFirstSearchVisitor()
+    if if_push is None:
+        if_push = (lambda e, g: True)
 
     vis.start_vertex(s, g)
     pmap_vcolor[s] = GRAY
@@ -94,15 +94,15 @@ def depth_first_search(
         pmap_vcolor[u] = BLACK
         vis.finish_vertex(u, g)
 
+# N.B: The following function is also named depth_first_search in boost.
 def depth_first_search_graph(
-    g :Graph,
-    pmap_vcolor :ReadWritePropertyMap,
-    vis       = DefaultDepthFirstSearchVisitor(),
-    # N.B: The following parameters doe not exists in libboost:
-    if_push   = None, # if_push(e :EdgeDecriptor) -> bool returns True iff e is relevant
-    forward   = True
+    g           :Graph,
+    sources     :set = None, # Or a generator e.g. vertices(g)
+    pmap_vcolor :ReadWritePropertyMap = None,
+    vis         :DefaultDepthFirstSearchVisitor = None,
+    if_push     :bool = None # if_push(e :EdgeDecriptor) -> bool
 ):
-    for u in vertices(g):
+    for u in (sources if sources else vertices(g)):
         if pmap_vcolor[u] == WHITE:
-            depth_first_search(u, g, pmap_vcolor, vis, if_push, forward)
+            depth_first_search(u, g, pmap_vcolor, vis, if_push)
 

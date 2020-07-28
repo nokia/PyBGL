@@ -14,11 +14,10 @@ __email__      = "marc-olivier.buob@nokia-bell-labs.com"
 __copyright__  = "Copyright (C) 2018, Nokia"
 __license__    = "BSD-3"
 
-from collections           import deque
-from pybgl.graph           import Graph, EdgeDescriptor, out_edges, source, target
-from pybgl.incidence_graph import in_edges
+from collections           import deque, defaultdict
+from pybgl.graph           import Graph, EdgeDescriptor, out_edges, target
 from pybgl.graph_traversal import WHITE, GRAY, BLACK
-from pybgl.property_map    import ReadWritePropertyMap
+from pybgl.property_map    import ReadWritePropertyMap, make_assoc_property_map
 
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # /!\ DO NOT MODIFY THIS FILE
@@ -40,17 +39,19 @@ class DefaultBreadthFirstSearchVisitor():
 # Multiple sources
 def breadth_first_search_graph(
     g           :Graph,
-    sources     :set, # Or a generator e.g. vertices(g)
-    pmap_vcolor :ReadWritePropertyMap,
+    sources     :set = None, # Or a generator e.g. vertices(g)
+    pmap_vcolor :ReadWritePropertyMap = None,
     vis         = DefaultBreadthFirstSearchVisitor(),
     # N.B: The following parameter does not exist in libboost:
-    if_push     = None, # if_push(e :EdgeDecriptor, g :Graph) -> bool returns True iff e is relevant
-    forward     = True  # allows to go through an IncidenceGraph backward
+    if_push     = None # if_push(e :EdgeDecriptor, g :Graph) -> bool returns True iff e is relevant
 ):
-    _out_edges = out_edges if forward else in_edges
-    _target    = target    if forward else source
-
-    if not if_push: if_push = (lambda e, g: True)
+    if pmap_vcolor is None:
+        map_vcolor = defaultdict(int)
+        pmap_vcolor = make_assoc_property_map(map_vcolor)
+    if vis is None:
+        vis = DefaultDepthFirstSearchVisitor()
+    if not if_push:
+        if_push = (lambda e, g: True)
 
     stack = deque()
     for s in sources:
@@ -60,18 +61,18 @@ def breadth_first_search_graph(
 
     while stack:
         u = stack.pop()
-
         vis.examine_vertex(u, g)
-        for e in _out_edges(u, g):
-            v = _target(e, g)
+        for e in out_edges(u, g):
+            if not if_push(e, g):
+                continue
+            v = target(e, g)
             vis.examine_edge(e, g)
             color_v = pmap_vcolor[v]
             if color_v == WHITE:
                 vis.tree_edge(e, g)
                 pmap_vcolor[v] = GRAY
                 vis.discover_vertex(v, g)
-                if if_push(e, g):
-                    stack.appendleft(v)
+                stack.appendleft(v)
             elif color_v == GRAY:
                 vis.gray_target(e, g)
             else:
@@ -83,11 +84,10 @@ def breadth_first_search_graph(
 def breadth_first_search(
     s :int,
     g :Graph,
-    pmap_vcolor :ReadWritePropertyMap,
-    vis         = DefaultBreadthFirstSearchVisitor(),
+    pmap_vcolor :ReadWritePropertyMap = None,
+    vis         :DefaultBreadthFirstSearchVisitor = None,
     # N.B: The following parameters doe not exists in libboost:
-    if_push     = None, # if_push(e :EdgeDecriptor) -> bool returns True iff e is relevant
-    forward     = True
+    if_push     = None # if_push(e :EdgeDecriptor) -> bool returns True iff e is relevant
 ):
-    breadth_first_search_graph(g, {s}, pmap_vcolor, vis, if_push, forward)
+    breadth_first_search_graph(g, {s}, pmap_vcolor, vis, if_push)
 
