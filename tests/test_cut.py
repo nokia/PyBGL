@@ -4,88 +4,67 @@
 __author__     = "Marc-Olivier Buob"
 __maintainer__ = "Marc-Olivier Buob"
 __email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2018, Nokia"
+__copyright__  = "Copyright (C) 2020, Nokia"
 __license__    = "BSD-3"
 
-from pybgl.graph import DirectedGraph, add_edge
-from pybgl.cut   import bfs_cut, dfs_cut
+from pybgl.cut          import cut
+from pybgl.graph        import DirectedGraph, add_edge
 
-def check_cut(g, map_cut_expected, sources = None):
-    if not sources:
-        sources = {0}
-    for (cut, expected) in map_cut_expected.items():
-        for traversal_cut in (dfs_cut, bfs_cut):
-            print(f"cut = {cut} traversal_cut = {traversal_cut}")
-            obtained = traversal_cut(
-                g,
-                sources = sources,
-                if_push = lambda e, g: e not in cut
-            )
-            assert obtained == expected, f"obtained = f{obtained}, expected = {expected}"
-
-def test_cut_branch():
-    g = DirectedGraph(4)
+def test_cut():
+    g = DirectedGraph(3)
     (e01, _) = add_edge(0, 1, g)
     (e12, _) = add_edge(1, 2, g)
-    (e23, _) = add_edge(2, 3, g)
 
-    map_cut_expected = {
-        tuple() : {3},
-        (e01, ) : {0},
-        (e12, ) : {1},
-        (e23, ) : {2},
-        (e12, e23) : {1},
-    }
-    check_cut(g, map_cut_expected)
+    obtained = cut(0, g, lambda e, g: e in {e01})
+    assert obtained == {1}
+
+    obtained = cut(0, g, lambda e, g: e in {e12})
+    assert obtained == {2}
+
+    obtained = cut(0, g, lambda e, g: False)
+    assert obtained == {2}
+
+    obtained = cut(0, g, lambda e, g: True)
+    assert obtained == {1}
 
 def test_cut_diamond():
     g = DirectedGraph(4)
     (e01, _) = add_edge(0, 1, g)
-    (e13, _) = add_edge(1, 3, g)
     (e02, _) = add_edge(0, 2, g)
+    (e13, _) = add_edge(1, 3, g)
     (e23, _) = add_edge(2, 3, g)
 
-    map_cut_expected = {
-        tuple() : {3},
-        (e01, ) : {3},
-        (e13, ) : {1, 3},
-        (e01, e02) : {0},
-        (e23, ) : {2, 3},
-        (e13, e23) : {1, 2},
-    }
-    check_cut(g, map_cut_expected)
+    obtained = cut(0, g, lambda e, g: e in {e01, e02})
+    assert obtained == {1, 2}
 
-def test_cut_loop():
-    g = DirectedGraph(3)
+    obtained = cut(0, g, lambda e, g: e in {e13, e23})
+    assert obtained == {3}
+
+def test_cut_tree():
+    g = DirectedGraph(9)
     (e01, _) = add_edge(0, 1, g)
-    (e11, _) = add_edge(1, 1, g)
-    (e12, _) = add_edge(1, 2, g)
+    (e02, _) = add_edge(0, 2, g)
+    (e23, _) = add_edge(2, 3, g)
+    (e24, _) = add_edge(2, 4, g)
 
-    map_cut_expected = {
-        tuple() : {2},
-        (e01, ) : {0},
-        (e12, ) : {1},
-        (e11, e12) : {1},
-        (e11, ) : {2},
-    }
-    check_cut(g, map_cut_expected)
+    (e35, _) = add_edge(3, 5, g)
+    (e36, _) = add_edge(3, 6, g)
+    (e45, _) = add_edge(4, 7, g)
+    (e46, _) = add_edge(4, 8, g)
+    (e19, _) = add_edge(1, 9, g)
 
-def test_disconnected():
-    g = DirectedGraph(6)
-    (e01, _) = add_edge(0, 1, g)
-    (e12, _) = add_edge(1, 2, g)
-    (e34, _) = add_edge(3, 4, g)
-    (e45, _) = add_edge(4, 5, g)
 
-    map_cut_expected = {tuple() : {2}}
-    check_cut(g, map_cut_expected, sources = {0})
-    check_cut(g, map_cut_expected, sources = {1})
-    check_cut(g, map_cut_expected, sources = {2})
+    obtained = cut(0, g, lambda e, g: e in {e01, e02})
+    assert obtained == {1, 2}
 
-    map_cut_expected = {tuple() : {5}}
-    check_cut(g, map_cut_expected, sources = {3})
-    check_cut(g, map_cut_expected, sources = {4})
-    check_cut(g, map_cut_expected, sources = {5})
+    obtained = cut(0, g, lambda e, g: False)
+    assert obtained == {5, 6, 7, 8, 9}
 
-    map_cut_expected = {tuple() : {2, 5}}
-    check_cut(g, map_cut_expected, sources = {0, 3})
+    obtained = cut(0, g, lambda e, g: e in {e01, e23, e24})
+    assert obtained == {1, 3, 4}
+
+    obtained = cut(0, g, lambda e, g: e in {e23, e24})
+    assert obtained == {3, 4, 9}
+
+
+

@@ -14,82 +14,59 @@ __copyright__  = "Copyright (C) 2020, Nokia"
 __license__    = "BSD-3"
 
 from collections                import defaultdict
-from pybgl.breadth_first_search import DefaultBreadthFirstSearchVisitor, breadth_first_search_graph
-from pybgl.depth_first_search   import DefaultDepthFirstSearchVisitor, depth_first_search_graph
+from pybgl.graph                import Graph, EdgeDescriptor, source, target
+from pybgl.depth_first_search   import WHITE, DefaultDepthFirstSearchVisitor, depth_first_search
 from pybgl.property_map         import make_assoc_property_map
-from pybgl.graph                import DirectedGraph, EdgeDescriptor, source, target
 
-class CutMixin:
+def cut(s :int, g :Graph, in_cut) -> set:
     """
-    Mixin used to find the cut in a acyclic Graph.
-    The cut is characterized by the `if_push` parameter of the graph traversal algorithm.
-    See `pybgl.breadth_first_search` or `pybgl.depth_first_search`.
-    """
-    def __init__(self, roots :list):
-        """
-        Constructor.
-        Args:
-            roots: `list` of roots of the graph.
-        """
-        self.cut = {u for u in roots}
-
-    def examine_edge(self, e :EdgeDescriptor, g :DirectedGraph):
-        """
-        Examine edge event.
-        Args:
-            e: `EdgeDescriptor` instance corresponding to the current edge.
-            g: `DirectedGraph` instance corresponding to considered graph.
-        """
-        u = source(e, g)
-        v = target(e, g)
-        if u in self.cut:
-            self.cut.remove(u)
-        self.cut.add(v)
-
-class BfsCutVisitor(CutMixin, DefaultBreadthFirstSearchVisitor):
-    def __init__(self, roots :list):
-        super().__init__(roots)
-
-class DfsCutVisitor(CutMixin, DefaultDepthFirstSearchVisitor):
-    def __init__(self, roots :list):
-        super().__init__(roots)
-
-def bfs_cut(g :DirectedGraph, sources :set, if_push) -> set:
-    """
-    Search a cut in a acyclic Graph.
+    Find a vertex cut given an edge cut.
     Args:
-        sources: `Iterable(int)` gathering sources of the graph where to start the BFS traversal.
-        if_push: `Callback(EdgeDescriptor, DirectedGraph) -> bool` indicating
-            whether a edge is relevant in the considered graph.
-        g: `DirectedGraph` instance corresponding to considered dendrogram.
-    Returns:
-        The `set(int)` of gathering the vertices involved in the cut.
+        g: A `Graph` instance corresponding to an acyclic graph.
+        s: The `VertexDescriptor` corresponding to the source vertex.
+        in_cut: `Callback(EdgeDescriptor, Graph) -> bool` indicating whether an
+            edge belong to the considered cut.
     """
-    vis = BfsCutVisitor(sources)
-    breadth_first_search_graph(
-        g,
-        sources,
-        vis = vis,
-        if_push = if_push
-    )
-    return vis.cut
+    class LeavesVisitor(DefaultDepthFirstSearchVisitor):
+        def __init__(self, leaves :set):
+            self.leaves = leaves
+        def examine_edge(self, e :EdgeDescriptor, g :Graph):
+            u = source(e, g)
+            self.leaves.discard(u)
+        def discover_vertex(self, u :int, g :Graph):
+            self.leaves.add(u)
 
-def dfs_cut(g :DirectedGraph, sources :set, if_push) -> set:
-    """
-    Search a cut in a acyclic Graph.
-    Args:
-        sources: `Iterable(int)` gathering sources of the graph where to start the DFS traversal.
-        if_push: `Callback(EdgeDescriptor, DirectedGraph) -> bool` indicating
-            whether a edge is relevant in the considered graph.
-        g: `DirectedGraph` instance corresponding to considered dendrogram.
-    Returns:
-        The `set(int)` of gathering the vertices involved in the cut.
-    """
-    vis = DfsCutVisitor(sources)
-    depth_first_search_graph(
-        g,
-        sources,
-        vis = vis,
-        if_push = if_push
+    class IfPush:
+        def __init__(self, in_cut, cutting_edges :set):
+            self.in_cut = in_cut
+            self.cutting_edges = cutting_edges
+        def __call__(self, e :EdgeDescriptor, g :Graph) -> bool:
+            is_cutting_edge = self.in_cut(e, g)
+            if is_cutting_edge:
+                self.cutting_edges.add(e)
+            return not is_cutting_edge
+
+    leaves = set()
+    cutting_edges = set()
+    map_vcolor = defaultdict(int)
+    depth_first_search(
+        s, g,
+        pmap_vcolor = make_assoc_property_map(map_vcolor),
+        vis = LeavesVisitor(leaves),
+        if_push = IfPush(in_cut, cutting_edges)
     )
-    return vis.cut
+    print(f"leaves = f{leaves}")
+    return {target(e, g) for e in cutting_edges} | {u for u in leaves} - {source(e, g) for e in cutting_edges}
+    # Reached leaved u unless they are source of a cutting edges
+#    if not cutting_edges:
+#        return leaves
+#    else:
+#        print("=" * 80)
+#        print(f"WHITE = {WHITE}")
+#        print(f"map_vcolor = {map_vcolor}")
+#        print(f"cutting_edges = f{cutting_edges}")
+#        print(f"leaves = f{leaves}")
+#        return {
+#            u for u in {target(e, g) for e in cutting_edges} - leaves
+#            if map_vcolor[u] == WHITE
+#        }
