@@ -55,18 +55,5 @@ def cut(s :int, g :Graph, in_cut) -> set:
         vis = LeavesVisitor(leaves),
         if_push = IfPush(in_cut, cutting_edges)
     )
-    print(f"leaves = f{leaves}")
     return {target(e, g) for e in cutting_edges} | {u for u in leaves} - {source(e, g) for e in cutting_edges}
-    # Reached leaved u unless they are source of a cutting edges
-#    if not cutting_edges:
-#        return leaves
-#    else:
-#        print("=" * 80)
-#        print(f"WHITE = {WHITE}")
-#        print(f"map_vcolor = {map_vcolor}")
-#        print(f"cutting_edges = f{cutting_edges}")
-#        print(f"leaves = f{leaves}")
-#        return {
-#            u for u in {target(e, g) for e in cutting_edges} - leaves
-#            if map_vcolor[u] == WHITE
-#        }
+
