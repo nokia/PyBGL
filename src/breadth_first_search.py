@@ -41,7 +41,7 @@ def breadth_first_search_graph(
     g           :Graph,
     sources     :set = None, # Or a generator e.g. vertices(g)
     pmap_vcolor :ReadWritePropertyMap = None,
-    vis         = DefaultBreadthFirstSearchVisitor(),
+    vis         = None,
     # N.B: The following parameter does not exist in libboost:
     if_push     = None # if_push(e :EdgeDecriptor, g :Graph) -> bool returns True iff e is relevant
 ):
@@ -49,7 +49,7 @@ def breadth_first_search_graph(
         map_vcolor = defaultdict(int)
         pmap_vcolor = make_assoc_property_map(map_vcolor)
     if vis is None:
-        vis = DefaultDepthFirstSearchVisitor()
+        vis = DefaultBreadthFirstSearchVisitor()
     if not if_push:
         if_push = (lambda e, g: True)
 
