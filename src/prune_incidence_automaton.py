@@ -7,20 +7,23 @@ __email__      = "{marc-olivier.buob,maxime.raynal}@nokia.com"
 __copyright__  = "Copyright (C) 2020, Nokia"
 __license__    = "BSD-3"
 
-from collections              import defaultdict
+from collections               import defaultdict
 
-from pybgl.automaton          import final, initial, remove_vertex, vertices
-from pybgl.depth_first_search import depth_first_search_graph, WHITE
-from pybgl.property_map       import make_assoc_property_map
-from pybgl.reverse            import reverse_graph
+from pybgl.graph               import Graph
+from pybgl.incidence_automaton import (
+    IncidenceAutomaton, final, initial, remove_vertex, vertices
+)
+from pybgl.depth_first_search  import depth_first_search_graph
+from pybgl.property_map        import make_assoc_property_map
+from pybgl.reverse             import reverse_graph
 
-def find_reachable_vertices(g, sources):
+def find_reachable_vertices(g: Graph, sources: set) -> set:
     map_vcolor = defaultdict(int)
     pmap_vcolor = make_assoc_property_map(map_vcolor)
     depth_first_search_graph(g, sources, pmap_vcolor=pmap_vcolor)
     return set(map_vcolor.keys())
 
-def prune_automaton(g):
+def prune_incidence_automaton(g: IncidenceAutomaton):
     to_keep = find_reachable_vertices(g, {initial(g)})
     reverse_graph(g)
     to_keep &= find_reachable_vertices(g, final(g))
