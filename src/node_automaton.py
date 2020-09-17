@@ -12,11 +12,12 @@ __license__    = "BSD-3"
 
 
 from collections            import defaultdict
-from pybgl.automaton        import \
-    BOTTOM, Automaton, EdgeDescriptor, accepts, add_vertex, alphabet, \
-    delta, edges, graphviz_arc, initial, is_initial, is_final, is_finite, \
-    final, label, num_edges, num_vertices, out_degree, out_edges, set_final, \
+from pybgl.automaton        import (
+    BOTTOM, Automaton, EdgeDescriptor, accepts, accepts_debug, add_vertex, alphabet,
+    delta, edges, graphviz_arc, initial, is_initial, is_final, is_finite,
+    final, label, num_edges, num_vertices, out_degree, out_edges, set_final,
     remove_vertex, remove_edge, set_initial, set_final, source, sigma, target, vertices
+)
 from pybgl.graph            import add_edge, edge
 from pybgl.property_map     import ReadWritePropertyMap, make_assoc_property_map
 

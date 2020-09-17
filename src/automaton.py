@@ -10,13 +10,13 @@ __license__    = "BSD-3"
 from collections import defaultdict
 
 # NB: pybgl.graph.edge and pybgl.graph.add_edge are not imported because their signature is different
-from pybgl.graph import \
-    DirectedGraph, EdgeDescriptor, \
-    add_edge, add_vertex, default_graphviz_style, edge, edges, num_edges, num_vertices,\
-    out_degree, out_edges,\
+from pybgl.graph import (
+    DirectedGraph, EdgeDescriptor,
+    add_edge, add_vertex, default_graphviz_style, edge, edges, num_edges, num_vertices,
+    out_degree, out_edges,
     remove_vertex, remove_edge, source, target, vertices
-from pybgl.graph import \
-    graphviz_arc, graphviz_type, vertices
+)
+from pybgl.graph        import graphviz_arc, graphviz_type, vertices
 from pybgl.property_map import ReadPropertyMap, make_assoc_property_map
 
 BOTTOM = None
@@ -164,6 +164,14 @@ def delta(q :int, a :chr, g :Automaton) -> int:
 def accepts(w: str, g :Automaton) -> bool:
     q = initial(g)
     for a in w: q = delta(q, a, g)
+    return is_final(q, g)
+
+def accepts_debug(w: str, g :Automaton) -> bool:
+    q = initial(g)
+    print(f"w = {w} q0 = {q}")
+    for (i, a) in enumerate(w):
+        print(f"w[{i}] = {a}, {q} -> {delta(q, a, g)}")
+        q = delta(q, a, g)
     return is_final(q, g)
 
 def is_finite(g) -> bool:
