@@ -10,7 +10,7 @@ __license__    = "BSD-3"
 from pybgl.incidence_automaton import (
     edges, make_incidence_automaton, source, target, vertices
 )
-from pybgl.prune_automaton import prune_incidence_automaton
+from pybgl.prune_incidence_automaton import prune_incidence_automaton
 from pybgl.property_map import make_func_property_map
 
 G1 = make_incidence_automaton(
