@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-#This file is part of veggie
-#Copyright © 2018 Nokia Corporation and/or its subsidiary(-ies). All rights reserved. *
-#
-#Contact:
-#    Marc-Olivier Buob <marc-olivier.buob@nokia-bell-labs.com>
-#    Anne Bouillard    <anne.bouillard@nokia-bell-labs.com>
-#    Achille Salaün    <achille.salaun@nokia.com>
-#
-# Authors:
-#   Achille Salaün    <achille.salaun@nokia.com>
-#   Marc-Olivier Buob <marc-olivier.buob@nokia-bell-labs.com>
+# This file is part of the pybgl project.
+# https://github.com/nokia/pybgl
+
+__author__     = "Marc-Olivier Buob, Achille Salaün, Anne Bouillard"
+__maintainer__ = "Marc-Olivier Buob"
+__email__      = "marc-olivier.buob@nokia-bell-labs.com"
+__copyright__  = "Copyright (C) 2018, Nokia"
+__license__    = "BSD-3"
+
 
 from collections import defaultdict
 from pybgl.incidence_automaton      import IncidenceAutomaton, label
