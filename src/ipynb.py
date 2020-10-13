@@ -12,8 +12,9 @@ __email__      = "marc-olivier.buob@nokia-bell-labs.com"
 __copyright__  = "Copyright (C) 2018, Nokia"
 __license__    = "BSD-3"
 
-from pybgl.html                 import html
-from pybgl.graphviz             import dotstr_to_html
+from IPython.display    import Javascript
+from pybgl.html         import html
+from pybgl.graphviz     import dotstr_to_html
 
 def in_ipynb() -> bool:
     """
