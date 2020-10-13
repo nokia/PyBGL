@@ -38,3 +38,36 @@ def display_svg(svg, filename_svg):
         print(svg, file = f)
         html("<a href='%s' target='_blank'>View</a>" % filename_svg)
     html(svg)
+
+def ipynb_get_background_color():
+    """
+    Retrieves the HTML background color of the Jupyter notebook.
+    Returns:
+        The `str` containing the background color of the notebook, `None` otherwise.
+    """
+    if not in_ipynb():
+        return None
+    Javascript(
+        """
+        var bgcolor = getComputedStyle(document.querySelector('.notebook_app #notebook')).backgroundColor;
+        IPython.notebook.kernel.execute("bgcolor = '" + bgcolor + "'")
+        """
+    )
+    return bgcolor
+
+def ipynb_get_foreground_color():
+    """
+    Retrieves the HTML foreground color of the Jupyter notebook.
+    Returns:
+        The `str` containing the background color of the notebook, `None` otherwise.
+    """
+    if not in_ipynb():
+        return None
+    Javascript(
+        """
+        var fgcolor = getComputedStyle(document.querySelector('.notebook_app div.output_area pre')).color;
+        IPython.notebook.kernel.execute("fgcolor = '" + fgcolor   + "'")
+        """
+    )
+    return fgcolor
+
