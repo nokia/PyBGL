@@ -163,7 +163,9 @@ def delta(q :int, a :chr, g :Automaton) -> int:
 
 def accepts(w: str, g :Automaton) -> bool:
     q = initial(g)
-    for a in w: q = delta(q, a, g)
+    for a in w:
+        if q is BOTTOM: return False
+        q = delta(q, a, g)
     return is_final(q, g)
 
 def accepts_debug(w: str, g :Automaton) -> bool:
@@ -171,6 +173,7 @@ def accepts_debug(w: str, g :Automaton) -> bool:
     print(f"w = {w} q0 = {q}")
     for (i, a) in enumerate(w):
         print(f"w[{i}] = {a}, {q} -> {delta(q, a, g)}")
+        if q is BOTTOM: return False
         q = delta(q, a, g)
     return is_final(q, g)
 
