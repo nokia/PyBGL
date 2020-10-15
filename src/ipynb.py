@@ -12,7 +12,6 @@ __email__      = "marc-olivier.buob@nokia-bell-labs.com"
 __copyright__  = "Copyright (C) 2018, Nokia"
 __license__    = "BSD-3"
 
-from IPython.display    import Javascript
 from pybgl.html         import html
 from pybgl.graphviz     import dotstr_to_html
 
@@ -48,12 +47,16 @@ def ipynb_get_background_color():
     """
     if not in_ipynb():
         return None
-    Javascript(
+
+    # <<< Must be in an independant Jupyter cell to publish bgcolor
+    from IPython.display import Javascript, display
+    display(Javascript(
         """
         var bgcolor = getComputedStyle(document.querySelector('.notebook_app #notebook')).backgroundColor;
         IPython.notebook.kernel.execute("bgcolor = '" + bgcolor + "'")
         """
-    )
+    ))
+    # >>>
     return bgcolor
 
 def ipynb_get_foreground_color():
@@ -64,11 +67,15 @@ def ipynb_get_foreground_color():
     """
     if not in_ipynb():
         return None
-    Javascript(
+
+    # <<< Must be in an independant Jupyter cell to publish fgcolor
+    from IPython.display import Javascript, display
+    display(Javascript(
         """
         var fgcolor = getComputedStyle(document.querySelector('.notebook_app div.output_area pre')).color;
         IPython.notebook.kernel.execute("fgcolor = '" + fgcolor   + "'")
         """
-    )
+    ))
+    # >>>
     return fgcolor
 
