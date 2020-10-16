@@ -11,7 +11,7 @@ __license__    = "BSD-3"
 from pybgl.digital_sequence import \
     BOTTOM, DigitalSequence, \
     accepts, delta, edge, edges, \
-    is_initial, in_degree, initial, is_final, is_finite, final, \
+    is_initial, in_degree, initial, is_final, is_finite, finals, \
     num_edges, num_vertices, out_degree, out_edges, set_final, \
     sigma, source, target, vertices
 

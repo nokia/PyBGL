@@ -12,7 +12,7 @@ from pybgl.graphviz             import graph_to_html
 from pybgl.property_map         import make_func_property_map
 from pybgl.incidence_automaton  import \
     BOTTOM, IncidenceAutomaton, accepts, add_edge, add_vertex, alphabet, delta, edge, \
-    final, initial, is_complete, is_deterministic, is_final, is_finite, is_initial, \
+    finals, initial, is_complete, is_deterministic, is_final, is_finite, is_initial, \
     in_degree, in_edges, \
     is_minimal, label, make_incidence_automaton, num_edges, num_vertices, \
     out_edges, out_degree, set_final, sigma, \
@@ -56,7 +56,7 @@ def test_incidence_automaton_initial():
     assert initial(G1) == 0
 
 def test_incidence_automaton_final():
-    assert final(G1) == {1}
+    assert finals(G1) == {1}
 
 def test_incidence_automaton_alphabet():
     assert alphabet(G1) == {"a", "b"}

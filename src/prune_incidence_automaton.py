@@ -11,7 +11,7 @@ from collections               import defaultdict
 
 from pybgl.graph               import Graph
 from pybgl.incidence_automaton import (
-    IncidenceAutomaton, final, initial, remove_vertex, vertices
+    IncidenceAutomaton, finals, initial, remove_vertex, vertices
 )
 from pybgl.depth_first_search  import depth_first_search_graph
 from pybgl.property_map        import make_assoc_property_map
@@ -41,7 +41,7 @@ def prune_incidence_automaton(g: IncidenceAutomaton):
     """
     to_keep = find_reachable_vertices(g, {initial(g)})
     reverse_graph(g)
-    to_keep &= find_reachable_vertices(g, final(g))
+    to_keep &= find_reachable_vertices(g, finals(g))
     reverse_graph(g)
     to_remove = set(vertices(g)) - to_keep
     for q in to_remove:

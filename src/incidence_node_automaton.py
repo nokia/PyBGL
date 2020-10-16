@@ -18,7 +18,7 @@ from pybgl.incidence_automaton  import in_degree, in_edges
 from pybgl.node_automaton       import (
     BOTTOM, NodeAutomaton, EdgeDescriptor, accepts, accepts_debug, add_edge, add_vertex,
     alphabet, delta, edge, edges, graphviz_arc, initial, is_initial, is_final, is_finite,
-    final, label, num_edges, num_vertices, out_degree, out_edges, set_final, symbol,
+    finals, label, num_edges, num_vertices, out_degree, out_edges, set_final, symbol,
     remove_vertex, remove_edge, set_initial, set_final, source, sigma, target, vertices
 )
 

@@ -10,7 +10,7 @@ __license__    = "BSD-3"
 from pybgl.html                import html
 from pybgl.ipynb               import in_ipynb
 from pybgl.graphviz            import graph_to_html
-from pybgl.trie                import Trie, final, num_vertices
+from pybgl.trie                import Trie, finals, num_vertices
 from pybgl.digital_sequence    import DigitalSequence
 
 def make_t1():
@@ -47,9 +47,9 @@ def test_trie_trie():
 def test_included_insertions():
     t3 = Trie()
     t3.insert("aaa")
-    assert {q for q in final(t3)} == {3}
+    assert {q for q in finals(t3)} == {3}
     t3.insert("aa")
-    assert {q for q in final(t3)} == {2, 3}
+    assert {q for q in finals(t3)} == {2, 3}
     t3.insert("")
-    assert {q for q in final(t3)} == {0, 2, 3}
+    assert {q for q in finals(t3)} == {0, 2, 3}
 

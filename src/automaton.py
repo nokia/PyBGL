@@ -155,7 +155,7 @@ def set_initial(q :int, g :Automaton, is_initial :bool = True):
 def set_final(q :int, g :Automaton, is_final :bool = True):
     g.set_final(q, is_final)
 
-def final(g: Automaton) -> set:
+def finals(g: Automaton) -> set:
     return {q for q in vertices(g) if is_final(q, g)}
 
 def delta(q :int, a :chr, g :Automaton) -> int:

@@ -14,7 +14,7 @@ from pybgl.graph   import in_degree, in_edges
 from pybgl.trie    import \
     BOTTOM, EdgeDescriptor, Trie, \
     accepts, alphabet, delta, edge, edges, \
-    is_initial, initial, is_final, is_finite, final, \
+    is_initial, initial, is_final, is_finite, finals, \
     num_edges, num_vertices, out_degree, out_edges, set_final, \
     sigma, source, label, target, vertices
 
