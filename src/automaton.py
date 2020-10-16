@@ -99,6 +99,9 @@ class Automaton(DirectedGraph):
     def is_final(self, q :int) -> bool:
         return self.m_pmap_final[q]
 
+    def finals(self) -> set:
+        return {q for q in vertices(self) if is_final(q, self)}
+
     def vertex_to_graphviz(self, u :int) -> str:
         return "%s [shape=\"%s\"]" % (
             u,
@@ -124,6 +127,42 @@ class Automaton(DirectedGraph):
             "edges"    : ";\n  ".join(["  %s" % self.edge_to_graphviz(e)   for e in edges(self)]),
             "sep2"     : ";" if num_edges(self) else "",
         }
+
+    def delta_word(self, q :int, w :str) -> int:
+        for a in w:
+            if q is BOTTOM: return q
+            q = delta(q, a, self)
+        return q
+
+    def accepts(self, w :str) -> bool:
+        q0 = initial(self)
+        q = delta_word(q0, w, self)
+        return q is not BOTTOM and is_final(q, self)
+
+    def is_finite(self) -> bool:
+        return True # By design of Automaton.
+
+    def is_deterministic(self) -> bool:
+        return True # By design of Automaton.
+
+    def is_complete(self) -> bool:
+        alpha = alphabet(self)
+        for q in vertices(self):
+            if sigma(q, self) != alpha:
+                return False
+        return True
+
+def accepts(w: str, g :Automaton) -> bool:
+    return g.accepts(w)
+
+def accepts_debug(w: str, g :Automaton) -> bool:
+    q = initial(g)
+    print(f"w = {w} q0 = {q}")
+    for (i, a) in enumerate(w):
+        print(f"w[{i}] = {a}, {q} -> {delta(q, a, g)}")
+        if q is BOTTOM: return False
+        q = delta(q, a, g)
+    return is_final(q, g)
 
 def add_edge(q :int, r :int, a :chr, g :Automaton) -> tuple:
     return g.add_edge(q, r, a)
@@ -156,39 +195,22 @@ def set_final(q :int, g :Automaton, is_final :bool = True):
     g.set_final(q, is_final)
 
 def finals(g: Automaton) -> set:
-    return {q for q in vertices(g) if is_final(q, g)}
+    return g.finals()
 
 def delta(q :int, a :chr, g :Automaton) -> int:
     return g.delta(q, a)
 
-def accepts(w: str, g :Automaton) -> bool:
-    q = initial(g)
-    for a in w:
-        if q is BOTTOM: return False
-        q = delta(q, a, g)
-    return is_final(q, g)
-
-def accepts_debug(w: str, g :Automaton) -> bool:
-    q = initial(g)
-    print(f"w = {w} q0 = {q}")
-    for (i, a) in enumerate(w):
-        print(f"w[{i}] = {a}, {q} -> {delta(q, a, g)}")
-        if q is BOTTOM: return False
-        q = delta(q, a, g)
-    return is_final(q, g)
+def delta_word(q :int, w :str, g :Automaton) -> int:
+    return g.delta_word(q, w)
 
 def is_finite(g) -> bool:
-    return True # By design of Automaton.
+    return g.is_finite()
 
 def is_deterministic(g) -> bool:
-    return True # By design of Automaton.
+    return g.is_deterministic()
 
 def is_complete(g) -> bool:
-    a = alphabet(g)
-    for q in vertices(g):
-        if sigma(q, g) != alphabet(g):
-            return False
-    return True
+    return g.is_complete()
 
 def is_minimal(g) -> bool:
     return True # Hardcoded, not implemented
