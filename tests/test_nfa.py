@@ -49,6 +49,10 @@ def test_num_edges():
     g = make_nfa1()
     assert num_edges(g) == 6
 
+def test_alphabet():
+    g = make_nfa1()
+    assert alphabet(g) == {"a", "b", "c"}
+
 def test_sigma():
     # sigma(q, g) list symbols != epsilon carried by egress transition
     # starting from q or any state reachable from q via one or more

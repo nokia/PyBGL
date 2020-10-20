@@ -105,7 +105,7 @@ class Nfa(DirectedGraph):
             for (q, arn) in self.adjacencies.items()
             for a in arn.keys()
             if a != self.epsilon
-        } if q is not None else set()
+        }
 
     def set_initial(self, q :int, is_initial :bool = True):
         if is_initial:
