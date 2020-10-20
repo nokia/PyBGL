@@ -4,7 +4,7 @@
 __author__     = "Marc-Olivier Buob"
 __maintainer__ = "Marc-Olivier Buob"
 __email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2018, Nokia"
+__copyright__  = "Copyright (C) 2020, Nokia"
 __license__    = "BSD-3"
 
 from pybgl.nfa import *
@@ -25,6 +25,20 @@ def make_nfa1(eps = EPSILON):
     set_final(1, g)
     set_final(3, g)
     assert set(vertices(g)) == {0, 1, 2, 3}
+    return g
+
+def make_nfa2(eps = EPSILON):
+    g = Nfa(3)
+    add_edge(0, 1, "a", g)
+    add_edge(0, 1, "a", g)
+    add_edge(0, 3, eps, g)
+    add_edge(1, 1, eps, g)
+    add_edge(1, 2, eps, g)
+    add_edge(2, 2, eps, g)
+    add_edge(0, 3, "a", g)
+    add_edge(3, 3, eps, g)
+    set_final(1, g)
+    set_final(3, g)
     return g
 
 def test_num_vertices():
@@ -69,7 +83,7 @@ def test_initials():
     for q in vertices(g):
         assert is_initial(q, g) == bool(q in i)
 
-def test_delta():
+def test_delta1():
     g = make_nfa1()
     assert delta(0, "a", g) == {1, 2}
     assert delta(0, "b", g) == {2}
@@ -83,6 +97,13 @@ def test_delta():
     assert delta(3, "a", g) == set()
     assert delta(3, "b", g) == set()
     assert delta(3, "c", g) == {3}
+
+def test_delta2():
+    g = make_nfa2()
+    for q in vertices(g):
+        qs = delta(q, 'a', g)
+        print(f"delta({q}, 'a') = {qs}")
+        assert qs == set() if q != 0 else {1,3}
 
 def test_delta_word():
     g = make_nfa1()
@@ -102,3 +123,4 @@ def test_set_initials():
     assert accepts("a", g) == True
     assert accepts("aa", g) == False
     assert accepts("ccc", g) == False
+
