@@ -12,7 +12,7 @@ from pybgl.nfa import (
     Nfa, accepts, add_edge, initials, finals, delta, set_final
 )
 from pybgl.thompson_compile_nfa import (
-    alternation, catify, concatenation, literal,
+    alternation, concatenation, literal,
     zero_or_one, zero_or_more, one_or_more,
     thompson_compile_nfa
 )
@@ -36,25 +36,6 @@ def make_nfa2() -> Nfa:
     add_edge(0, 1, "b", g)
     set_final(1, g)
     return g
-
-def test_catify():
-    assert "".join(catify("123?(4|5)*67")) == "1.2.3?.(4|5)*.6.7"
-    assert "".join(catify("(1?2)*?3+5")) == "(1?.2)*?.3+.5"
-
-def test_catify_tokenized():
-    # See also pybgl.shunting_yard_postfix.tokenize_re
-    assert list(catify(["a", "\\d"])) == ["a", ".", "\\d"]
-    assert list(catify(["a", "\\d", "+"])) == ["a", ".", "\\d", "+"]
-    assert list(catify(["a", "[0-9]", "+"])) == ["a", ".", "[0-9]", "+"]
-
-def test_catify_tokenize_re():
-    from pybgl.shunting_yard_postfix import tokenize_re
-    # tokenize_re split the string so that escape sequences and
-    # character classes result to a single token. Parsing
-    assert list(catify(tokenize_re("a\\d"))) == ["a", ".", "\\d"]
-    assert list(catify(tokenize_re("a\\d+"))) == ["a", ".", "\\d", "+"]
-    assert list(catify(tokenize_re("a[0-9]+"))) == ["a", ".", "[0-9]", "+"]
-    assert list(catify(tokenize_re("a{2,3}b"))) == ["a", "{2,3}", ".", "b"]
 
 def test_literal():
     (nfa, q0, f) = literal("a")

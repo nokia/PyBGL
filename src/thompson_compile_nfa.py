@@ -15,8 +15,8 @@ from pybgl.nfa import (
     source, target, vertices
 )
 from pybgl.shunting_yard_postfix import (
-    OPERATORS_RE, DefaultShuntingYardVisitor,
-    shunting_yard_postfix
+    MAP_OPERATORS_RE, DefaultShuntingYardVisitor,
+    catify, shunting_yard_postfix
 )
 
 #-------------------------------------------------------------
@@ -97,50 +97,6 @@ def one_or_more(nfa :Nfa, q0 :int, f :int) -> Nfa:
 # Thompson algorithm
 #-------------------------------------------------------------
 
-def catify(
-    expression :str,
-    is_binary  = None,
-    is_unary   = None,
-    is_opening = None,
-    is_closing = None,
-    cat="."
-) -> str:
-    """
-    Add concatenation operator in an input regular expression.
-    Args:
-        expression: A `str` containing a regular expression.
-        is_binary: `Callback(chr) -> bool` returning `True`
-            iff the character is a binary operator.
-        is_unary: `Callback(chr) -> bool` returning `True`
-            iff the character is a unary operator.
-        is_opening: `Callback(chr) -> bool` returning `True`
-            iff the character is a opening operator.
-        is_closing: `Callback(chr) -> bool` returning `True`
-            iff the character is a closing operator.
-        cat: `chr` representing the concatenation operator.
-    Returns:
-        The `str` corresponding to `expression` by adding `cat`
-        in the appropriate places.
-    """
-    if not is_binary:
-        is_binary = lambda o: o in "|"
-    if not is_unary:
-        is_unary = lambda o: o in "*+?"
-    if not is_opening:
-        is_opening = lambda o: o in "([{"
-    if not is_closing:
-        is_closing = lambda o: o in ")]}"
-    is_operator = lambda o: is_unary(o) or is_binary(o)
-
-    prev_needs_dot = False
-    for a in expression:
-        if prev_needs_dot and not is_operator(a) and not is_closing(a):
-            yield cat
-            yield a
-        else:
-            yield a
-        prev_needs_dot = not is_binary(a) and not is_opening(a)
-
 def thompson_compile_nfa(expression :str) -> Nfa:
     expression = "".join([
         a for a in catify(
@@ -179,7 +135,7 @@ def thompson_compile_nfa(expression :str) -> Nfa:
             self.nfas.append((nfa1, q01, f1))
 
     vis = ThompsonShuntingYardVisitor()
-    shunting_yard_postfix(expression, map_operators=OPERATORS_RE, vis=vis)
+    shunting_yard_postfix(expression, map_operators=MAP_OPERATORS_RE, vis=vis)
     assert len(vis.nfas) == 1
     (nfa, q0, f) = vis.nfas.pop()
     return (nfa, q0, f)
