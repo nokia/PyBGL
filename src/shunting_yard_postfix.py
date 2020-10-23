@@ -175,12 +175,10 @@ def catify(expression :str, cat :str = ".") -> iter:
                 prev_needs_dot = True
         operator = match.group(0)
         if operator:
-            print(f"operator == {operator} operator[0] = {operator[0]} prev_needs_dot = {prev_needs_dot}")
             if (operator == "(" or operator[0] == "\\") and prev_needs_dot:
                 yield cat
             yield operator
             prev_needs_dot = not is_binary(operator) and operator != "("
-            print(f"operator == {operator} --> prev_needs_dot = {prev_needs_dot}")
         start = match.end()
     operand = expression[start:]
     if operand:
