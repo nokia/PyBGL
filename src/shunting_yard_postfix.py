@@ -113,7 +113,7 @@ def alg_operand_to_token(operand):
 
 def tokenizer_alg(expression :str) -> iter:
     return tokenize(
-        expression,
+        "".join(a for a in expression if not a.isspace()),
         RE_OPERATORS_ALG,
         operator_to_token = alg_operator_to_token,
         operand_to_token = alg_operand_to_token
@@ -145,52 +145,55 @@ RE_OPERATORS_RE = [
     "(\\\\(d|s|w))",
 ]
 
-def tokenizer_re(expression :str) -> iter:
-     return tokenize(expression, RE_OPERATORS_RE)
-
-def catify(
-    expression :str,
-    is_binary  :callable = None,
-    is_unary   :callable = None,
-    is_opening :callable = None,
-    is_closing :callable = None,
-    cat        :str      = "."
-) -> iter:
+# TODO factorization with tokenize
+def catify(expression :str, cat :str = ".") -> iter:
     """
     Add concatenation operator in an input regular expression.
     Args:
         expression: A `str` containing a regular expression.
         is_binary: `Callback(chr) -> bool` returning `True`
             iff the character is a binary operator.
-        is_unary: `Callback(chr) -> bool` returning `True`
-            iff the character is a unary operator.
-        is_opening: `Callback(chr) -> bool` returning `True`
-            iff the character is a opening operator.
-        is_closing: `Callback(chr) -> bool` returning `True`
-            iff the character is a closing operator.
         cat: `chr` representing the concatenation operator.
     Returns:
         The `iter` corresponding to `expression` by adding `cat`
         in the appropriate places.
     """
-    if not is_binary:
-        is_binary = lambda o: o == "|"
-    if not is_unary:
-        is_unary = lambda o: o in "*+?" or (len(o) > 2 and o[0] in "\\{[")
-    if not is_opening:
-        is_opening = lambda o: o == "("
-    if not is_closing:
-        is_closing = lambda o: o == ")"
-    is_operator = lambda o: is_unary(o) or is_binary(o)
+    is_binary = lambda o: o == "|"
 
+    pattern = "|".join(re_operator for re_operator in set(RE_OPERATORS_RE))
+    tokenizer = re.compile(pattern)
+
+    start = 0
     prev_needs_dot = False
-    for a in expression:
-        if prev_needs_dot and not is_operator(a) and not is_closing(a):
-            yield cat
+    for match in tokenizer.finditer(expression):
+        operand = expression[start:match.start()]
+        if operand:
+            for a in operand:
+                if prev_needs_dot:
+                    yield cat
+                yield a
+                prev_needs_dot = True
+        operator = match.group(0)
+        if operator:
+            print(f"operator == {operator} operator[0] = {operator[0]} prev_needs_dot = {prev_needs_dot}")
+            if (operator == "(" or operator[0] == "\\") and prev_needs_dot:
+                yield cat
+            yield operator
+            prev_needs_dot = not is_binary(operator) and operator != "("
+            print(f"operator == {operator} --> prev_needs_dot = {prev_needs_dot}")
+        start = match.end()
+    operand = expression[start:]
+    if operand:
+        for a in operand:
+            if prev_needs_dot:
+                yield cat
             yield a
-        else:
-            yield a
-        prev_needs_dot = not is_binary(a) and not is_opening(a)
+            prev_needs_dot = True
+
+def tokenizer_re(expression :str, cat = ".") -> iter:
+    if cat:
+        expression = "".join(catify(expression, cat))
+    return tokenize(expression, RE_OPERATORS_RE)
 
 #------------------------------------------------------------------------
 # Shutting Yard algorithm
@@ -209,7 +212,7 @@ class DebugShuntingYardVisitor(DefaultShuntingYardVisitor):
 def shunting_yard_postfix(
     expression    :iter,
     map_operators :dict,
-    map_opener_closer = None,
+    output :deque = None,
     vis :DefaultShuntingYardVisitor = None
 ) -> deque:
     """
@@ -217,17 +220,19 @@ def shunting_yard_postfix(
     Args:
         expression: Tokenized `iter` containing the input infix notation.
             Each iteration must move to the next token.
-            Functions like `tokenize_alg`, `tokenize_re` can help to transform
+            Functions like `tokenizer_alg`, `tokenizer_re` can help to transform
             a `str` to the appropriate iterable.
         map_operators: `dict{str : Op}` defining the grammar.
+        output: The output `deque`. You could pass a custom class (which implements `.append`),
+            e.g. to run streamed computations.
         vis: A `DefaultShuntingYardVisitor` instance handling event raised by this function.
     Returns:
         The corresponding Reverse Polish Notation.
     """
-    if not vis:
+    if vis is None:
         vis = DefaultShuntingYardVisitor()
-
-    output = deque() # queue
+    if output is None:
+        output = deque() # queue
     operators = deque() # stack
 
     # Internals
@@ -273,4 +278,123 @@ def shunting_yard_postfix(
     while operators:
         push_output(pop_operator())
     return output
+
+#------------------------------------------------------------------------
+# RPN specialized queues
+#------------------------------------------------------------------------
+
+from collections        import defaultdict
+from pybgl.graph        import DirectedGraph, add_edge
+from pybgl.graph_dp     import GraphDp
+from pybgl.property_map import (
+    ReadWritePropertyMap, make_assoc_property_map, make_func_property_map
+)
+
+class Ast(DirectedGraph):
+    def __init__(self, pmap_vlabel :ReadWritePropertyMap = None, num_vertices = 0):
+        super().__init__(num_vertices)
+        if not pmap_vlabel:
+            self.map_vlabel = defaultdict()
+            self.pmap_vlabel = make_assoc_property_map(self.map_vlabel)
+        else:
+            self.pmap_vlabel = pmap_vlabel
+
+    def add_vertex(self, a :chr):
+        u = super().add_vertex()
+        self.pmap_vlabel[u] = a
+        return u
+
+    def to_dot(self):
+        return GraphDp(
+            self,
+            dpv = {
+                "label" : make_func_property_map(
+                    lambda u: "%s %s" % (u, self.pmap_vlabel[u])
+                )
+            }
+        ).to_dot()
+
+class RpnDequeOperation(deque):
+    def __init__(self, map_operators :dict, **kwargs):
+        super().__init__(**kwargs)
+        self.map_operators = map_operators
+    def on_append(self, a :str) -> object:
+        return a
+    def on_operation(self, a :str, op :Op, u :object, vs :iter) -> object:
+        return a
+    def append(self, a):
+        op = self.map_operators.get(a)
+        u = self.on_append(a)
+        if op is not None:
+            card = op.cardinality
+            vs = list()
+            for _ in range(card):
+                v = self.pop()
+                vs.insert(0, v)
+            u = self.on_operation(a, op, u, vs)
+        super().append(u)
+
+class RpnDequeAst(RpnDequeOperation):
+    def __init__(self, ast :Ast = None, **kwargs):
+        super().__init__(**kwargs)
+        self.ast = ast if ast else Ast()
+    def on_append(self, a :str) -> int:
+        u = self.ast.add_vertex(a)
+        return u
+    def on_operation(self, a, op :Op, u :int, vs :int) -> int:
+        for v in vs:
+            add_edge(u, v, self.ast)
+        return u
+
+def shunting_yard_ast(
+    expression    :iter,
+    map_operators :dict,
+    vis :DefaultShuntingYardVisitor = None
+) -> tuple:
+    ast = Ast()
+    output = RpnDequeAst(map_operators = map_operators, ast = ast)
+    ret = shunting_yard_postfix(expression, map_operators, output, vis)
+    assert len(ret) == 1
+    root = ret.pop()
+    return (ast, root)
+
+class RpnDequeAlg(RpnDequeOperation):
+    def __init__(self, **kwargs):
+        map_operators = kwargs.pop("map_operators")
+        super().__init__(
+            map_operators = map_operators if map_operators else MAP_OPERATORS_ALG,
+            **kwargs
+        )
+        self.result = None
+    def on_operation(self, a, op :Op, u :None, vs :iter) -> float:
+        assert len(vs) == op.cardinality
+        if op.cardinality == 1:
+            x = vs[0]
+        elif op.cardinality == 2:
+            x = vs[0]
+            y = vs[1]
+        else:
+            raise ValueError(f"Unsupported cardinality '{a}' (card={card})")
+        if   a == "+":  return x + y
+        elif a == "-":  return x - y
+        elif a == "/":  return x / y
+        elif a == "*":  return x * y
+        elif a == "^":  return x ** y
+        elif a == "u-": return -x
+        elif a == "u-": return x
+        else:
+            raise ValueError(f"Unsupported operator '{a}'")
+        return ret
+
+def shunting_yard_compute(
+    expression    :iter,
+    map_operators :dict = MAP_OPERATORS_ALG,
+    vis :DefaultShuntingYardVisitor = None
+) -> float:
+    output = RpnDequeAlg(map_operators = map_operators)
+    ret = shunting_yard_postfix(tokenizer_alg(expression), map_operators, output, vis)
+    assert len(ret) == 1
+    result = ret.pop()
+    return result
+
 

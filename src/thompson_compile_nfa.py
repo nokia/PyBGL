@@ -98,14 +98,7 @@ def one_or_more(nfa :Nfa, q0 :int, f :int) -> Nfa:
 #-------------------------------------------------------------
 
 def thompson_compile_nfa(expression :str) -> Nfa:
-    expression = "".join([
-        a for a in catify(
-            expression,
-            is_binary = lambda o: o in "|",
-            is_unary  = lambda o: o in "*+?",
-            cat="."
-        )
-    ])
+    expression = "".join([a for a in catify(expression, cat=".")])
 
     class ThompsonShuntingYardVisitor(DefaultShuntingYardVisitor):
         def __init__(self):
