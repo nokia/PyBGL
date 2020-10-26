@@ -7,7 +7,7 @@ __email__      = "marc-olivier.buob@nokia-bell-labs.com"
 __copyright__  = "Copyright (C) 2020, Nokia"
 __license__    = "BSD-3"
 
-import copy, re
+import copy, re, string
 from collections import deque
 
 from pybgl.nfa import (
@@ -52,7 +52,7 @@ def insert_automaton(g1 :Nfa, g2 :Nfa) -> dict:
         add_edge(q1, r1, a, g1)
     return map21
 
-def concatenation(nfa1 :Nfa, q01 :int, f1 :int, nfa2 :Nfa, q02 :int, f2 :int) -> Nfa:
+def concatenation(nfa1 :Nfa, q01 :int, f1 :int, nfa2 :Nfa, q02 :int, f2 :int) -> tuple:
     eps = epsilon(nfa1)
     map21 = insert_automaton(nfa1, nfa2)
     q02 = map21[q02]
@@ -61,7 +61,7 @@ def concatenation(nfa1 :Nfa, q01 :int, f1 :int, nfa2 :Nfa, q02 :int, f2 :int) ->
     set_final(f1, nfa1, False)
     return (nfa1, q01, f2)
 
-def alternation(nfa1 :Nfa, q01 :int, f1 :int, nfa2 :Nfa, q02 :int, f2 :int) -> Nfa:
+def alternation(nfa1 :Nfa, q01 :int, f1 :int, nfa2 :Nfa, q02 :int, f2 :int) -> tuple:
     eps = epsilon(nfa1)
     map21 = insert_automaton(nfa1, nfa2)
     q02 = map21[q02]
@@ -71,12 +71,12 @@ def alternation(nfa1 :Nfa, q01 :int, f1 :int, nfa2 :Nfa, q02 :int, f2 :int) -> N
     add_edge(f1, f2, eps, nfa1)
     return (nfa1, q01, f2)
 
-def zero_or_one(nfa :Nfa, q0 :int, f :int) -> Nfa:
+def zero_or_one(nfa :Nfa, q0 :int, f :int) -> tuple:
     eps = epsilon(nfa)
     add_edge(q0, f, eps, nfa)
     return (nfa, q0, f)
 
-def zero_or_more(nfa :Nfa, q0 :int, f :int) -> Nfa:
+def zero_or_more(nfa :Nfa, q0 :int, f :int) -> tuple:
     eps = epsilon(nfa)
     s = add_vertex(nfa)
     t = add_vertex(nfa)
@@ -89,12 +89,12 @@ def zero_or_more(nfa :Nfa, q0 :int, f :int) -> Nfa:
     set_final(t, nfa)
     return (nfa, s, t)
 
-def one_or_more(nfa :Nfa, q0 :int, f :int) -> Nfa:
+def one_or_more(nfa :Nfa, q0 :int, f :int) -> tuple:
     eps = epsilon(nfa)
     add_edge(f, q0, eps, nfa)
     return (nfa, q0, f)
 
-def repetition(nfa :Nfa, q0 :int, f :int, m :int, do_0m :bool = False) -> Nfa:
+def repetition(nfa :Nfa, q0 :int, f :int, m :int, do_0m :bool = False) -> tuple:
     assert m >= 0
     if m == 0:
         nfa = Nfa(1)
@@ -114,7 +114,7 @@ def repetition(nfa :Nfa, q0 :int, f :int, m :int, do_0m :bool = False) -> Nfa:
                 add_edge(q0_ori, f, eps, nfa)
     return (nfa, q0, f)
 
-def repetition_range(nfa :Nfa, q0 :int, f :int, m :int, n :int) -> Nfa:
+def repetition_range(nfa :Nfa, q0 :int, f :int, m :int, n :int) -> tuple:
     assert n is None or m <= n, "The lower bound {m} must be less than the upper bound {n}"
     if   (m, n) == (0, 1):
         return zero_or_one(nfa, q0, f)
@@ -137,6 +137,13 @@ def repetition_range(nfa :Nfa, q0 :int, f :int, m :int, n :int) -> Nfa:
             assert m == n
             return (nfa1, q01, f1)
 
+def bracket(chars :iter) -> tuple:
+    nfa = Nfa(2)
+    set_final(1, nfa)
+    for a in chars:
+        add_edge(0, 1, a, nfa)
+    return (nfa, 0, 1)
+
 #-------------------------------------------------------------
 # Thompson algorithm
 #-------------------------------------------------------------
@@ -153,6 +160,35 @@ def parse_repetition(s :str) -> tuple:
         m = int(match.group(1)) if match.group(1) else 0
         n = int(match.group(2)) if match.group(2) else None
     return (m, n)
+
+def parse_bracket(s :str, whole_alphabet :iter = None) -> set:
+    if not whole_alphabet:
+        #alphabet = [chr(i) for i in range(256)]
+        whole_alphabet = string.printable
+    assert s[0] == "[" and s[-1] == "]", f"parse_bracket: Invalid parameter: s = {s}"
+    assert len(s) >= 3, f"parse_bracket: Unmatched []: s = {s}"
+
+    reverse = (s[1] == "^")
+    i = 2 if s[1] == "^" else 1
+    accepted = set()
+    last_non_hat = None
+    imax = len(s)
+
+    while i < imax - 1:
+        a = s[i]
+        if a == "-" and last_non_hat:
+            m = ord(last_non_hat)
+            n = ord(s[i + 1])
+            assert m <= n, f"parse_bracket: Invalid end of interval in s = {s} at index m = {m}"
+            for c in range(m, n + 1):
+                accepted.add(chr(c))
+            i += 1
+        else:
+            accepted.add(a)
+        last_non_hat = a
+        i += 1
+
+    return accepted if not reverse else set(whole_alphabet) - accepted
 
 def thompson_compile_nfa(expression :str) -> Nfa:
     #expression = "".join([a for a in catify(expression, cat=".")])
@@ -188,7 +224,9 @@ def thompson_compile_nfa(expression :str) -> Nfa:
             elif a[0] == "\\":
                 print(f"{a} not yet supported")
             elif a[0] == "[":
-                print(f"{a} not yet supported")
+                chars = parse_bracket(a)
+                print(f"chars = {sorted(chars)}")
+                (nfa1, q01, f1) = bracket(chars)
             else:
                 (nfa1, q01, f1) = literal(a)
             self.nfas.append((nfa1, q01, f1))
@@ -198,5 +236,3 @@ def thompson_compile_nfa(expression :str) -> Nfa:
     assert len(vis.nfas) == 1
     (nfa, q0, f) = vis.nfas.pop()
     return (nfa, q0, f)
-
-
