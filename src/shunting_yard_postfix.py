@@ -145,7 +145,6 @@ RE_OPERATORS_RE = [
     "(\\\\(d|s|w))",
 ]
 
-# TODO factorization with tokenize
 def catify(expression :str, cat :str = ".") -> iter:
     """
     Add concatenation operator in an input regular expression.
@@ -268,7 +267,8 @@ def shunting_yard_postfix(
                 o = pop_operator()
         elif a in map_operators.keys():
             while operators and operators[-1] in map_operators.keys() and preceeds(operators[-1], a):
-                push_output(pop_operator())
+                op = pop_operator()
+                push_output(op)
             push_operator(a)
         else:
             push_output(a)
@@ -288,7 +288,34 @@ from pybgl.property_map import (
     ReadWritePropertyMap, make_assoc_property_map, make_func_property_map
 )
 
+class RpnDequeOperation(deque):
+    """
+    Queue triggering `on_append`and `on_operation` events.
+    """
+    def __init__(self, map_operators :dict, **kwargs):
+        super().__init__(**kwargs)
+        self.map_operators = map_operators
+    def on_append(self, a :str) -> object:
+        return a
+    def on_operation(self, a :str, op :Op, u :object, vs :iter) -> object:
+        return a
+    def append(self, a):
+        op = self.map_operators.get(a)
+        u = self.on_append(a)
+        if op is not None:
+            card = op.cardinality
+            vs = list()
+            for _ in range(card):
+                v = self.pop()
+                vs.insert(0, v)
+            u = self.on_operation(a, op, u, vs)
+        super().append(u)
+
+
 class Ast(DirectedGraph):
+    """
+    Abstract Syntax Tree.
+    """
     def __init__(self, pmap_vlabel :ReadWritePropertyMap = None, num_vertices = 0):
         super().__init__(num_vertices)
         if not pmap_vlabel:
@@ -312,34 +339,40 @@ class Ast(DirectedGraph):
             }
         ).to_dot()
 
-class RpnDequeOperation(deque):
-    def __init__(self, map_operators :dict, **kwargs):
-        super().__init__(**kwargs)
-        self.map_operators = map_operators
-    def on_append(self, a :str) -> object:
-        return a
-    def on_operation(self, a :str, op :Op, u :object, vs :iter) -> object:
-        return a
-    def append(self, a):
-        op = self.map_operators.get(a)
-        u = self.on_append(a)
-        if op is not None:
-            card = op.cardinality
-            vs = list()
-            for _ in range(card):
-                v = self.pop()
-                vs.insert(0, v)
-            u = self.on_operation(a, op, u, vs)
-        super().append(u)
-
 class RpnDequeAst(RpnDequeOperation):
+    """
+    Queue that can be passed to `shunting_yard_postfix` to build
+    in streaming an AST. See `shunting_yard_ast`.
+    """
     def __init__(self, ast :Ast = None, **kwargs):
+        """
+        Constructor.
+        """
         super().__init__(**kwargs)
         self.ast = ast if ast else Ast()
+
     def on_append(self, a :str) -> int:
+        """
+        Build the vertex related to a token pushed in this `RpnDequeAst` instance.
+        Args:
+            a: `str` represening the processed token.
+        Returns:
+            The correspoding vertex descriptor.
+        """
         u = self.ast.add_vertex(a)
         return u
-    def on_operation(self, a, op :Op, u :int, vs :int) -> int:
+
+    def on_operation(self, a, op :Op, u :int, vs :list) -> int:
+        """
+        Build edges from an operator to its operand in the `self.ast` AST.
+        Args:
+            a: `str` represening the processed operator.
+            op: `Op` specification of `a`.
+            u: parent vertex descriptor (operator).
+            vs: list of child vertex descriptors (operands).
+        Returns:
+            The parent vertex descriptor.
+        """
         for v in vs:
             add_edge(u, v, self.ast)
         return u
@@ -349,6 +382,14 @@ def shunting_yard_ast(
     map_operators :dict,
     vis :DefaultShuntingYardVisitor = None
 ) -> tuple:
+    """
+    Compute the AST related to a tokenized expression.
+    Args:
+        expression: An `iter` containing a tokenized expression.
+        map_operators: `dict{str : Op}` mapping operator representation
+            in the input queue and the corresponding operator specification.
+        vis: A `DefaultShuntingYardVisitor` instance or `None`.
+    """
     ast = Ast()
     output = RpnDequeAst(map_operators = map_operators, ast = ast)
     ret = shunting_yard_postfix(expression, map_operators, output, vis)
@@ -357,14 +398,32 @@ def shunting_yard_ast(
     return (ast, root)
 
 class RpnDequeAlg(RpnDequeOperation):
+    """
+    Queue that can be passed to `shunting_yard_postfix` to compute
+    an operation result in streaming. See `shunting_yard_compute`.
+    """
     def __init__(self, **kwargs):
+        """
+        Constructor.
+        """
         map_operators = kwargs.pop("map_operators")
         super().__init__(
             map_operators = map_operators if map_operators else MAP_OPERATORS_ALG,
             **kwargs
         )
         self.result = None
-    def on_operation(self, a, op :Op, u :None, vs :iter) -> float:
+
+    def on_operation(self, a, op :Op, u :None, vs :list) -> float:
+        """
+        Compute an operation.
+        Args:
+            a: The `str` containing the processed operator.
+            op: The `Op` specification of `a`.
+            u: Ignored
+            vs: The `list` of operands.
+        Returns:
+            The `float` containing the operation result.
+        """
         assert len(vs) == op.cardinality
         if op.cardinality == 1:
             x = vs[0]
@@ -387,12 +446,24 @@ class RpnDequeAlg(RpnDequeOperation):
 def shunting_yard_compute(
     expression    :iter,
     map_operators :dict = MAP_OPERATORS_ALG,
+    tokenize      :bool = True,
     vis :DefaultShuntingYardVisitor = None
 ) -> float:
-    output = RpnDequeAlg(map_operators = map_operators)
+    """
+    Compute an operation and returns the corresponding results.
+    Args:
+        expression: The input operation, either as a string (pass `tokenize=True`),
+            or already tokenized (see e.g. `tokenizer_alg`).
+        map_operators: `dict{str : Op}` mapping the operator string representation
+            in the tokenized input with the corresponding `Op` specification.
+        tokenize: Pass `True` if `expression` must be tokenized, `False` otherwise.
+        vis: A `DefaultShuntingYardVisitor` instance.
+    Returns:
+        The output `float` result.
+    """
+    if tokenize:
+        output = RpnDequeAlg(map_operators = map_operators)
     ret = shunting_yard_postfix(tokenizer_alg(expression), map_operators, output, vis)
     assert len(ret) == 1
     result = ret.pop()
     return result
-
-
