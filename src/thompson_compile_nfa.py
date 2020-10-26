@@ -7,6 +7,7 @@ __email__      = "marc-olivier.buob@nokia-bell-labs.com"
 __copyright__  = "Copyright (C) 2020, Nokia"
 __license__    = "BSD-3"
 
+import copy, re
 from collections import deque
 
 from pybgl.nfa import (
@@ -16,7 +17,7 @@ from pybgl.nfa import (
 )
 from pybgl.shunting_yard_postfix import (
     MAP_OPERATORS_RE, DefaultShuntingYardVisitor,
-    catify, shunting_yard_postfix
+    shunting_yard_postfix, tokenizer_re
 )
 
 #-------------------------------------------------------------
@@ -93,12 +94,69 @@ def one_or_more(nfa :Nfa, q0 :int, f :int) -> Nfa:
     add_edge(f, q0, eps, nfa)
     return (nfa, q0, f)
 
+def repetition(nfa :Nfa, q0 :int, f :int, m :int, do_0m :bool = False) -> Nfa:
+    assert m >= 0
+    if m == 0:
+        nfa = Nfa(1)
+        set_final(0, nfa)
+        (nfa, q0, f) = (nfa, 0, 0)
+    elif m > 1:
+        eps = epsilon(nfa)
+        ori = copy.deepcopy(nfa)
+        q0_ori = q0
+        f_ori = f
+        if do_0m:
+            add_edge(q0, f, eps, nfa)
+        for _ in range(m - 1):
+            set_final(f, nfa, False)
+            (nfa, q0, f) = concatenation(nfa, q0, f, ori, q0_ori, f_ori)
+            if do_0m:
+                add_edge(q0_ori, f, eps, nfa)
+    return (nfa, q0, f)
+
+def repetition_range(nfa :Nfa, q0 :int, f :int, m :int, n :int) -> Nfa:
+    assert n is None or m <= n, "The lower bound {m} must be less than the upper bound {n}"
+    if   (m, n) == (0, 1):
+        return zero_or_one(nfa, q0, f)
+    elif (m, n) == (0, None):
+        return zero_or_more(nfa, q0, f)
+    elif (m, n) == (1, None):
+        return one_or_more(nfa, q0, f)
+
+    ori = copy.deepcopy(nfa)
+    if n is None:
+        (nfa1, q01, f1) = repetition(nfa, q0, f, m - 1)
+        (nfa2, q02, f2) = one_or_more(ori, q0, f)
+        return concatenation(nfa1, q01, f1, nfa2, q02, f2)
+    else:
+        (nfa1, q01, f1) = repetition(nfa, q0, f, m)
+        if n > m:
+            (nfa2, q02, f2) = repetition(ori, q0, f, n - m, do_0m = True)
+            return concatenation(nfa1, q01, f1, nfa2, q02, f2)
+        else:
+            assert m == n
+            return (nfa1, q01, f1)
+
 #-------------------------------------------------------------
 # Thompson algorithm
 #-------------------------------------------------------------
 
+def parse_repetition(s :str) -> tuple:
+    r = re.compile(r"{\s*(\d+)\s*}")
+    match = r.match(s)
+    if match:
+        m = n = match.group(1)
+    else:
+        r = re.compile(r"{\s*(\d*)\s*,\s*(\d*)\s*}")
+        match = r.match(s)
+        assert match, f"Invalid token {s}: Not well-formed"
+        m = int(match.group(1)) if match.group(1) else 0
+        n = int(match.group(2)) if match.group(2) else None
+    return (m, n)
+
 def thompson_compile_nfa(expression :str) -> Nfa:
-    expression = "".join([a for a in catify(expression, cat=".")])
+    #expression = "".join([a for a in catify(expression, cat=".")])
+    expression = list(tokenizer_re(expression, cat = "."))
 
     class ThompsonShuntingYardVisitor(DefaultShuntingYardVisitor):
         def __init__(self):
@@ -110,7 +168,7 @@ def thompson_compile_nfa(expression :str) -> Nfa:
                 (nfa1, q01, f1) = self.nfas.pop()
                 f = (
                     concatenation if a == "." else
-                    union         if a == "|" else
+                    alternation   if a == "|" else
                     None
                 )
                 (nfa1, q01, f1) = f(nfa1, q01, f1, nfa2, q02, f2)
@@ -123,6 +181,14 @@ def thompson_compile_nfa(expression :str) -> Nfa:
                     None
                 )
                 (nfa1, q01, f1) = f(nfa1, q01, f1)
+            elif a[0] == "{":
+                (nfa1, q01, f1) = self.nfas.pop()
+                (m, n) = parse_repetition(a)
+                (nfa1, q01, f1) = repetition_range(nfa1, q01, f1, m, n)
+            elif a[0] == "\\":
+                print(f"{a} not yet supported")
+            elif a[0] == "[":
+                print(f"{a} not yet supported")
             else:
                 (nfa1, q01, f1) = literal(a)
             self.nfas.append((nfa1, q01, f1))

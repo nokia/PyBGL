@@ -14,6 +14,7 @@ from pybgl.nfa import (
 from pybgl.thompson_compile_nfa import (
     alternation, concatenation, literal,
     zero_or_one, zero_or_more, one_or_more,
+    repetition, repetition_range,
     thompson_compile_nfa
 )
 
@@ -60,28 +61,56 @@ def test_alternation():
     assert accepts("aab", nfa) == True
 
 def test_zero_or_one():
-    (nfa1, q01, f1) = nfa_to_triple(make_nfa1())
-    (nfa1, q01, f1) = zero_or_one(nfa1, q01, f1)
-    assert accepts("", nfa1) == True
-    assert accepts("x", nfa1) == True
-    assert accepts("xx", nfa1) == False
-    assert accepts("a", nfa1) == False
+    (nfa, q0, f) = nfa_to_triple(make_nfa1())
+    (nfa, q0, f) = zero_or_one(nfa, q0, f)
+    assert accepts("", nfa) == True
+    assert accepts("x", nfa) == True
+    assert accepts("xx", nfa) == False
+    assert accepts("a", nfa) == False
 
 def test_zero_or_more():
-    (nfa1, q01, f1) = nfa_to_triple(make_nfa1())
-    (nfa1, q01, f1) = zero_or_more(nfa1, q01, f1)
-    assert accepts("", nfa1) == True
-    assert accepts("x", nfa1) == True
-    assert accepts("xx", nfa1) == True
-    assert accepts("a", nfa1) == False
+    (nfa, q0, f) = nfa_to_triple(make_nfa1())
+    (nfa, q0, f) = zero_or_more(nfa, q0, f)
+    assert accepts("", nfa) == True
+    assert accepts("x", nfa) == True
+    assert accepts("xx", nfa) == True
+    assert accepts("a", nfa) == False
 
 def test_one_or_more():
-    (nfa1, q01, f1) = nfa_to_triple(make_nfa1())
-    (nfa1, q01, f1) = one_or_more(nfa1, q01, f1)
-    assert accepts("", nfa1) == False
-    assert accepts("x", nfa1) == True
-    assert accepts("xx", nfa1) == True
-    assert accepts("a", nfa1) == False
+    (nfa, q0, f) = nfa_to_triple(make_nfa1())
+    (nfa, q0, f) = one_or_more(nfa, q0, f)
+    assert accepts("", nfa) == False
+    assert accepts("x", nfa) == True
+    assert accepts("xx", nfa) == True
+    assert accepts("a", nfa) == False
+
+def test_repetition_0m():
+    (nfa, q0, f) = nfa_to_triple(make_nfa1())
+    m = 4
+    (nfa, q0, f) = repetition(nfa, q0, f, m, do_0m = True)
+    words = ["x" * i for i in range(10)]
+    # Between 0 and m repetition
+    for (i, w) in enumerate(words):
+        assert accepts(w, nfa) == (i <= m)
+
+def test_repetition_mm():
+    (nfa, q0, f) = nfa_to_triple(make_nfa1())
+    m = 4
+    (nfa, q0, f) = repetition(nfa, q0, f, m, do_0m = False)
+    words = ["x" * i for i in range(10)]
+    # Exactly m repetition
+    for (i, w) in enumerate(words):
+        assert accepts(w, nfa) == (i == m)
+
+def test_repetition_mn():
+    (nfa, q0, f) = nfa_to_triple(make_nfa1())
+    words = ["x" * i for i in range(10)]
+    # Between m and n repetition
+    for (m, n) in [(0, 1), (0, None), (1, None), (3, 3), (2, 4), (2, None)]:
+        (nfa, q0, f) = literal("x")
+        (nfa, q0, f) = repetition_range(nfa, q0, f, m, n)
+        for (i, w) in enumerate(words):
+            assert accepts(w, nfa) == (i >= m and (n is None or i <= n))
 
 def test_thompson_compile_nfa():
     (nfa, q0, f) = thompson_compile_nfa("(a?b)*?c+d")
