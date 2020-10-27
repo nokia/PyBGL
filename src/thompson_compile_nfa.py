@@ -27,7 +27,19 @@ from pybgl.shunting_yard_postfix import (
 # state and a single final state and combine them to form
 # the NFA representing a regular expression.
 #
-# The following functions implement the .|+*? operators.
+# The following functions craft NFAs resulting from the
+# following operators:
+#   .     concatenation
+#   |     alternation
+#   ?     0-1 repetition
+#   *     0 or more repetitions
+#   +     1 or more repetitions
+#   {n}   n repetitions
+#   {n,}  n or more repetitions
+#   {,m}  0-m repetitions
+#   {n,m} n-m repetitions
+#   [x]   bracket expression
+#   \x    escape sequence
 #-------------------------------------------------------------
 
 def literal(a :chr) -> Nfa:
@@ -145,7 +157,7 @@ def bracket(chars :iter) -> tuple:
     return (nfa, 0, 1)
 
 #-------------------------------------------------------------
-# Thompson algorithm
+# Internal parsers
 #-------------------------------------------------------------
 
 def parse_repetition(s :str) -> tuple:
@@ -161,12 +173,15 @@ def parse_repetition(s :str) -> tuple:
         n = int(match.group(2)) if match.group(2) else None
     return (m, n)
 
+DEFAULT_ALPHABET = string.printable
+
 def parse_bracket(s :str, whole_alphabet :iter = None) -> set:
     if not whole_alphabet:
-        #alphabet = [chr(i) for i in range(256)]
-        whole_alphabet = string.printable
-    assert s[0] == "[" and s[-1] == "]", f"parse_bracket: Invalid parameter: s = {s}"
-    assert len(s) >= 3, f"parse_bracket: Unmatched []: s = {s}"
+        whole_alphabet = DEFAULT_ALPHABET
+    if not (s[0] == "[" and s[-1] == "]"):
+        raise ValueError(f"Invalid parameter: s = {s}")
+    if len(s) < 3:
+        raise ValueError(f"Unmatched []: s = {s}")
 
     reverse = (s[1] == "^")
     i = 2 if s[1] == "^" else 1
@@ -179,7 +194,8 @@ def parse_bracket(s :str, whole_alphabet :iter = None) -> set:
         if a == "-" and last_non_hat:
             m = ord(last_non_hat)
             n = ord(s[i + 1])
-            assert m <= n, f"parse_bracket: Invalid end of interval in s = {s} at index m = {m}"
+            if m > n:
+                raise ValueError(f"Invalid end of interval in s = {s} at index m = {m}")
             for c in range(m, n + 1):
                 accepted.add(chr(c))
             i += 1
@@ -187,11 +203,55 @@ def parse_bracket(s :str, whole_alphabet :iter = None) -> set:
             accepted.add(a)
         last_non_hat = a
         i += 1
-
     return accepted if not reverse else set(whole_alphabet) - accepted
 
-def thompson_compile_nfa(expression :str) -> Nfa:
-    #expression = "".join([a for a in catify(expression, cat=".")])
+def parse_escaped(s :str, whole_alphabet :iter = None) -> iter:
+    MAP_ESCAPED_BRACKET = {
+        r"\d" : "[0-9]",
+        r"\D" : "[^0-9]",
+        r"\s" : "[ \t]",
+        r"\S" : "[^ \t]",
+        # \w and \W should depend on the locale. Here, we assume ASCII.
+        r"\w" : "[0-9A-Za-z]",
+        r"\W" : "[^0-9A-Za-z]",
+    }
+    MAP_ESCAPED_SPECIAL = {
+        r"\a" : "\a",
+        r"\b" : "\b",
+        r"\f" : "\f",
+        r"\n" : "\n",
+        r"\r" : "\r",
+        r"\t" : "\t",
+        r"\v" : "\v",
+    }
+    if len(s) == 2:
+        if s in {
+            r"\+", r"\*", r"\?", r"\.", r"\|",
+            r"\[", r"\]", r"\(", r"\)", r"\{", r"\}"
+        }:
+            return [s[1]]
+        elif s in {r"\A", r"\B", r"\Z"}:
+            raise ValueError(f"Escape sequence {s} not supported")
+        else:
+            a = MAP_ESCAPED_SPECIAL.get(s)
+            if a is not None:
+                return [a]
+            r = MAP_ESCAPED_BRACKET.get(s)
+            if r is not None:
+                chars = parse_bracket(r, whole_alphabet)
+                return chars
+    else:
+        if s[1] in {"x", "u", "U", "N", "0"}:
+            raise ValueError(f"Escape sequence {s} not supported")
+    raise ValueError(f"Invalid escape sequence {s}")
+
+#-------------------------------------------------------------
+# Thompson algorithm
+#-------------------------------------------------------------
+
+def thompson_compile_nfa(expression :str, whole_alphabet = None) -> Nfa:
+    if whole_alphabet is None:
+        whole_alphabet = DEFAULT_ALPHABET
     expression = list(tokenizer_re(expression, cat = "."))
 
     class ThompsonShuntingYardVisitor(DefaultShuntingYardVisitor):
@@ -221,11 +281,11 @@ def thompson_compile_nfa(expression :str) -> Nfa:
                 (nfa1, q01, f1) = self.nfas.pop()
                 (m, n) = parse_repetition(a)
                 (nfa1, q01, f1) = repetition_range(nfa1, q01, f1, m, n)
-            elif a[0] == "\\":
-                print(f"{a} not yet supported")
             elif a[0] == "[":
-                chars = parse_bracket(a)
-                print(f"chars = {sorted(chars)}")
+                chars = parse_bracket(a, whole_alphabet)
+                (nfa1, q01, f1) = bracket(chars)
+            elif a[0] == "\\":
+                chars = parse_escaped(a, whole_alphabet)
                 (nfa1, q01, f1) = bracket(chars)
             else:
                 (nfa1, q01, f1) = literal(a)

@@ -12,11 +12,13 @@ from pybgl.nfa import (
     Nfa, accepts, add_edge, initials, finals, delta, set_final
 )
 from pybgl.thompson_compile_nfa import (
-    alternation, concatenation, literal,
-    zero_or_one, zero_or_more, one_or_more,
-    bracket, parse_bracket,
-    parse_repetition, repetition, repetition_range,
-    thompson_compile_nfa
+    DEFAULT_ALPHABET,
+    alternation, bracket, concatenation, literal,
+    one_or_more,
+    parse_bracket, parse_escaped, parse_repetition,
+    repetition, repetition_range,
+    thompson_compile_nfa,
+    zero_or_one, zero_or_more,
 )
 
 def nfa_to_triple(nfa) -> tuple:
@@ -157,6 +159,65 @@ def test_bracket():
         assert accepts(a, nfa) == True
     for a in "ABC12456789fghi":
         assert accepts(a, nfa) == False
+
+def test_parse_escaped():
+    assert parse_escaped(r"\.") == ["."]
+    assert parse_escaped(r"\|") == ["|"]
+    assert parse_escaped(r"\?") == ["?"]
+    assert parse_escaped(r"\*") == ["*"]
+    assert parse_escaped(r"\+") == ["+"]
+    assert parse_escaped(r"\(") == ["("]
+    assert parse_escaped(r"\)") == [")"]
+    assert parse_escaped(r"\[") == ["["]
+    assert parse_escaped(r"\]") == ["]"]
+    assert parse_escaped(r"\{") == ["{"]
+    assert parse_escaped(r"\}") == ["}"]
+    assert sorted(parse_escaped(r"\w")) == sorted(parse_bracket("[a-zA-Z0-9]"))
+    assert sorted(parse_escaped(r"\W")) == sorted(parse_bracket("[^a-zA-Z0-9]"))
+    assert sorted(parse_escaped(r"\d")) == sorted(parse_bracket("[0-9]"))
+    assert sorted(parse_escaped(r"\D")) == sorted(parse_bracket("[^0-9]"))
+    assert parse_escaped(r"\a") == ["\a"]
+    assert parse_escaped(r"\b") == ["\b"]
+    assert parse_escaped(r"\f") == ["\f"]
+    assert parse_escaped(r"\n") == ["\n"]
+    assert parse_escaped(r"\r") == ["\r"]
+    assert parse_escaped(r"\t") == ["\t"]
+    assert parse_escaped(r"\v") == ["\v"]
+
+def test_escaped_operator():
+    (nfa, q0, f) = thompson_compile_nfa("a\\?b")
+    assert accepts("a?b", nfa) == True
+    assert accepts("ab", nfa) == False
+    assert accepts("b", nfa) == False
+
+    (nfa, q0, f) = thompson_compile_nfa("a?b")
+    assert accepts("a?b", nfa) == False
+    assert accepts("ab", nfa) == True
+    assert accepts("b", nfa) == True
+
+    for regexp in r"\|", r"\.", r"\*", r"\+", r"\(", r"\)", r"\{", r"\}", r"\[", r"\]":
+        (nfa, q0, f) = thompson_compile_nfa(regexp)
+        assert accepts(regexp.replace("\\", ""), nfa)
+
+    regexp = r"\|\.\*\+\(\)\{\}\[\]"
+    (nfa, q0, f) = thompson_compile_nfa(regexp)
+    accepts(regexp.replace("\\", ""), nfa)
+
+def test_escaped_classes():
+    whole_alphabet = DEFAULT_ALPHABET
+    escaped_classes = [r"\d", r"\w", r"\s", r"\D", r"\W", r"\S"]
+    map_escape_allowed = {
+        r : set(parse_escaped(r, whole_alphabet))
+        for r in escaped_classes
+    }
+    for regexp in [r"\d", r"\w", r"\s", r"\D", r"\W", r"\S"]:
+        allowed = map_escape_allowed[regexp.lower()]
+        if regexp.lower() != regexp:
+            allowed = set(whole_alphabet) - allowed
+        (nfa, q0, f) = thompson_compile_nfa(regexp, whole_alphabet)
+        for a in whole_alphabet:
+            assert accepts(a, nfa) == (a in allowed), \
+                f"regexp = {regexp} a = '{a}' ({ord(a)}) allowed = '{allowed}' obtained = {accepts(a, nfa)} expected = {a in allowed}"
 
 def test_thompson_compile_nfa():
     (nfa, q0, f) = thompson_compile_nfa("(a?b)*?c+d")

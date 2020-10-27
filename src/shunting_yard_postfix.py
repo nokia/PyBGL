@@ -142,7 +142,7 @@ RE_OPERATORS_RE = [
     # Character classes
     "\\[.*\\]",
     # Escape sequences (not exhaustive)
-    "(\\\\(d|s|w))",
+    "(\\\\[abdDfnrsStvwW*+?.|\[\](){}])",
 ]
 
 def catify(expression :str, cat :str = ".") -> iter:
