@@ -12,14 +12,11 @@ __license__    = "BSD-3"
 
 
 from collections            import defaultdict
-from pybgl.automaton        import (
-    BOTTOM, Automaton, EdgeDescriptor, accepts, accepts_debug, add_vertex, alphabet,
-    delta, edges, graphviz_arc, initial, is_initial, is_final, is_finite,
-    finals, label, num_edges, num_vertices, out_degree, out_edges, set_final,
-    remove_vertex, remove_edge, set_initial, set_final, source, sigma, target, vertices
+from pybgl.automaton        import *
+from pybgl.graph            import add_edge, add_vertex, edge
+from pybgl.property_map     import (
+    ReadWritePropertyMap, make_assoc_property_map, make_func_property_map
 )
-from pybgl.graph            import add_edge, edge
-from pybgl.property_map     import ReadWritePropertyMap, make_assoc_property_map
 
 class NodeAutomaton(Automaton):
     def __init__(
@@ -97,18 +94,18 @@ class NodeAutomaton(Automaton):
     def label(self, e :EdgeDescriptor) -> chr:
         return symbol(target(e, self), self)
 
-    def vertex_to_graphviz(self, q :int) -> chr:
-        return "%s [shape=\"%s\" label=<%s>]" % (
-            q,
-            "doublecircle" if self.is_final(q) else "circle",
-            symbol(q, self) if not is_initial(q, self) else "^"
-        )
-
-    def edge_to_graphviz(self, e :EdgeDescriptor) -> str:
-        return "%s %s %s" % (
-            source(e, self),
-            graphviz_arc(self),
-            target(e, self)
+    def to_dot(self, graphviz_style :str = None) -> str:
+        return to_dot(
+            self,
+            dpv = {
+                "shape" : make_func_property_map(
+                    lambda u: "doublecircle" if self.is_final(u) else "circle"
+                ),
+                "label" : make_func_property_map(
+                    lambda u: "^" if self.is_initial(u) else self.symbol(u)
+                )
+            },
+            graphviz_style=graphviz_style
         )
 
 def add_vertex(a :chr, g :NodeAutomaton) -> int:

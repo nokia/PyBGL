@@ -10,6 +10,8 @@ __email__      = "marc-olivier.buob@nokia-bell-labs.com"
 __copyright__  = "Copyright (C) 2018, Nokia"
 __license__    = "BSD-3"
 
+from .graphviz_impl import *
+
 def __len_gen__(gen) -> int:
     """
     Get the "length" of a generator.
@@ -43,7 +45,7 @@ class EdgeDescriptor:
     def __hash__(self):
         return hash((self.m_source, self.m_target, self.m_distinguisher))
 
-    def __eq__(self, e):
+    def __eq__(self, e) -> bool:
         return e != None \
             and self.m_source == e.m_source \
             and self.m_target == e.m_target \
@@ -57,66 +59,8 @@ class EdgeDescriptor:
 # Generic graph
 #-------------------------------------------------------------------
 
-from pybgl.singleton import Singleton
-
-class GraphvizStyle(metaclass=Singleton):
-    graph = {
-        "fontcolor" : "black",
-        "bgcolor"   : "transparent",
-        "rankdir"   : "LR",
-    }
-    node = {
-        "color"     : "black",
-        "fontcolor" : "black",
-        "shape"     : "circle",
-    }
-    edge = {
-        "color"     : "black",
-        "fontcolor" : "black",
-    }
-    extra_style = list() # splines, etc
-
-    @staticmethod
-    def set_fg_color(color):
-        GraphvizStyle.graph["fontcolor"] = color
-        GraphvizStyle.node["color"]      = color
-        GraphvizStyle.node["fontcolor"]  = color
-        GraphvizStyle.edge["color"]      = color
-        GraphvizStyle.edge["fontcolor"]  = color
-
-    @staticmethod
-    def set_bg_color(color):
-        GraphvizStyle.graph["bgcolor"] = color
-
-    @staticmethod
-    def attributes_to_dot(prefix :str, d :dict) -> str:
-        return "%s [%s]" % (
-            prefix,
-            "; ".join([
-                "%s=\"%s\"" % (k, v) for k, v in d.items()
-            ])
-        ) if d else ""
-
-    def __str__(self) -> str:
-        return "; ".join(
-            [
-                GraphvizStyle.attributes_to_dot("graph", GraphvizStyle.graph),
-                GraphvizStyle.attributes_to_dot("node",  GraphvizStyle.node),
-                GraphvizStyle.attributes_to_dot("edge",  GraphvizStyle.edge)
-            ] + GraphvizStyle.extra_style
-        )
-
-def default_graphviz_style() -> str:
-    return str(GraphvizStyle())
-
 def is_directed(g) -> bool:
     return g.directed
-
-def graphviz_type(g) -> str:
-    return "digraph" if is_directed(g) else "graph"
-
-def graphviz_arc(g) -> str:
-    return "->" if is_directed(g) else "--"
 
 class Graph:
     def __init__(self, directed = None, num_vertices = 0):
@@ -207,22 +151,17 @@ class Graph:
         return ret
 
     def to_dot(self, graphviz_style = None) -> str:
-        if graphviz_style == None:
-            graphviz_style = default_graphviz_style()
-        return "%(type)s G {%(graph)s}" % {
-            "type"     : graphviz_type(self),
-            "graph"    : "; ".join([
-                graphviz_style,
-                "; ".join(["%s" % u for u in self.vertices()]),
-                "; ".join([
-                    "%s %s %s" % (
-                        source(e, self),
-                        graphviz_arc(self),
-                        target(e, self)
-                    ) for e in self.edges()
-                ])
-            ])
-        }
+        return to_dot(self, graphviz_style=graphviz_style)
+
+    def has_vertex(self) -> bool:
+        for _ in vertices(self):
+            return True
+        return False
+
+    def has_edge(self) -> bool:
+        for _ in edges(self):
+            return True
+        return False
 
     def source(self, e :EdgeDescriptor) -> int:
         return e.m_source
@@ -303,6 +242,9 @@ def vertices(g :Graph) -> iter:
 def num_vertices(g :Graph) -> int:
     return g.num_vertices()
 
+def has_vertex(g :Graph) -> bool:
+    return g.has_vertex()
+
 def add_vertex(g :Graph) -> int:
     return g.add_vertex()
 
@@ -314,6 +256,9 @@ def edges(g :Graph):
 
 def num_edges(g :Graph) -> int:
     return g.num_edges()
+
+def has_edge(g :Graph) -> bool:
+    return g.has_edge()
 
 def add_edge(u :int, v :int, g :Graph) -> EdgeDescriptor:
     return g.add_edge(u, v)

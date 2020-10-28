@@ -13,8 +13,8 @@ __copyright__  = "Copyright (C) 2018, Nokia"
 __license__    = "BSD-3"
 
 from copy       import copy
-from .graph     import DirectedGraph, GraphvizStyle, graphviz_arc, graphviz_type, edges, Graph, source, target, vertices
-from .graphviz  import escape_html
+from .graph     import Graph, edges, source, target, vertices
+from .graphviz  import GraphvizStyle, graphviz_type, to_dot
 
 JSON_GRAPH_FORMAT = """{
     "graph_type" : "%(graph_type)s",
@@ -40,8 +40,8 @@ class GraphDp:
         dpv :dict = None, # Vertex attributes
         dpe :dict = None, # Edge attributes
         dg  :dict = None, # Graph attributes
-        dv  :dict = None, # Vertex default attributes
-        de  :dict = None, # Edge default attributes
+        dv  :dict = None, # Vertex default attributesde  :dict = None,
+        de  :dict = None, # Edge default attributesde  :dict = None,
         extra_style :list = None  # Extra style (splines etc)
     ):
         self.g = g
@@ -69,47 +69,20 @@ class GraphDp:
         )
 
     def to_dot(self, vs = None, es = None) -> str:
-        if vs == None: vs = vertices(self.g)
-        if es == None: es = edges(self.g)
-        graphviz_style = ("%s;" % "; ".join(self.extra_style)) if self.extra_style else ""
-        graphviz_style += "; ".join([
-            GraphDp.default_to_dot("graph", self.dg),
-            GraphDp.default_to_dot("node",  self.dv),
-            GraphDp.default_to_dot("edge",  self.de),
-            ""
-        ])
-
-        return "%s G {%s %s}" % (
-            graphviz_type(self.g),
-            graphviz_style,
-            "; ".join(
-                [
-                    "%s [%s]" % (
-                        u,
-                        "; ".join([
-                            "%s=\"%s\"" % (k, pmap[u]) if k != "label" else
-                            "%s=<%s>"   % (k, escape_html(pmap[u]))
-                            for k, pmap in self.dpv.items()
-                        ])
-                    ) for u in vs
-                ] + [
-                    "%s %s %s [%s]" % (
-                        source(e, self.g),
-                        graphviz_arc(self.g),
-                        target(e, self.g),
-                        "; ".join([
-                            "%s=\"%s\"" % (k, pmap[e]) if k != "label" else
-                            "%s=<%s>"   % (k, escape_html(pmap[e]))
-                            for k, pmap in self.dpe.items()
-                        ])
-                    ) for e in es
-                ]
-            )
+        return to_dot(
+            self.g,
+            vs = vs,
+            es = es,
+            dg = self.dg,
+            dv = self.dv,
+            de = self.de,
+            dpv = self.dpv,
+            dpe = self.dpe
         )
 
     def to_json(self, vs = None, es = None) -> str:
-        if vs == None: vs = vertices(self.g)
-        if es == None: es = edges(self.g)
+        if vs is None: vs = vertices(self.g)
+        if es is None: es = edges(self.g)
 
         return JSON_GRAPH_FORMAT % {
             "graph_type" : graphviz_type(self.g),

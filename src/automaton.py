@@ -7,17 +7,13 @@ __email__      = "marc-olivier.buob@nokia-bell-labs.com"
 __copyright__  = "Copyright (C) 2018, Nokia"
 __license__    = "BSD-3"
 
-from collections import defaultdict
+from collections        import defaultdict
 
-# NB: pybgl.graph.edge and pybgl.graph.add_edge are not imported because their signature is different
-from pybgl.graph import (
-    DirectedGraph, EdgeDescriptor,
-    add_edge, add_vertex, default_graphviz_style, edge, edges, num_edges, num_vertices,
-    out_degree, out_edges,
-    remove_vertex, remove_edge, source, target, vertices
-)
-from pybgl.graph        import graphviz_arc, graphviz_type, vertices
-from pybgl.property_map import ReadPropertyMap, make_assoc_property_map
+# NB: pybgl.graph.edge and pybgl.graph.add_edge are overloaded by this file because
+# they don't have the same signature.
+from .graph        import *
+from .graphviz     import graphviz_escape_html
+from .property_map import ReadPropertyMap, make_assoc_property_map, make_func_property_map
 
 BOTTOM = None
 
@@ -102,31 +98,21 @@ class Automaton(DirectedGraph):
     def finals(self) -> set:
         return {q for q in vertices(self) if is_final(q, self)}
 
-    def vertex_to_graphviz(self, u :int) -> str:
-        return "%s [shape=\"%s\"]" % (
-            u,
-            "doublecircle" if self.is_final(u) else "circle"
-        )
-
-    def edge_to_graphviz(self, e :EdgeDescriptor) -> str:
-        return "%s %s %s [label=\"%s\"]" % (
-            source(e, self),
-            graphviz_arc(self),
-            target(e, self),
-            label(e, self)
-        )
-
     def to_dot(self, graphviz_style :str = None) -> str:
-        if graphviz_style == None:
-            graphviz_style = default_graphviz_style()
-        return "%(type)s G {  %(style)s  %(vertices)s%(sep1)s  %(edges)s%(sep2)s\n}" % {
-            "style"    : graphviz_style,
-            "type"     : graphviz_type(self),
-            "vertices" : ";\n  ".join(["  %s" % self.vertex_to_graphviz(u) for u in vertices(self)]),
-            "sep1"     : ";" if num_vertices(self) else "",
-            "edges"    : ";\n  ".join(["  %s" % self.edge_to_graphviz(e)   for e in edges(self)]),
-            "sep2"     : ";" if num_edges(self) else "",
-        }
+        return to_dot(
+            self,
+            dpv = {
+                "shape" : make_func_property_map(
+                    lambda u: "doublecircle" if self.is_final(u) else "circle"
+                ),
+            },
+            dpe = {
+                "label" : make_func_property_map(
+                    lambda e: graphviz_escape_html(self.label(e))
+                )
+            },
+            graphviz_style=graphviz_style
+        )
 
     def delta_word(self, q :int, w :str) -> int:
         for a in w:
