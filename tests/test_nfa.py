@@ -7,7 +7,8 @@ __email__      = "marc-olivier.buob@nokia-bell-labs.com"
 __copyright__  = "Copyright (C) 2020, Nokia"
 __license__    = "BSD-3"
 
-from pybgl.nfa import *
+from pybgl.nfa      import *
+from pybgl.graphviz import graph_to_html
 
 def make_nfa1(eps = EPSILON):
     g = Nfa(4)
@@ -128,3 +129,6 @@ def test_set_initials():
     assert accepts("aa", g) == False
     assert accepts("ccc", g) == False
 
+def test_nfa_graphviz():
+    nfa = make_nfa1()
+    svg = graph_to_html(nfa)
