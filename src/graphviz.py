@@ -12,9 +12,55 @@ __license__    = "BSD-3"
 
 import re
 
-from subprocess         import Popen, PIPE
-from pybgl.graph        import Graph, add_vertex, add_edge, EdgeDescriptor
-from pybgl.property_map import put, get
+from subprocess     import Popen, PIPE
+from .graph         import Graph, add_vertex, add_edge, EdgeDescriptor
+from .tokenize      import TokenizeVisitor, tokenize
+
+#------------------------------------------------------------------
+# Graphviz write utilities
+# See also Graph.to_dot() and GraphDp.to_dot()
+#------------------------------------------------------------------
+
+GRAPHVIZ_SUPPORTED_HTML_TAGS = {
+    "b", "/b", "br", "br/", "font", "/font", "hr", "/hr", "i", "/i",
+    "img", "/img", "o", "/o", "s", "/s", "sub", "/sub", "sup", "/sup",
+    "table", "/table", "td", "/td", "tr", "/tr", "u", "/u", "vr", "/vr",
+}
+
+GRAPHVIZ_HTML_TOKENIZER = re.compile(
+    "|".join(
+        f"<\\s*{tag}\\s*>"
+        for tag in GRAPHVIZ_SUPPORTED_HTML_TAGS
+    )
+)
+
+# The following characters makes crash graphviz when involved in a <label>,
+# so we replace them by their corresponding HTML representation.
+GRAPHIVZ_MAP_CHAR_ESCAPED = {
+    "<"  : "&#60;",
+    ">"  : "&#62;",
+    "\n" : "\\n",
+    "\t" : "\\t",
+    "["  : "&#91;",
+    "]"  : "&#93;",
+    "{"  : "&#123;",
+    "}"  : "&#125;",
+}
+
+class EscapeHtmlTokenizeVisitor(TokenizeVisitor):
+    def __init__(self):
+        self.out = ""
+    def on_unmatched(self, unmatched :str, start :int, end :int, s :str):
+        for a in unmatched:
+            escaped = GRAPHIVZ_MAP_CHAR_ESCAPED.get(a, a)
+            self.out += escaped
+    def on_matched(self, matched :str, start :int, end :int, s :str):
+        self.out += matched
+
+def escape_html(s :str) -> str:
+    vis = EscapeHtmlTokenizeVisitor()
+    tokenize(GRAPHVIZ_HTML_TOKENIZER, s, vis)
+    return vis.out
 
 #------------------------------------------------------------------
 # Graphviz parser
@@ -128,12 +174,12 @@ class ReadGraphvizDpVisitor(ReadGraphvizVisitor):
         self.m_dpe = dpe
 
     def on_install_vertex_property(self, u, g, key, value):
-        pmap = self.m_dpv.get(key) if self.m_dpv else None
-        if pmap: put(pmap, u, value)
+        pmap = self.m_dpv[key] if self.m_dpv else None
+        if pmap: pmap[u] = value
 
     def on_install_edge_property(self, e, g, key, value):
-        pmap = self.m_dpe.get(key) if self.m_dpe else None
-        if pmap: put(pmap, e, value)
+        pmap = self.m_dpe[key] if self.m_dpe else None
+        if pmap: pmap[e] = value
 
 def read_graphviz_dp(iterable, g :Graph, dpv = None, dpe = None):
     """

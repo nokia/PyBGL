@@ -12,8 +12,9 @@ __email__      = "marc-olivier.buob@nokia-bell-labs.com"
 __copyright__  = "Copyright (C) 2018, Nokia"
 __license__    = "BSD-3"
 
-from copy   import copy
-from .graph import DirectedGraph, GraphvizStyle, graphviz_arc, graphviz_type, edges, Graph, source, target, vertices
+from copy       import copy
+from .graph     import DirectedGraph, GraphvizStyle, graphviz_arc, graphviz_type, edges, Graph, source, target, vertices
+from .graphviz  import escape_html
 
 JSON_GRAPH_FORMAT = """{
     "graph_type" : "%(graph_type)s",
@@ -31,7 +32,6 @@ JSON_EDGE_FORMAT = """{
             "target" : %(target)s%(sep)s
             %(attributes)s
         }"""
-
 
 class GraphDp:
     def __init__(
@@ -86,14 +86,22 @@ class GraphDp:
                 [
                     "%s [%s]" % (
                         u,
-                        "; ".join(["%s=\"%s\"" % (k, pmap[u]) if k != "label" else "%s=<%s>" % (k, pmap[u]) for k, pmap in self.dpv.items()])
+                        "; ".join([
+                            "%s=\"%s\"" % (k, pmap[u]) if k != "label" else
+                            "%s=<%s>"   % (k, escape_html(pmap[u]))
+                            for k, pmap in self.dpv.items()
+                        ])
                     ) for u in vs
                 ] + [
                     "%s %s %s [%s]" % (
                         source(e, self.g),
                         graphviz_arc(self.g),
                         target(e, self.g),
-                        "; ".join(["%s=\"%s\"" % (k, pmap[e]) if k != "label" else "%s=<%s>" % (k, pmap[e]) for k, pmap in self.dpe.items()])
+                        "; ".join([
+                            "%s=\"%s\"" % (k, pmap[e]) if k != "label" else
+                            "%s=<%s>"   % (k, escape_html(pmap[e]))
+                            for k, pmap in self.dpe.items()
+                        ])
                     ) for e in es
                 ]
             )
@@ -109,7 +117,8 @@ class GraphDp:
                     JSON_NODE_FORMAT % {
                         "id" : u,
                         "attributes" : ",\n            ".join([
-                            "\"%s\" : \"%s\"" % (k, pmap[u]) for k, pmap in self.dpv.items()
+                            "\"%s\" : \"%s\"" % (k, pmap[u])
+                            for k, pmap in self.dpv.items()
                         ]),
                         "sep" : "," if self.dpv else "",
                     } for u in vs
@@ -119,7 +128,8 @@ class GraphDp:
                         "source" : source(e, self.g),
                         "target" : target(e, self.g),
                         "attributes" : ",\n            ".join([
-                            "\"%s\" : \"%s\"" % (k, pmap[e]) for k, pmap in self.dpe.items()
+                            "\"%s\" : \"%s\"" % (k, pmap[e])
+                            for k, pmap in self.dpe.items()
                         ]),
                         "sep" : "," if self.dpv else "",
                     } for e in es
