@@ -128,7 +128,7 @@ class Graph:
             self.add_vertex()
 
     @property
-    def directed(self):
+    def directed(self) -> bool:
         return self.m_directed
 
     def add_vertex(self) -> int:
@@ -137,7 +137,7 @@ class Graph:
         self.m_id += 1
         return u
 
-    def num_vertices(self):
+    def num_vertices(self) -> int:
         return __len_gen__(self.vertices())
 
     def remove_vertex(self, u :int):
@@ -148,7 +148,7 @@ class Graph:
         # Remove u and its out-edges
         del self.adjacencies[u]
 
-    def vertices(self):
+    def vertices(self) -> iter:
         return self.adjacencies.keys()
 
     @property
@@ -181,13 +181,13 @@ class Graph:
                 #if not bool(adjs_u):
                 #    del self.adjacencies[u]
 
-    def num_edges(self):
+    def num_edges(self) -> int:
         return __len_gen__(self.edges())
 
-    def out_edges(self, u :int):
+    def out_edges(self, u :int) -> iter:
         return (EdgeDescriptor(u, v, n) for v, s in self.adjacencies.get(u, dict()).items() for n in s)
 
-    def edges(self):
+    def edges(self) -> iter:
         return (EdgeDescriptor(u, v, n) for u, vs in self.adjacencies.items() for v, s in vs.items() for n in s)
 
     def edge(self, u :int, v :int) -> tuple:
@@ -224,16 +224,16 @@ class Graph:
             ])
         }
 
-    def source(self, e :EdgeDescriptor):
+    def source(self, e :EdgeDescriptor) -> int:
         return e.m_source
 
-    def target(self, e :EdgeDescriptor):
+    def target(self, e :EdgeDescriptor) -> int:
         return e.m_target
 
-def source(e :EdgeDescriptor, g :Graph):
+def source(e :EdgeDescriptor, g :Graph) -> int:
     return g.source(e)
 
-def target(e :EdgeDescriptor, g :Graph):
+def target(e :EdgeDescriptor, g :Graph) -> int:
     return g.target(e)
 
 #-------------------------------------------------------------------
@@ -241,7 +241,7 @@ def target(e :EdgeDescriptor, g :Graph):
 #-------------------------------------------------------------------
 
 class DirectedGraph(Graph):
-    def __init__(self, num_vertices = 0):
+    def __init__(self, num_vertices :int = 0):
         super().__init__(True, num_vertices)
 
 #-------------------------------------------------------------------
@@ -251,7 +251,7 @@ class DirectedGraph(Graph):
 class UndirectedGraph(Graph):
     # The reverse are automatically added/inserted.
 
-    def __init__(self, num_vertices = 0):
+    def __init__(self, num_vertices :int = 0):
         super().__init__(False, num_vertices)
 
     def add_edge(self, u :int, v :int) -> tuple:
@@ -264,7 +264,7 @@ class UndirectedGraph(Graph):
             self.m_adjacencies[v][u].add(n)
         return (e, added)
 
-    def out_edges(self, u :int):
+    def out_edges(self, u :int) -> iter:
         # source(e, g) and target(e, g) impose to returns (u, v)-like
         # EdgeDescriptors.
         return (
@@ -282,13 +282,13 @@ class UndirectedGraph(Graph):
             n = e.m_distinguisher
             self.m_adjacencies[v][u].remove(n)
 
-    def in_edges(self, u :int):
+    def in_edges(self, u :int) -> iter:
         return self.out_edges(u)
 
-    def edges(self):
+    def edges(self) -> iter:
         return (EdgeDescriptor(u, v, n) for u, vs in self.adjacencies.items() for v, s in vs.items() for n in s if u <= v)
 
-    def remove_vertex(self, u):
+    def remove_vertex(self, u :int):
         for e in [e for e in out_edges(u, self)]:
             remove_edge(e, self)
         del self.m_adjacencies[u]
@@ -297,7 +297,7 @@ class UndirectedGraph(Graph):
 # Common methods
 #-------------------------------------------------------------------
 
-def vertices(g :Graph):
+def vertices(g :Graph) -> iter:
     return g.vertices()
 
 def num_vertices(g :Graph) -> int:
@@ -321,13 +321,13 @@ def add_edge(u :int, v :int, g :Graph) -> EdgeDescriptor:
 def remove_edge(e :EdgeDescriptor, g :Graph):
     g.remove_edge(e)
 
-def in_edges(u :int, g :Graph):
+def in_edges(u :int, g :Graph) -> iter:
     return g.in_edges(u)
 
-def in_degree(u :int, g :Graph):
+def in_degree(u :int, g :Graph) -> int:
     return __len_gen__(in_edges(u, g))
 
-def out_edges(u :int, g :Graph):
+def out_edges(u :int, g :Graph) -> iter:
     return g.out_edges(u)
 
 def out_degree(u :int, g :Graph) -> int:
