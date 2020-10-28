@@ -7,14 +7,9 @@ __email__      = "marc-olivier.buob@nokia-bell-labs.com"
 __copyright__  = "Copyright (C) 2018, Nokia"
 __license__    = "BSD-3"
 
-from collections           import defaultdict
 from pybgl.graphviz        import graph_to_html
 from pybgl.property_map    import make_assoc_property_map
-from pybgl.node_automaton  import \
-    BOTTOM, NodeAutomaton, add_vertex, add_edge, alphabet, delta, edge, \
-    edges, label, num_edges, num_vertices, \
-    out_degree, out_edges, remove_vertex, remove_edge, \
-    sigma, source, symbol, target, vertices
+from pybgl.node_automaton  import *
 
 (u, v, w) = (0, 1, 2)
 

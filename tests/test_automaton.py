@@ -7,12 +7,8 @@ __email__      = "marc-olivier.buob@nokia-bell-labs.com"
 __copyright__  = "Copyright (C) 2018, Nokia"
 __license__    = "BSD-3"
 
-from pybgl.automaton import \
-    BOTTOM, Automaton, accepts, add_edge, add_vertex, alphabet, delta, edge, \
-    finals, initial, is_complete, is_deterministic, is_final, is_finite, is_initial, \
-    is_minimal, label, make_automaton, num_edges, num_vertices, set_initial, set_final, sigma, \
-    remove_edge, remove_vertex, source, target, vertices
-from pybgl.graphviz import graph_to_html
+from pybgl.automaton    import *
+from pybgl.graphviz     import graph_to_html
 from pybgl.property_map import make_func_property_map
 
 G1 = make_automaton(
