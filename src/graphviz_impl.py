@@ -132,6 +132,7 @@ def graphviz_properties_to_str(x, dpx :dict) -> str:
         "%s=\"%s\"" % (k, pmap[x]) if k != "label" else
         "%s=<%s>"   % (k, graphviz_escape_html(str(pmap[x])))
         for (k, pmap) in dpx.items()
+        if pmap[x] is not None
     ]) if dpx else ""
 
 def default_graphviz_style() -> str:
