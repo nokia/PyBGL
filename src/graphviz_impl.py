@@ -177,12 +177,11 @@ def edge_to_graphviz(e, g, dpe :dict = None, source :callable = None, target :ca
 
 def enrich_kwargs(default_d :dict, key :str, **kwargs) -> dict:
     if default_d:
-        if key in kwargs:
-            for (k, v) in default_d.items():
-                if k not in kwargs[key].keys():
-                    kwargs[key][k] = v
-        else:
-            kwargs[key] = copy.copy(default_d)
+        if not key in kwargs:
+            kwargs[key] = dict()
+        for (k, v) in default_d.items():
+            if k not in kwargs[key].keys():
+                kwargs[key][k] = v
     return kwargs
 
 def to_dot(
@@ -190,6 +189,7 @@ def to_dot(
     vs              :iter = None,
     es              :iter = None,
     dg              :dict = None,
+    extra_style     :str  = None,
     dv              :dict = None,
     de              :dict = None,
     dpv             :dict = None,
@@ -214,6 +214,7 @@ def to_dot(
         + ([dg] if dg else [])
         + ([dv] if dv else [])
         + ([de] if de else [])
+        + ([extra_style] if extra_style else [])
         + [vertex_to_graphviz(u, g, dpv) for u in vs]
         + [edge_to_graphviz(e, g, dpe, source, target, is_directed) for e in es]
     )

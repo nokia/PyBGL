@@ -330,16 +330,13 @@ class Ast(DirectedGraph):
         return u
 
     def to_dot(self, **kwargs):
-        kwargs.pop("dpv", None)
-        return to_dot(
-            self,
-            dpv = {
-                "label" : make_func_property_map(
-                    lambda u: "%s %s" % (u, self.pmap_vlabel[u])
-                )
-            },
-            **kwargs
-        )
+        dpv = {
+            "label" : make_func_property_map(
+                lambda u: "%s %s" % (u, self.pmap_vlabel[u])
+            )
+        }
+        kwargs = enrich_kwargs(dpv, "dpv", **kwargs)
+        return to_dot(self, **kwargs)
 
 class RpnDequeAst(RpnDequeOperation):
     """
@@ -408,7 +405,7 @@ class RpnDequeAlg(RpnDequeOperation):
         """
         Constructor.
         """
-        map_operators = kwargs.pop("map_operators")
+        map_operators = kwargs.pop("map_operators", None)
         super().__init__(
             map_operators = map_operators if map_operators else MAP_OPERATORS_ALG,
             **kwargs

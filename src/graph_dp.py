@@ -60,11 +60,11 @@ class GraphDp:
     def get_de(self) -> dict: return self.de
 
     def to_dot(self, **kwargs) -> str:
-        enrich_kwargs(self.dg,  "dg",  **kwargs)
-        enrich_kwargs(self.dv,  "dv",  **kwargs)
-        enrich_kwargs(self.de,  "de",  **kwargs)
-        enrich_kwargs(self.dpv, "dpv", **kwargs)
-        enrich_kwargs(self.dpe, "dpe", **kwargs)
+        kwargs = enrich_kwargs(self.dg,  "dg",  **kwargs)
+        kwargs = enrich_kwargs(self.dv,  "dv",  **kwargs)
+        kwargs = enrich_kwargs(self.de,  "de",  **kwargs)
+        kwargs = enrich_kwargs(self.dpv, "dpv", **kwargs)
+        kwargs = enrich_kwargs(self.dpe, "dpe", **kwargs)
         return to_dot(self.g, **kwargs)
 
     def to_json(self, vs = None, es = None) -> str:

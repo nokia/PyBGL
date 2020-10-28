@@ -139,25 +139,22 @@ class Nfa(DirectedGraph):
         return self.pmap_final[q]
 
     def to_dot(self, **kwargs):
-        for k in ["dpv", "dpe"]:
-            kwargs.pop(k, None)
-        return to_dot(
-            self,
-            dpv = {
-                "shape" : make_func_property_map(
-                    lambda u: "doublecircle" if self.is_final(u) else "circle"
-                ),
-            },
-            dpe = {
-                "label" : make_func_property_map(
-                    lambda e: (
-                        "<i>\u03b5</i>" if self.label(e) == self.epsilon
-                        else graphviz_escape_html(self.label(e))
-                    )
+        dpv = {
+            "shape" : make_func_property_map(
+                lambda u: "doublecircle" if self.is_final(u) else "circle"
+            ),
+        }
+        dpe = {
+            "label" : make_func_property_map(
+                lambda e: (
+                    "<i>\u03b5</i>" if self.label(e) == self.epsilon
+                    else graphviz_escape_html(self.label(e))
                 )
-            },
-            **kwargs
-        )
+            )
+        }
+        kwargs = enrich_kwargs(dpv, "dpv", **kwargs)
+        kwargs = enrich_kwargs(dpe, "dpe", **kwargs)
+        return to_dot(self, **kwargs)
 
     def accepts(self, w) -> True:
         return any(is_final(q, self) for q in delta_word(w, self))

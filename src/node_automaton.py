@@ -95,20 +95,16 @@ class NodeAutomaton(Automaton):
         return symbol(target(e, self), self)
 
     def to_dot(self, **kwargs) -> str:
-        for k in ["dpv", "dpe"]:
-            kwargs.pop(k, None)
-        return to_dot(
-            self,
-            dpv = {
-                "shape" : make_func_property_map(
-                    lambda u: "doublecircle" if self.is_final(u) else "circle"
-                ),
-                "label" : make_func_property_map(
-                    lambda u: "^" if self.is_initial(u) else self.symbol(u)
-                )
-            },
-            **kwargs
-        )
+        dpv = {
+            "shape" : make_func_property_map(
+                lambda u: "doublecircle" if self.is_final(u) else "circle"
+            ),
+            "label" : make_func_property_map(
+                lambda u: "^" if self.is_initial(u) else self.symbol(u)
+            )
+        }
+        kwargs = enrich_kwargs(dpv, "dpv", **kwargs)
+        return to_dot(self, **kwargs)
 
 def add_vertex(a :chr, g :NodeAutomaton) -> int:
     return g.add_vertex(a)

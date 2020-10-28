@@ -109,8 +109,8 @@ class Automaton(DirectedGraph):
                 lambda e: graphviz_escape_html(self.label(e))
             )
         }
-        enrich_kwargs(dpv, "dpv", **kwargs)
-        enrich_kwargs(dpe, "dpe", **kwargs)
+        kwargs = enrich_kwargs(dpv, "dpv", **kwargs)
+        kwargs = enrich_kwargs(dpe, "dpe", **kwargs)
         return to_dot(self, **kwargs)
 
     def delta_word(self, q :int, w :str) -> int:
