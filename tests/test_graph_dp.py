@@ -9,6 +9,7 @@ from pybgl.graph        import DirectedGraph, add_edge, edges, num_edges, num_ve
 from pybgl.graph_dp     import GraphDp
 from pybgl.graphviz     import read_graphviz
 from pybgl.property_map import make_assoc_property_map, make_func_property_map
+from pybgl.ipynb        import ipynb_display_graph
 
 def make_g() -> DirectedGraph:
     g = DirectedGraph(3)
@@ -61,4 +62,28 @@ def test_graph_dp_json():
         # Try to load json
         json.loads(s_json)
 
-test_graph_dp_json()
+def test_graph_dp_filter():
+    def vertex_filter(u):
+        return u < 2
+
+    def edge_filter(e, g, vertex_filter):
+        return vertex_filter(source(e, g)) and vertex_filter(target(e, g))
+
+    g = make_g()
+    gdp = GraphDp(
+        g,
+        dv = {"color" : "red"},
+        de = {"color" : "purple"},
+        dpv = {"fontcolor" : make_func_property_map(lambda e: "blue" if e % 2 else "green")}
+    )
+    ipynb_display_graph(
+        gdp,
+        vs = (u for u in vertices(g) if vertex_filter(u)),
+        es = (e for e in edges(g)    if edge_filter(e, g, vertex_filter))
+    )
+    gdp = GraphDp(
+        g,
+        dv = {"color" : "red"},
+        de = {"color" : "purple"},
+        dpv = {"fontcolor" : make_func_property_map(lambda e: "blue" if e % 2 else "green")}
+    )
