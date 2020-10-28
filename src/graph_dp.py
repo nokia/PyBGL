@@ -14,7 +14,7 @@ __license__    = "BSD-3"
 
 from copy       import copy
 from .graph     import Graph, edges, source, target, vertices
-from .graphviz  import GraphvizStyle, graphviz_type, to_dot
+from .graphviz  import GraphvizStyle, enrich_kwargs, graphviz_type, to_dot
 
 JSON_GRAPH_FORMAT = """{
     "graph_type" : "%(graph_type)s",
@@ -59,26 +59,13 @@ class GraphDp:
     def get_dv(self) -> dict: return self.dv
     def get_de(self) -> dict: return self.de
 
-    @staticmethod
-    def default_to_dot(prefix :str, d :dict) -> str:
-        return "%s [%s]" % (
-            prefix,
-            "; ".join([
-                "%s=\"%s\"" % (k, v) for k, v in d.items()
-            ])
-        )
-
-    def to_dot(self, vs = None, es = None) -> str:
-        return to_dot(
-            self.g,
-            vs = vs,
-            es = es,
-            dg = self.dg,
-            dv = self.dv,
-            de = self.de,
-            dpv = self.dpv,
-            dpe = self.dpe
-        )
+    def to_dot(self, **kwargs) -> str:
+        enrich_kwargs(self.dg,  "dg",  **kwargs)
+        enrich_kwargs(self.dv,  "dv",  **kwargs)
+        enrich_kwargs(self.de,  "de",  **kwargs)
+        enrich_kwargs(self.dpv, "dpv", **kwargs)
+        enrich_kwargs(self.dpe, "dpe", **kwargs)
+        return to_dot(self.g, **kwargs)
 
     def to_json(self, vs = None, es = None) -> str:
         if vs is None: vs = vertices(self.g)

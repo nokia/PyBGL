@@ -150,8 +150,8 @@ class Graph:
             ret = (candidates_edges.pop(), True)
         return ret
 
-    def to_dot(self, graphviz_style = None) -> str:
-        return to_dot(self, graphviz_style=graphviz_style)
+    def to_dot(self, **kwargs) -> str:
+        return to_dot(self, **kwargs)
 
     def has_vertex(self) -> bool:
         for _ in vertices(self):

@@ -11,7 +11,7 @@ __copyright__  = "Copyright (C) 2020, Nokia"
 __license__    = "BSD-3"
 
 # This file must have NO dependency on .graph to avoid mutual inclusion
-import re
+import copy, re
 from .singleton     import Singleton
 from .tokenize      import TokenizeVisitor, tokenize
 
@@ -173,6 +173,16 @@ def edge_to_graphviz(e, g, dpe :dict = None, source :callable = None, target :ca
         str(target(e, g)),
         graphviz_properties_to_str(e, dpe)
     ])
+
+def enrich_kwargs(default_d :dict, key :str, **kwargs) -> dict:
+    if default_d:
+        if key in kwargs:
+            for (k, v) in default_d.items():
+                if k not in kwargs[key].keys():
+                    kwargs[key][k] = v
+        else:
+            kwargs[key] = copy.copy(default_d)
+    return kwargs
 
 def to_dot(
     g,

@@ -229,7 +229,7 @@ def dotstr_to_html(s_dot :str, engine = "dot") -> str:
     """
     return run_graphviz(s_dot, engine)
 
-def graph_to_html(g, engine = "dot") -> str:
+def graph_to_html(g, engine = "dot", **kwargs) -> str:
     """
     Convert a Graph to a HTML string.
     Args:
@@ -238,5 +238,5 @@ def graph_to_html(g, engine = "dot") -> str:
     Returns:
         The corresponding HTML string.
     """
-    s_dot = g.to_dot()
+    s_dot = g.to_dot(**kwargs)
     return dotstr_to_html(s_dot, engine)

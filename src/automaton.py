@@ -98,21 +98,20 @@ class Automaton(DirectedGraph):
     def finals(self) -> set:
         return {q for q in vertices(self) if is_final(q, self)}
 
-    def to_dot(self, graphviz_style :str = None) -> str:
-        return to_dot(
-            self,
-            dpv = {
-                "shape" : make_func_property_map(
-                    lambda u: "doublecircle" if self.is_final(u) else "circle"
-                ),
-            },
-            dpe = {
-                "label" : make_func_property_map(
-                    lambda e: graphviz_escape_html(self.label(e))
-                )
-            },
-            graphviz_style=graphviz_style
-        )
+    def to_dot(self, **kwargs) -> str:
+        dpv = {
+            "shape" : make_func_property_map(
+                lambda u: "doublecircle" if self.is_final(u) else "circle"
+            ),
+        }
+        dpe = {
+            "label" : make_func_property_map(
+                lambda e: graphviz_escape_html(self.label(e))
+            )
+        }
+        enrich_kwargs(dpv, "dpv", **kwargs)
+        enrich_kwargs(dpe, "dpe", **kwargs)
+        return to_dot(self, **kwargs)
 
     def delta_word(self, q :int, w :str) -> int:
         for a in w:

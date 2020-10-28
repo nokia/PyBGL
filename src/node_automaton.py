@@ -94,7 +94,9 @@ class NodeAutomaton(Automaton):
     def label(self, e :EdgeDescriptor) -> chr:
         return symbol(target(e, self), self)
 
-    def to_dot(self, graphviz_style :str = None) -> str:
+    def to_dot(self, **kwargs) -> str:
+        for k in ["dpv", "dpe"]:
+            kwargs.pop(k, None)
         return to_dot(
             self,
             dpv = {
@@ -105,7 +107,7 @@ class NodeAutomaton(Automaton):
                     lambda u: "^" if self.is_initial(u) else self.symbol(u)
                 )
             },
-            graphviz_style=graphviz_style
+            **kwargs
         )
 
 def add_vertex(a :chr, g :NodeAutomaton) -> int:

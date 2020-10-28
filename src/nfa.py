@@ -138,34 +138,26 @@ class Nfa(DirectedGraph):
     def is_final(self, q :int) -> bool:
         return self.pmap_final[q]
 
-    def vertex_to_graphviz(self, q :int) -> str:
-        return "%s [shape=\"%s\"]" % (
-            q,
-            "doublecircle" if self.is_final(q) else "circle"
+    def to_dot(self, **kwargs):
+        for k in ["dpv", "dpe"]:
+            kwargs.pop(k, None)
+        return to_dot(
+            self,
+            dpv = {
+                "shape" : make_func_property_map(
+                    lambda u: "doublecircle" if self.is_final(u) else "circle"
+                ),
+            },
+            dpe = {
+                "label" : make_func_property_map(
+                    lambda e: (
+                        "<i>\u03b5</i>" if self.label(e) == self.epsilon
+                        else graphviz_escape_html(self.label(e))
+                    )
+                )
+            },
+            **kwargs
         )
-
-    def edge_to_graphviz(self, e :EdgeDescriptor) -> str:
-        l = label(e, self)
-        if l == self.epsilon:
-            l = "<i>\u03b5</i>"
-        return "%s %s %s [label=<%s>]" % (
-            source(e, self),
-            graphviz_arc(self),
-            target(e, self),
-            l
-        )
-
-    def to_dot(self, graphviz_style :str = None) -> str:
-        if graphviz_style == None:
-            graphviz_style = default_graphviz_style()
-        return "%(type)s G {  %(style)s  %(vertices)s%(sep1)s  %(edges)s%(sep2)s\n}" % {
-            "style"    : graphviz_style,
-            "type"     : graphviz_type(self),
-            "vertices" : ";\n  ".join(["  %s" % self.vertex_to_graphviz(u) for u in vertices(self)]),
-            "sep1"     : ";" if num_vertices(self) else "",
-            "edges"    : ";\n  ".join(["  %s" % self.edge_to_graphviz(e)   for e in edges(self)]),
-            "sep2"     : ";" if num_edges(self) else "",
-        }
 
     def accepts(self, w) -> True:
         return any(is_final(q, self) for q in delta_word(w, self))

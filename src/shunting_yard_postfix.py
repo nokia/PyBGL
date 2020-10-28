@@ -283,7 +283,7 @@ def shunting_yard_postfix(
 
 from collections        import defaultdict
 from pybgl.graph        import DirectedGraph, add_edge
-from pybgl.graph_dp     import GraphDp
+from pybgl.graphviz     import to_dot
 from pybgl.property_map import (
     ReadWritePropertyMap, make_assoc_property_map, make_func_property_map
 )
@@ -329,15 +329,17 @@ class Ast(DirectedGraph):
         self.pmap_vlabel[u] = a
         return u
 
-    def to_dot(self):
-        return GraphDp(
+    def to_dot(self, **kwargs):
+        kwargs.pop("dpv", None)
+        return to_dot(
             self,
             dpv = {
                 "label" : make_func_property_map(
                     lambda u: "%s %s" % (u, self.pmap_vlabel[u])
                 )
-            }
-        ).to_dot()
+            },
+            **kwargs
+        )
 
 class RpnDequeAst(RpnDequeOperation):
     """
