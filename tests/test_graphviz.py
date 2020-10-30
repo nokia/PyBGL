@@ -7,7 +7,11 @@ __email__      = "marc-olivier.buob@nokia-bell-labs.com"
 __copyright__  = "Copyright (C) 2020, Nokia"
 __license__    = "BSD-3"
 
-from pybgl.graphviz import graphviz_escape_html
+from pybgl.graph    import *
+from pybgl.graph_dp import GraphDp
+from pybgl.graphviz import graphviz_escape_html, graph_to_html
+from pybgl.html     import html
+from pybgl.ipynb    import in_ipynb, ipynb_display_graph
 
 def test_graphviz_escape_html():
     assert graphviz_escape_html("<table><tr><td>foo</td></tr></table>") == "<table><tr><td>foo</td></tr></table>"
@@ -22,3 +26,107 @@ def test_graphviz_escape_html():
     assert graphviz_escape_html("}") == "&#125;"
     assert graphviz_escape_html("<foo>") == "&#60;foo&#62;"
     assert graphviz_escape_html("<b>foo</b><bar>") == "<b>foo</b>&#60;bar&#62;"
+
+def test_graph_to_html():
+    g = DirectedGraph(2)
+    (e, _) = add_edge(0, 1, g)
+    shtml = graph_to_html(g)
+    if in_ipynb():
+        ipynb_display_graph(g)
+
+def make_graph(G):
+    g = G(10)
+    for u in vertices(g):
+        for v in vertices(g):
+            if u < v < u + 3:
+                add_edge(u, v, g)
+    return g
+
+def test_graph_to_html_with_pmaps():
+    # Configure theme
+
+    GraphvizStyle.set_fg_color("grey")
+    GraphvizStyle.set_bg_color("transparent")
+    display_graph = ipynb_display_graph
+
+    from pybgl.graph_dp     import GraphDp
+    from pybgl.property_map import make_func_property_map
+
+    def vertex_filter(u):
+        return u < 5
+
+    def edge_filter(e, g, vertex_filter):
+        return vertex_filter(source(e, g)) and vertex_filter(target(e, g))
+
+    for G in [DirectedGraph, UndirectedGraph]:
+        html(str(G))
+        g = make_graph(G)
+
+        # Graph configuration display
+        dv = {"color" : "purple"}
+        de = {"color" : "red"}
+        dpv = {
+            "fontcolor" : make_func_property_map(
+                lambda e: "cyan" if e % 2 else "orange"
+            )
+        }
+        dpe = {
+            "fontcolor" : make_func_property_map(
+                lambda e: "blue" if source(e, g) % 2 else "red"
+            ),
+            "label" : make_func_property_map(
+                lambda e: f"({source(e, g)}, {target(e, g)})"
+            )
+        }
+
+        # Choose view
+        # Omit vs (resp. es) to iterate over all vertices (resp. edges)
+        vs = [u for u in vertices(g) if vertex_filter(u)]
+        es = [e for e in edges(g)    if edge_filter(e, g, vertex_filter)]
+
+        # Method1: call helper (ipynb_display_graph, graph_to_html)
+        shtml = graph_to_html(g, dpv=dpv, dpe=dpe, dv=dv, de=de, vs=vs, es=es)
+        if in_ipynb():
+            ipynb_display_graph(g, dpv=dpv, dpe=dpe, dv=dv, de=de, vs=vs, es=es)
+
+        # Method2: use GraphDp. This offers the opportunity to export the
+        # displayed graph to other export formats.
+        gdp = GraphDp(g, dpv=dpv, dpe=dpe, dv=dv, de=de)
+
+        # These two commands have the same outcome
+        shtml = graph_to_html(gdp, vs=vs, es=es)
+        shtml = graph_to_html(gdp, dpv=dpv, dpe=dpe, dv=dv, de=de, vs=vs, es=es)
+
+        if in_ipynb():
+            # These two commands have the same outcome
+            ipynb_display_graph(gdp, vs=vs, es=es)
+            ipynb_display_graph(gdp, dpv=dpv, dpe=dpe, dv=dv, de=de, vs=vs, es=es)
+
+def test_graph_to_html_with_html_sequences():
+    from collections        import defaultdict
+    from pybgl.property_map import make_assoc_property_map
+
+    g = DirectedGraph(2)
+    (e, _) = add_edge(0, 1, g)
+    pmap_vlabel = make_assoc_property_map(defaultdict(str))
+    pmap_elabel = make_assoc_property_map(defaultdict(str))
+    gdp = GraphDp(
+        g,
+        dpv = {"label" : pmap_vlabel},
+        dpe = {"label" : pmap_elabel}
+    )
+
+    for label in [
+        "<b>foo</b>", "<foo>", "<", ">",
+        "<b>foo</b><bar>",
+        "<bar><b>foo</b>",
+        "<font color='red'><b>foo</b></font>",
+        # NB: foo.png must exists + graphviz imposes <img/> not <img>
+        #"<table><tr><td><img src='foo.png'/></td></tr></table>",
+    ]:
+        print(f"{label} --> {graphviz_escape_html(label)}")
+        pmap_vlabel[0] = pmap_vlabel[1] = pmap_elabel[e] = label
+        shtml = graph_to_html(gdp)
+        if in_ipynb():
+            html(shtml)
+            ipynb_display_graph(gdp)

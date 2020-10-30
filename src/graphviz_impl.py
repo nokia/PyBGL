@@ -88,9 +88,13 @@ GRAPHVIZ_SUPPORTED_HTML_TAGS = {
 
 GRAPHVIZ_HTML_TOKENIZER = re.compile(
     "|".join(
-        f"<\\s*{tag}\\s*>"
+        "<\\s*%s%s\\s*>" % (
+            tag,
+            "(\\s[^>]*)?" if tag[0] != "/" else ""
+        )
         for tag in GRAPHVIZ_SUPPORTED_HTML_TAGS
-    )
+    ),
+    re.IGNORECASE
 )
 
 # The following characters makes crash graphviz when involved in a <label>,
