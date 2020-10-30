@@ -7,8 +7,8 @@ __email__      = "marc-olivier.buob@nokia-bell-labs.com"
 __copyright__  = "Copyright (C) 2020, Nokia"
 __license__    = "BSD-3"
 
-from pybgl.ipynb import in_ipynb, ipynb_display_graph
-from pybgl.nfa import (
+from pybgl.ipynb    import in_ipynb, ipynb_display_graph
+from pybgl.nfa      import (
     Nfa, accepts, add_edge, initials, finals, delta, set_final
 )
 from pybgl.thompson_compile_nfa import (
@@ -235,3 +235,9 @@ def test_thompson_compile_nfa_bracket_repetitions():
     for w in ["", "xxxx", "aaa"]:
         assert accepts(w, nfa) == False
 
+def test_thompson_compile_nfa_escaped_operators():
+    regexp = r"\|\.\*\+\(\)\{\}\[\]aa"
+    (nfa, q0, f) = thompson_compile_nfa(regexp)
+    accepts(regexp.replace("\\", ""), nfa)
+    if in_ipynb():
+        ipynb_display_graph(nfa)
