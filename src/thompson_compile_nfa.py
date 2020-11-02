@@ -164,7 +164,7 @@ def parse_repetition(s :str) -> tuple:
     r = re.compile(r"{\s*(\d+)\s*}")
     match = r.match(s)
     if match:
-        m = n = match.group(1)
+        m = n = int(match.group(1))
     else:
         r = re.compile(r"{\s*(\d*)\s*,\s*(\d*)\s*}")
         match = r.match(s)

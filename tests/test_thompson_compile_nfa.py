@@ -235,6 +235,9 @@ def test_thompson_compile_nfa_bracket_repetitions():
     for w in ["", "xxxx", "aaa"]:
         assert accepts(w, nfa) == False
 
+    (nfa, q0, f) = thompson_compile_nfa("x{3}")
+    assert accepts("xxx", nfa)
+
 def test_thompson_compile_nfa_escaped_operators():
     regexp = r"\|\.\*\+\(\)\{\}\[\]aa"
     (nfa, q0, f) = thompson_compile_nfa(regexp)
