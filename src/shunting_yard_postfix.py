@@ -245,7 +245,7 @@ def shunting_yard_postfix(
 
 from collections        import defaultdict
 from pybgl.graph        import DirectedGraph, add_edge
-from pybgl.graphviz     import to_dot
+from pybgl.graphviz     import enrich_kwargs, to_dot
 from pybgl.property_map import (
     ReadWritePropertyMap, make_assoc_property_map, make_func_property_map
 )
