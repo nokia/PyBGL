@@ -14,7 +14,8 @@ __copyright__  = "Copyright (C) 2020, Nokia"
 __license__    = "BSD-3"
 
 import re
-from collections import deque, namedtuple
+from collections    import deque, namedtuple
+from .tokenize      import TokenizeVisitor, tokenize as _tokenize
 
 (RIGHT, LEFT) = range(2)
 
@@ -24,11 +25,6 @@ Op = namedtuple(
     "Op", ["cardinality", "precedence", "associativity"]
 )
 
-#------------------------------------------------------------------------
-# Tokenization (token = atomic sequence of characters)
-#------------------------------------------------------------------------
-
-# See https://docs.python.org/3/library/re.html#writing-a-tokenizer
 def re_escape(s :chr) -> str:
     return "".join(
         a if a not in "|[]{}.+*?()^$\\"
@@ -36,51 +32,9 @@ def re_escape(s :chr) -> str:
         for a in s
     )
 
-def tokenize(
-    expression        :str,
-    re_operators      :set,
-    operator_to_token :callable = None,
-    operand_to_token  :callable = None
-) -> iter:
-    """
-    Tokenize an input string.
-    Args:
-        expression: `str` containing the input expression to tokenize.
-        re_operators: `set(str)` storing the regular expression to recognize operators.
-            Each string must be compatible with `re.compile`.
-            Examples: `RE_OPERATORS_ALG`, `RE_OPERATORS_RE`.
-        operator_to_token: `None` or Callback used to convert an operator to a dedicated type.
-            Can be used to determine whether we process the unary or binary version
-            of an operator (see e.g. `alg_operator_to_token`)
-        operand_to_token; `None` or Callback used to process an operand (strip, cast, etc.)
-    Returns:
-        An iterator over the tokenized expression.
-    """
-    if not operator_to_token:
-        operator_to_token = lambda prev_token, prev_is_operator, operator: operator
-    if not operand_to_token:
-        operand_to_token = lambda operand: operand
-
-    pattern = "|".join(re_operator for re_operator in set(re_operators))
-    tokenizer = re.compile(pattern)
-    start = 0
-    (prev_token, prev_is_operator) = (None, True)
-    for match in tokenizer.finditer(expression):
-        operand = expression[start:match.start()]
-        if operand:
-            yield operand_to_token(operand)
-            (prev_token, prev_is_operator) = (operand, False)
-        operator = match.group(0)
-        if operator:
-            yield operator_to_token(prev_token, prev_is_operator, operator)
-            (prev_token, prev_is_operator) = (operator, True)
-        start = match.end()
-    operand = expression[start:]
-    if operand:
-        yield operand_to_token(operand)
-
 #------------------------------------------------------------------------
 # Algebra tokenization
+# See https://docs.python.org/3/library/re.html#writing-a-tokenizer
 #------------------------------------------------------------------------
 
 MAP_OPERATORS_ALG = {
@@ -100,24 +54,29 @@ RE_OPERATORS_ALG = [
     for op in list(MAP_OPERATORS_ALG.keys()) + list("()")
 ]
 
-def alg_operator_to_token(prev_token :str, prev_is_operator :bool, operator :str) -> str:
-    if prev_is_operator and prev_token != ")" and operator != "(":
-        if   operator == "+": return "u+"
-        elif operator == "-": return "u-"
-        else: raise RuntimeError(f"Invalid unary operator '{operator}'")
-    else:
-        return operator
-
-def alg_operand_to_token(operand):
-    return float(operand.strip())
+class AlgTokenizeVisitor(TokenizeVisitor):
+    def __init__(self, expression :list = None, cat :chr = "."):
+        self.expression = list() if expression is None else expression
+        self.prev_is_operator = True
+    def on_unmatched(self, unmatched :str, start :int, end :int, s :str):
+        self.expression.append(float(unmatched))
+        self.prev_is_operator = False
+    def on_matched(self, matched :str, start :int, end :int, s :str):
+        operator = matched
+        if self.prev_is_operator and matched not in {"(", ")"}:
+            if   matched == "+": operator = "u+"
+            elif matched == "-": operator = "u-"
+            else: raise RuntimeError(f"Invalid unary matched '{matched}'")
+        self.expression.append(operator)
+        self.prev_is_operator = matched != ")"
 
 def tokenizer_alg(expression :str) -> iter:
-    return tokenize(
-        "".join(a for a in expression if not a.isspace()),
-        RE_OPERATORS_ALG,
-        operator_to_token = alg_operator_to_token,
-        operand_to_token = alg_operand_to_token
-    )
+    pattern = "|".join(RE_OPERATORS_ALG)
+    tokenizer = re.compile(pattern)
+    expression = "".join(a for a in expression if not a.isspace())
+    vis = AlgTokenizeVisitor()
+    _tokenize(tokenizer, expression, vis)
+    return vis.expression
 
 #------------------------------------------------------------------------
 # Regexp tokenization
@@ -145,7 +104,28 @@ RE_OPERATORS_RE = [
     "(\\\\[abdDfnrsStvwW*+?.|\[\](){}])",
 ]
 
-def catify(expression :str, cat :str = ".") -> iter:
+class CatifyTokenizeVisitor(TokenizeVisitor):
+    def __init__(self, expression :list = None, cat :chr = "."):
+        self.expression = list() if expression is None else expression
+        self.prev_needs_cat = False
+        self.cat = cat
+    def on_unmatched(self, unmatched :str, start :int, end :int, s :str):
+        if self.cat is not None:
+            for a in unmatched:
+                if self.prev_needs_cat:
+                    self.expression.append(self.cat)
+                self.expression.append(a)
+                self.prev_needs_cat = True
+        else:
+            self.expression.append(unmatched)
+            self.prev_needs_cat = True
+    def on_matched(self, matched :str, start :int, end :int, s :str):
+        if self.cat is not None and self.prev_needs_cat and matched[0] in {"[", "(", "\\"}:
+            self.expression.append(self.cat)
+        self.expression.append(matched)
+        self.prev_needs_cat = (matched not in {"(", "|"})
+
+def catify(s :str, cat :str = ".") -> iter:
     """
     Add concatenation operator in an input regular expression.
     Args:
@@ -157,43 +137,17 @@ def catify(expression :str, cat :str = ".") -> iter:
         The `iter` corresponding to `expression` by adding `cat`
         in the appropriate places.
     """
-    is_binary = lambda o: o == "|"
-
     pattern = "|".join(re_operator for re_operator in set(RE_OPERATORS_RE))
     tokenizer = re.compile(pattern)
+    vis = CatifyTokenizeVisitor(cat = cat)
+    _tokenize(tokenizer, s, vis = vis)
+    return vis.expression
 
-    start = 0
-    prev_needs_dot = False
-    for match in tokenizer.finditer(expression):
-        operand = expression[start:match.start()]
-        if operand:
-            for a in operand:
-                if prev_needs_dot:
-                    yield cat
-                yield a
-                prev_needs_dot = True
-        operator = match.group(0)
-        if operator:
-            if (operator == "(" or operator[0] == "\\") and prev_needs_dot:
-                yield cat
-            yield operator
-            prev_needs_dot = not is_binary(operator) and operator != "("
-        start = match.end()
-    operand = expression[start:]
-    if operand:
-        for a in operand:
-            if prev_needs_dot:
-                yield cat
-            yield a
-            prev_needs_dot = True
-
-def tokenizer_re(expression :str, cat = ".") -> iter:
-    if cat:
-        expression = "".join(catify(expression, cat))
-    return tokenize(expression, RE_OPERATORS_RE)
+def tokenizer_re(expression :str, cat :str = ".") -> iter:
+    return catify(expression, cat = cat)
 
 #------------------------------------------------------------------------
-# Shutting Yard algorithm
+# Shutting Yard output sinks
 #------------------------------------------------------------------------
 
 class DefaultShuntingYardVisitor:
@@ -205,6 +159,10 @@ class DebugShuntingYardVisitor(DefaultShuntingYardVisitor):
     def on_pop_operator(self, o :str):  print(f"pop op {o}")
     def on_push_operator(self, o :str): print(f"push op {o}")
     def on_push_output(self, a :str):   print(f"push out {a}")
+
+#------------------------------------------------------------------------
+# Shutting Yard algorithm
+#------------------------------------------------------------------------
 
 def shunting_yard_postfix(
     expression    :iter,
@@ -278,7 +236,11 @@ def shunting_yard_postfix(
     return output
 
 #------------------------------------------------------------------------
-# RPN specialized queues
+# Shunting Yard concrete examples.
+# - shunting_yard_compute computes the result of an algebraic expression.
+# - shunting_yard_ast builds the AST of an arbitrary expression.
+# These two examples rely on specialized sinks used to translate
+# on-the-fly the RPN expression returned by shunting_yard_postfix.
 #------------------------------------------------------------------------
 
 from collections        import defaultdict
@@ -310,7 +272,6 @@ class RpnDequeOperation(deque):
                 vs.insert(0, v)
             u = self.on_operation(a, op, u, vs)
         super().append(u)
-
 
 class Ast(DirectedGraph):
     """

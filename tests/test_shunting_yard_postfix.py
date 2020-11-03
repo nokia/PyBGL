@@ -48,11 +48,6 @@ def test_re_escape():
     assert re_escape(")") == "\\)"
     assert re_escape("a") == "a"
 
-def test_tokenizer_re():
-    assert list(tokenizer_re("11.2.(3+.4*.5?)", cat=None)) == [
-        "11", ".", "2", ".", "(", "3", "+", ".", "4", "*", ".", "5", "?", ")"
-    ]
-
 def test_tokenizer_re_char_repetitions():
     # Explicit concatenation
     assert list(tokenizer_re("x{1,3}.y", cat=None)) == ["x", "{1,3}", ".", "y"]
@@ -75,44 +70,61 @@ def test_tokenizer_re_escape_sequence():
 
 def test_tokenizer_re_classes():
     # Explicit concatenation
-    assert list(tokenizer_re("a[0-9].b",  cat=None)) == ["a", "[0-9]",  ".", "b"]
-    assert list(tokenizer_re("a[^0-9].b", cat=None)) == ["a", "[^0-9]", ".", "b"]
-    assert list(tokenizer_re("a[(].b",    cat=None)) == ["a", "[(]",    ".", "b"]
-    assert list(tokenizer_re("a[\\]].b",  cat=None)) == ["a", "[\\]]",  ".", "b"]
+    assert list(tokenizer_re("a.[0-9].b",  cat=None)) == ["a", ".", "[0-9]",  ".", "b"]
+    assert list(tokenizer_re("a.[^0-9].b", cat=None)) == ["a", ".", "[^0-9]", ".", "b"]
+    assert list(tokenizer_re("a.[(].b",    cat=None)) == ["a", ".", "[(]",    ".", "b"]
+    assert list(tokenizer_re("a.[\\]].b",  cat=None)) == ["a", ".", "[\\]]",  ".", "b"]
     # Implicit concatenation
-    assert list(tokenizer_re("a[0-9]b" )) == ["a", "[0-9]",  ".", "b"]
-    assert list(tokenizer_re("a[^0-9]b")) == ["a", "[^0-9]", ".", "b"]
-    assert list(tokenizer_re("a[(]b"   )) == ["a", "[(]",    ".", "b"]
-    assert list(tokenizer_re("a[\\]]b" )) == ["a", "[\\]]",  ".", "b"]
+    assert list(tokenizer_re("a[0-9]b" )) == ["a", ".", "[0-9]",  ".", "b"]
+    assert list(tokenizer_re("a[^0-9]b")) == ["a", ".", "[^0-9]", ".", "b"]
+    assert list(tokenizer_re("a[(]b"   )) == ["a", ".", "[(]",    ".", "b"]
+    assert list(tokenizer_re("a[\\]]b" )) == ["a", ".", "[\\]]",  ".", "b"]
 
 def test_tokenizer_re_parenthesis():
-    assert list(tokenizer_re("(a.b.c)+", cat=None)) == ["(", "a", ".", "b", ".", "c", ")", "+"]
-    assert list(tokenizer_re("(abc)+"))             == ["(", "a", ".", "b", ".", "c", ")", "+"]
-
-def test_shunting_yard_postfix_alg():
-    assert list(shunting_yard_postfix(tokenizer_alg("12+3*4+(5-6)/7"), MAP_OPERATORS_ALG)) == [
-        12, 3, 4, "*", "+", 5, 6, "-", 7, "/", "+"
+    assert list(tokenizer_re("(a.b.c)+", cat=None)) == [
+        "(", "a", ".", "b", ".", "c", ")", "+"
+    ]
+    assert list(tokenizer_re("(abc)+")) == [
+        "(", "a", ".", "b", ".", "c", ")", "+"
     ]
 
-def test_shunting_yard_postfix_re():
-    tokenized = "".join(tokenizer_re("(12)?(345)*?(67)+89"))
-    expected = ['1', '2', '.', '?', '3', '4', '.', '5', '.', '*', '?', '.', '6', '7', '.', '+', '.', '8', '.', '9', '.']
-    obtained = list(shunting_yard_postfix(tokenized, MAP_OPERATORS_RE))
-    assert obtained == expected
+def test_tokenizer_re_explicit():
+    assert list(tokenizer_re("11.2.(3+.4*.5?)", cat=None)) == [
+        "11", ".", "2", ".", "(", "3", "+", ".", "4", "*", ".", "5", "?", ")"
+    ]
 
-def test_catify():
+def test_tokenizer_re_implicit():
     map_input_expected = {
+
         "123?(4|5)*67" : "1.2.3?.(4|5)*.6.7",
         "(1?2)*?3+4"   : "(1?.2)*?.3+.4",
         "a\\dx"        : "a.\\d.x",
         "a\\d+x"       : "a.\\d+.x",
-        "a[0-9]x"      : "a[0-9].x",
-        "a[0-9]+x"     : "a[0-9]+.x",
+        "a[0-9]x"      : "a.[0-9].x",
+        "a[0-9]+x"     : "a.[0-9]+.x",
         "a{1,2}+x"     : "a{1,2}+.x",
     }
     for (regexp, expected) in map_input_expected.items():
-        obtained = "".join(catify(regexp))
+        obtained = "".join(tokenizer_re(regexp))
         assert obtained == expected
+
+def test_shunting_yard_postfix_alg():
+    assert list(shunting_yard_postfix(
+        tokenizer_alg("12+3*4+(5-6)/7"),
+        MAP_OPERATORS_ALG
+    )) == [
+        12, 3, 4, "*", "+", 5, 6, "-", 7, "/", "+"
+    ]
+
+def test_shunting_yard_postfix_re():
+    assert list(shunting_yard_postfix(
+        tokenizer_re("(12)?(345)*?(67)+89"),
+        MAP_OPERATORS_RE
+    )) == [
+        '1', '2', '.', '?', '3', '4', '.', '5', '.',
+        '*', '?', '.', '6', '7', '.', '+', '.', '8',
+        '.', '9', '.'
+    ]
 
 def test_rpn_queue_alg():
     assert list(shunting_yard_postfix(
