@@ -27,8 +27,11 @@ def tokenize(tokenizer :re.Pattern, s :str, vis :TokenizeVisitor = None):
     for match in tokenizer.finditer(s):
         end = match.start()
         unmatched = s[start:end]
-        vis.on_unmatched(unmatched, start, end, s)
-        vis.on_matched(match.group(0), match.start(), match.end(), s)
+        if unmatched:
+            vis.on_unmatched(unmatched, start, end, s)
+        matched = match.group(0)
+        if matched:
+            vis.on_matched(matched, match.start(), match.end(), s)
         start = match.end()
     remaining = s[start:]
     if remaining:
