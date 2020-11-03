@@ -70,15 +70,15 @@ def test_tokenizer_re_escape_sequence():
 
 def test_tokenizer_re_classes():
     # Explicit concatenation
-    assert list(tokenizer_re("a.[0-9].b",  cat=None)) == ["a", ".", "[0-9]",  ".", "b"]
-    assert list(tokenizer_re("a.[^0-9].b", cat=None)) == ["a", ".", "[^0-9]", ".", "b"]
-    assert list(tokenizer_re("a.[(].b",    cat=None)) == ["a", ".", "[(]",    ".", "b"]
-    assert list(tokenizer_re("a.[\\]].b",  cat=None)) == ["a", ".", "[\\]]",  ".", "b"]
+    assert list(tokenizer_re("a.[0-9].b",   cat=None)) == ["a", ".", "[0-9]",  ".", "b"]
+    assert list(tokenizer_re("a.[^0-9].b",  cat=None)) == ["a", ".", "[^0-9]", ".", "b"]
+    assert list(tokenizer_re("a.[(].b",     cat=None)) == ["a", ".", "[(]",    ".", "b"]
+    assert list(tokenizer_re("[a-z].[0-9]", cat=None)) == ["[a-z]", ".", "[0-9]"]
     # Implicit concatenation
     assert list(tokenizer_re("a[0-9]b" )) == ["a", ".", "[0-9]",  ".", "b"]
     assert list(tokenizer_re("a[^0-9]b")) == ["a", ".", "[^0-9]", ".", "b"]
     assert list(tokenizer_re("a[(]b"   )) == ["a", ".", "[(]",    ".", "b"]
-    assert list(tokenizer_re("a[\\]]b" )) == ["a", ".", "[\\]]",  ".", "b"]
+    assert list(tokenizer_re("[a-z][0-9]")) == ["[a-z]", ".", "[0-9]"]
 
 def test_tokenizer_re_parenthesis():
     assert list(tokenizer_re("(a.b.c)+", cat=None)) == [

@@ -99,7 +99,8 @@ RE_OPERATORS_RE = [
     # Extra repetition operators
     "\\{\\s*\\d+(\\s*,)?(\\s*\\d+)?\\s*\\}",
     # Character classes
-    "\\[.*\\]",
+    #"\\[.*\\]",
+    '\\[([^]])*\\]',
     # Escape sequences (not exhaustive)
     "(\\\\[abdDfnrsStvwW*+?.|\[\](){}])",
 ]
