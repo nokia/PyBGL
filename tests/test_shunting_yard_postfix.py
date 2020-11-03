@@ -145,6 +145,8 @@ def test_rpn_deque_ast():
     assert num_edges(ast) == 10
     [root] = ret
     assert root == 10
+    from pybgl.graphviz import graph_to_html
+    graph_to_html(ast)
 
 def test_shunting_yard_ast():
     tokenized = tokenizer_re("(a?b)*?c+d")
