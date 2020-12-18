@@ -37,6 +37,7 @@ class GraphvizStyle(metaclass=Singleton):
     node = {
         "color"     : "black",
         "fontcolor" : "black",
+        "fillcolor" : "transparent",
         "shape"     : "circle",
     }
     edge = {
