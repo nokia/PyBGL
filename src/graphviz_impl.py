@@ -143,8 +143,9 @@ def graphviz_properties_to_str(x, dpx :dict) -> str:
 def default_graphviz_style() -> str:
     return str(GraphvizStyle())
 
-def vertex_to_graphviz(u :int, g, dpv :dict = None) -> str:
-    return " ".join([str(u), graphviz_properties_to_str(u, dpv)])
+def vertex_to_graphviz(u :int, g, dpv :dict = None, vertex_to_str :callable = None) -> str:
+    if not vertex_to_str: vertex_to_str = str
+    return " ".join([vertex_to_str(u), graphviz_properties_to_str(u, dpv)])
 
 def graphviz_arc(g, is_directed :bool = None) -> str:
     if is_directed is None:
@@ -166,17 +167,26 @@ def graphviz_dx_to_dot(prefix :str, dx :dict) -> str:
         ])
     ) if dx else ""
 
-def edge_to_graphviz(e, g, dpe :dict = None, source :callable = None, target :callable = None, is_directed :bool = None) -> str:
+def edge_to_graphviz(
+    e,
+    g, dpe :dict = None,
+    source :callable = None,
+    target :callable = None,
+    is_directed :bool = None,
+    vertex_to_str :callable = None
+) -> str:
     if source is None:
         source = lambda e, g: g.source(e)
     if target is None:
         target = lambda e, g: g.target(e)
     if is_directed is None:
         is_directed = lambda g: g.is_directed()
+    if vertex_to_str is None:
+        vertex_to_str = str
     return " ".join([
-        str(source(e, g)),
+        vertex_to_str(source(e, g)),
         graphviz_arc(g, is_directed),
-        str(target(e, g)),
+        vertex_to_str(target(e, g)),
         graphviz_properties_to_str(e, dpe)
     ])
 
@@ -202,7 +212,8 @@ def to_dot(
     graphviz_style  :str = None,
     source          :callable = None,
     target          :callable = None,
-    is_directed     :bool = None
+    is_directed     :bool = None,
+    vertex_to_str   :callable = None
 ) -> str:
     if vs             is None: vs     = (u for u in g.vertices())
     if es             is None: es     = (e for e in g.edges())
@@ -210,6 +221,7 @@ def to_dot(
     if target         is None: target = lambda e, g: g.target(e)
     if is_directed    is None: is_directed = g.directed
     if graphviz_style is None: graphviz_style = default_graphviz_style()
+    if vertex_to_str  is None: vertex_to_str = str
 
     dg = graphviz_dx_to_dot("graph", dg)
     dv = graphviz_dx_to_dot("node",  dv)
@@ -220,8 +232,11 @@ def to_dot(
         + ([dv] if dv else [])
         + ([de] if de else [])
         + ([extra_style] if extra_style else [])
-        + [vertex_to_graphviz(u, g, dpv) for u in vs]
-        + [edge_to_graphviz(e, g, dpe, source, target, is_directed) for e in es]
+        + [vertex_to_graphviz(u, g, dpv, vertex_to_str) for u in vs]
+        + [
+            edge_to_graphviz(e, g, dpe, source, target, is_directed, vertex_to_str)
+            for e in es
+        ]
     )
 
     return "%(type)s G {%(instructions)s}" % {
