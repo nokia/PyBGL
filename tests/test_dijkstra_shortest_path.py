@@ -7,12 +7,19 @@
 import sys
 from collections import defaultdict
 
-from pybgl.graph import \
-    DirectedGraph, UndirectedGraph, \
+from pybgl.graph import (
+    DirectedGraph, EdgeDescriptor, UndirectedGraph,
     add_edge, add_vertex, edges, source, target, vertices
-from pybgl.property_map import \
-    ReadWritePropertyMap, make_assoc_property_map
-from pybgl.dijkstra_shortest_paths import dijkstra_shortest_paths
+)
+from pybgl.ipynb import in_ipynb, ipynb_display_graph
+from pybgl.property_map import (
+    ReadWritePropertyMap,
+    make_assoc_property_map, make_func_property_map
+)
+from pybgl.dijkstra_shortest_paths import (
+    DijkstraVisitor,
+    dijkstra_shortest_path, dijkstra_shortest_paths, make_path
+)
 
 LINKS = [
     (0, 1, 1),
@@ -147,6 +154,22 @@ def test_parallel_edges():
         v : w
     }
 
+class DebugVisitor(DijkstraVisitor):
+    def initialize_vertex(self, u :int, g :DirectedGraph):
+        print("initialize_vertex", u, g)
+    def examine_vertex(self, u :int, g :DirectedGraph):
+        print("examine_vertex", u, g)
+    def examine_edge(self, e :EdgeDescriptor, g :DirectedGraph):
+        print("examine_edge", e, g)
+    def discover_vertex(self, u :int, g :DirectedGraph):
+        print("discover_vertex", u, g)
+    def edge_relaxed(self, e :EdgeDescriptor, g :DirectedGraph):
+        print("edge_relaxed", e, g)
+    def edge_not_relaxed(self, e :EdgeDescriptor, g :DirectedGraph):
+        print("edge_not_relaxed", e, g)
+    def finish_vertex(self, u :int, g :DirectedGraph):
+        print("finish_vertex", u, g)
+
 def test_directed_graph(links :list = LINKS):
     map_eweight = dict()
     pmap_eweight = make_assoc_property_map(map_eweight)
@@ -158,7 +181,8 @@ def test_directed_graph(links :list = LINKS):
         g, 0,
         pmap_eweight,
         make_assoc_property_map(map_vpreds),
-        make_assoc_property_map(map_vdist)
+        make_assoc_property_map(map_vdist),
+        vis = DebugVisitor()
     )
 
     infty = sys.maxsize
@@ -232,4 +256,24 @@ def test_directed_symmetric_graph(links :list = LINKS):
         10 : 3
     }
 
+def test_dijkstra_shortest_path():
+    # Prepare graph
+    map_eweight = defaultdict(int)
+    pmap_eweight = make_assoc_property_map(map_eweight)
+    g = make_graph(LINKS, pmap_eweight, build_reverse_edge = False)
 
+    # Dijkstra, stopped when vertex 9 is reached
+    map_vpreds = defaultdict(set)
+    map_vdist = defaultdict(int)
+    s = 0
+    t = 9
+    path = dijkstra_shortest_path(
+        g, s, t,
+        make_assoc_property_map(map_eweight),
+        make_assoc_property_map(map_vpreds),
+        make_assoc_property_map(map_vdist)
+    )
+    assert [
+        (source(e, g), target(e, g))
+        for e in path
+    ] == [(0, 1), (1, 3), (3, 4), (4, 6), (6, 7), (7, 9)]
