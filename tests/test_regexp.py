@@ -13,7 +13,7 @@ from pybgl.ipynb        import in_ipynb, ipynb_display_graph
 from pybgl.regexp       import compile_nfa, compile_dfa
 
 if in_ipynb():
-    display_graph = ipynb_display_graph if in_ipynb
+    display_graph = ipynb_display_graph
 else:
     display_graph = lambda g: None
 
