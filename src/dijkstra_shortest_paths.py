@@ -49,6 +49,11 @@ class Heap:
     def push(self, item :object):
         heapq.heappush(self._data, (self.key(item), self.index, item))
         self.index += 1
+    def decrease_key(self, item :object):
+        for (i, (key, index, x)) in enumerate(self._data):
+            if item == x:
+                self._data[i] = (self.key(item), index, item)
+                heapq.heapify(self._data)
     def pop(self) -> tuple:
         return heapq.heappop(self._data)[2]
     def __str__(self) -> str:
@@ -113,6 +118,8 @@ def dijkstra_shortest_paths_iteration(
                 heap.push(v) # As v is WHITE, v cannot be in the heap.
                 pmap_vcolor[v] = GRAY
                 vis.discover_vertex(v, g)
+            elif pmap_vcolor[v] == GRAY:
+                heap.decrease_key(v)
             vis.edge_relaxed(e, g)
         elif w == w_sv: # Hence we discover equally-cost shortest paths
             preds_v = pmap_vpreds[v]
@@ -179,7 +186,10 @@ def dijkstra_shortest_paths(
         pmap_vcolor = make_assoc_property_map(color)
 
     # Initialization
-    dijkstra_shortest_paths_initialization(g, s, pmap_vcolor, pmap_vdist, zero, infty, vis)
+    dijkstra_shortest_paths_initialization(
+        g, s, pmap_vcolor,
+        pmap_vdist, zero, infty, vis
+    )
 
     # Iteration
     heap = Heap([s], key = lambda u: pmap_vdist[u])
@@ -226,7 +236,8 @@ def make_dag(
     done = set()
     while to_process:
         es = {e for u in to_process if pmap_vpreds[u] for e in pmap_vpreds[u]}
-        if single_path and es: es = {es.pop()}
+        if single_path and es:
+            es = {es.pop()}
         kept_edges |= es
         predecessors = {source(e, g) for e in es if e not in done}
         done |= to_process

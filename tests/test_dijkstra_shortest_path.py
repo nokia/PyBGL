@@ -22,6 +22,7 @@ from pybgl.dijkstra_shortest_paths import (
 )
 
 LINKS = [
+    # (u, v, weight)
     (0, 1, 1),
     (1, 2, 1),
     (1, 3, 3),
@@ -173,7 +174,7 @@ class DebugVisitor(DijkstraVisitor):
 def test_directed_graph(links :list = LINKS):
     map_eweight = dict()
     pmap_eweight = make_assoc_property_map(map_eweight)
-    g = make_graph(LINKS, pmap_eweight, directed = True, build_reverse_edge = False)
+    g = make_graph(links, pmap_eweight, directed = True, build_reverse_edge = False)
 
     map_vpreds = defaultdict(set)
     map_vdist = dict()
@@ -211,6 +212,35 @@ def test_directed_graph(links :list = LINKS):
         8  : 15,
         9  : 15,
         10 : infty
+    }
+
+def test_decrease_key():
+    g = DirectedGraph(3)
+    (e01, _) = add_edge(0, 1, g)
+    (e02, _) = add_edge(0, 2, g)
+    (e21, _) = add_edge(2, 1, g)
+    map_eweight = {
+        e01 : 9,
+        e02 : 1,
+        e21 : 1,
+    }
+    pmap_eweight = make_assoc_property_map(map_eweight)
+
+    map_vpreds = defaultdict(set)
+    map_vdist = dict()
+    dijkstra_shortest_paths(
+        g, 0,
+        pmap_eweight,
+        make_assoc_property_map(map_vpreds),
+        make_assoc_property_map(map_vdist)
+    )
+
+    assert map_vpreds[1] == {e21}
+    assert map_vpreds[2] == {e02}
+    assert map_vdist == {
+        0  : 0,
+        1  : 2,
+        2  : 1,
     }
 
 def test_directed_symmetric_graph(links :list = LINKS):
@@ -256,11 +286,11 @@ def test_directed_symmetric_graph(links :list = LINKS):
         10 : 3
     }
 
-def test_dijkstra_shortest_path():
+def test_dijkstra_shortest_path(links :list = LINKS):
     # Prepare graph
     map_eweight = defaultdict(int)
     pmap_eweight = make_assoc_property_map(map_eweight)
-    g = make_graph(LINKS, pmap_eweight, build_reverse_edge = False)
+    g = make_graph(links, pmap_eweight, build_reverse_edge = False)
 
     # Dijkstra, stopped when vertex 9 is reached
     map_vpreds = defaultdict(set)
@@ -277,3 +307,4 @@ def test_dijkstra_shortest_path():
         (source(e, g), target(e, g))
         for e in path
     ] == [(0, 1), (1, 3), (3, 4), (4, 6), (6, 7), (7, 9)]
+
