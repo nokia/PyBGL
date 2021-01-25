@@ -274,6 +274,8 @@ def make_path(
 # Optimization to stop Dijkstra iteration once distance from s to t
 #--------------------------------------------------------------------
 
+from pybgl.aggregated_visitor import AggregatedVisitor
+
 class DijkstraStopException(Exception):
     pass
 
@@ -302,12 +304,14 @@ def dijkstra_shortest_path(
     compare      :BinaryPredicate = Less(), # Ignored, see Heap class.
     combine      :BinaryFunction  = ClosedPlus(),
     zero         :int = 0,
-    infty        :int = sys.maxsize
+    infty        :int = sys.maxsize,
+    vis          :DijkstraVisitor = None
 ) -> list:
     """
     Helper to find a single shortest path from s to t.
     """
-    vis = DijkstraTowardsVisitor(t)
+    vis_towards = DijkstraTowardsVisitor(t)
+    vis = AggregatedVisitor([vis, vis_towards]) if vis else vis_towards
     try:
         dijkstra_shortest_paths(
             g, s,
