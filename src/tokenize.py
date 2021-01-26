@@ -20,7 +20,7 @@ class TokenizeVisitor:
     def on_unmatched(self, unmatched :str, start :int, end :int, s :str): pass
     def on_matched(self, matched :str, start :int, end :int, s :str): pass
 
-def tokenize(tokenizer :re.Pattern, s :str, vis :TokenizeVisitor = None):
+def tokenize(tokenizer, s :str, vis :TokenizeVisitor = None):
     if vis is None:
         vis = TokenizeVisitor()
     start = 0
