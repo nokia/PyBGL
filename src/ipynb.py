@@ -26,18 +26,22 @@ def in_ipynb() -> bool:
     except NameError:
         return False
 
+def background_template_html(background_color = None):
+    return "<div style='background-color:%s'>%%s</div>" % background_color if background_color else "%s"
+
 def ipynb_display_graph(g, background_color = None, **kwargs):
     """
     Display a Graph in a Jupyter Notebook.
     """
-    template_html = "<div style='background-color:%s'>%%s</div>" % background_color if background_color else "%s"
+    template_html = background_template_html(background_color)
     html(template_html % dotstr_to_html(g.to_dot(**kwargs)))
 
-def display_svg(svg, filename_svg):
+def display_svg(svg, filename_svg, background_color = None):
     with open(filename_svg, "w") as f:
         print(svg, file = f)
         html("<a href='%s' target='_blank'>View</a>" % filename_svg)
-    html(svg)
+    template_html = background_template_html(background_color)
+    html(template_html % svg)
 
 def ipynb_get_background_color():
     """
