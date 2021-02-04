@@ -31,6 +31,22 @@ class DijkstraVisitor:
     def edge_not_relaxed(self, e :EdgeDescriptor, g :DirectedGraph): pass
     def finish_vertex(self, u :int, g :DirectedGraph): pass
 
+class DijkstraDebugVisitor(DijkstraVisitor):
+    def initialize_vertex(self, u :int, g :DirectedGraph):
+        print(f"initialize_vertex({u})")
+    def examine_vertex(self, u :int, g :DirectedGraph):
+        print(f"examine_vertex({u})")
+    def examine_edge(self, e :EdgeDescriptor, g :DirectedGraph):
+        print(f"examine_edge({e} {e.m_distinguisher})")
+    def discover_vertex(self, u :int, g :DirectedGraph):
+        print(f"discover_vertex({u})")
+    def edge_relaxed(self, e :EdgeDescriptor, g :DirectedGraph):
+        print(f"edge_relaxed({e}  {e.m_distinguisher})")
+    def edge_not_relaxed(self, e :EdgeDescriptor, g :DirectedGraph):
+        print(f"edge_not_relaxed({e}  {e.m_distinguisher})")
+    def finish_vertex(self, u :int, g :DirectedGraph):
+        print(f"finish_vertex({u})")
+
 # TODO How to pass Compare???
 # https://stackoverflow.com/questions/8875706/heapq-with-custom-compare-predicate
 class Heap:
@@ -289,7 +305,7 @@ class DijkstraTowardsVisitor(DijkstraVisitor):
     """
     def __init__(self, t :int):
         self.t = t
-    def discover_vertex(self, u :int, g :DirectedGraph):
+    def finish_vertex(self, u :int, g :DirectedGraph):
         if u == self.t:
             raise DijkstraStopException(u)
 
