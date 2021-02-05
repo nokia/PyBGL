@@ -165,28 +165,28 @@ def test_parse_bracket_escaped():
     assert parse_bracket(s) == {' ', '\t'}
 
 def test_parse_escaped():
-    assert parse_escaped(r"\.") == ["."]
-    assert parse_escaped(r"\|") == ["|"]
-    assert parse_escaped(r"\?") == ["?"]
-    assert parse_escaped(r"\*") == ["*"]
-    assert parse_escaped(r"\+") == ["+"]
-    assert parse_escaped(r"\(") == ["("]
-    assert parse_escaped(r"\)") == [")"]
-    assert parse_escaped(r"\[") == ["["]
-    assert parse_escaped(r"\]") == ["]"]
-    assert parse_escaped(r"\{") == ["{"]
-    assert parse_escaped(r"\}") == ["}"]
-    assert sorted(parse_escaped(r"\w")) == sorted(parse_bracket("[a-zA-Z0-9]"))
-    assert sorted(parse_escaped(r"\W")) == sorted(parse_bracket("[^a-zA-Z0-9]"))
-    assert sorted(parse_escaped(r"\d")) == sorted(parse_bracket("[0-9]"))
-    assert sorted(parse_escaped(r"\D")) == sorted(parse_bracket("[^0-9]"))
-    assert parse_escaped(r"\a") == ["\a"]
-    assert parse_escaped(r"\b") == ["\b"]
-    assert parse_escaped(r"\f") == ["\f"]
-    assert parse_escaped(r"\n") == ["\n"]
-    assert parse_escaped(r"\r") == ["\r"]
-    assert parse_escaped(r"\t") == ["\t"]
-    assert parse_escaped(r"\v") == ["\v"]
+    assert parse_escaped(r"\.") == {"."}
+    assert parse_escaped(r"\|") == {"|"}
+    assert parse_escaped(r"\?") == {"?"}
+    assert parse_escaped(r"\*") == {"*"}
+    assert parse_escaped(r"\+") == {"+"}
+    assert parse_escaped(r"\(") == {"("}
+    assert parse_escaped(r"\)") == {")"}
+    assert parse_escaped(r"\[") == {"["}
+    assert parse_escaped(r"\]") == {"]"}
+    assert parse_escaped(r"\{") == {"{"}
+    assert parse_escaped(r"\}") == {"}"}
+    assert parse_escaped(r"\w") == parse_bracket("[a-zA-Z0-9]")
+    assert parse_escaped(r"\W") == parse_bracket("[^a-zA-Z0-9]")
+    assert parse_escaped(r"\d") == parse_bracket("[0-9]")
+    assert parse_escaped(r"\D") == parse_bracket("[^0-9]")
+    assert parse_escaped(r"\a") == {"\a"}
+    assert parse_escaped(r"\b") == {"\b"}
+    assert parse_escaped(r"\f") == {"\f"}
+    assert parse_escaped(r"\n") == {"\n"}
+    assert parse_escaped(r"\r") == {"\r"}
+    assert parse_escaped(r"\t") == {"\t"}
+    assert parse_escaped(r"\v") == {"\v"}
 
 def test_escaped_operator():
     (nfa, q0, f) = thompson_compile_nfa("a\\?b")

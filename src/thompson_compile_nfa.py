@@ -209,7 +209,7 @@ def parse_bracket(s :str, whole_alphabet :iter = None) -> set:
         i += 1
     return accepted if not reverse else set(whole_alphabet) - accepted
 
-def parse_escaped(s :str, whole_alphabet :iter = None) -> iter:
+def parse_escaped(s :str, whole_alphabet :iter = None) -> set:
     MAP_ESCAPED_BRACKET = {
         r"\d" : "[0-9]",
         r"\D" : "[^0-9]",
@@ -233,13 +233,13 @@ def parse_escaped(s :str, whole_alphabet :iter = None) -> iter:
             r"\+", r"\*", r"\?", r"\.", r"\|",
             r"\[", r"\]", r"\(", r"\)", r"\{", r"\}"
         }:
-            return [s[1]]
+            return {s[1]}
         elif s in {r"\A", r"\B", r"\Z"}:
             raise ValueError(f"Escape sequence {s} not supported")
         else:
             a = MAP_ESCAPED_SPECIAL.get(s)
             if a is not None:
-                return [a]
+                return {a}
             r = MAP_ESCAPED_BRACKET.get(s)
             if r is not None:
                 chars = parse_bracket(r, whole_alphabet)
