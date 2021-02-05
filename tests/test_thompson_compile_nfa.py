@@ -151,7 +151,7 @@ def test_parse_bracket():
     for (s, expected) in map_input_expected.items():
         assert sorted(parse_bracket(s)) == expected
 
-def test_bracket():
+def test_parse_bracket():
     s = "[X-Z03a-e]"
     chars = parse_bracket(s)
     (nfa, q0, f) = bracket(chars)
@@ -159,6 +159,10 @@ def test_bracket():
         assert accepts(a, nfa) == True
     for a in "ABC12456789fghi":
         assert accepts(a, nfa) == False
+
+def test_parse_bracket_escaped():
+    s = r"[\s]"
+    assert parse_bracket(s) == {' ', '\t'}
 
 def test_parse_escaped():
     assert parse_escaped(r"\.") == ["."]
