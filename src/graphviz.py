@@ -10,7 +10,7 @@ __email__      = "marc-olivier.buob@nokia-bell-labs.com"
 __copyright__  = "Copyright (C) 2018, Nokia"
 __license__    = "BSD-3"
 
-import re
+import re, sys
 
 from subprocess     import Popen, PIPE
 from .graph         import Graph, add_vertex, add_edge, EdgeDescriptor
@@ -156,7 +156,7 @@ def read_graphviz_dp(iterable, g :Graph, dpv = None, dpe = None):
 #------------------------------------------------------------------
 
 def error(*cls):
-    print(*cls)
+    print(*cls, file=sys.stderr)
 
 def run_graphviz(s_dot, layout_engine = "dot", format = "svg") -> bytes:
     """

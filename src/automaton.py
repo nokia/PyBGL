@@ -12,7 +12,6 @@ from collections        import defaultdict
 # NB: pybgl.graph.edge and pybgl.graph.add_edge are overloaded by this file because
 # they don't have the same signature.
 from .graph        import *
-from .graphviz     import graphviz_escape_html
 from .property_map import ReadPropertyMap, make_assoc_property_map, make_func_property_map
 
 BOTTOM = None
@@ -105,9 +104,7 @@ class Automaton(DirectedGraph):
             ),
         }
         dpe = {
-            "label" : make_func_property_map(
-                lambda e: graphviz_escape_html(self.label(e))
-            )
+            "label" : make_func_property_map(self.label)
         }
         kwargs = enrich_kwargs(dpv, "dpv", **kwargs)
         kwargs = enrich_kwargs(dpe, "dpe", **kwargs)

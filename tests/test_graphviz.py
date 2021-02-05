@@ -9,9 +9,30 @@ __license__    = "BSD-3"
 
 from pybgl.graph    import *
 from pybgl.graph_dp import GraphDp
-from pybgl.graphviz import graphviz_escape_html, graph_to_html
+from pybgl.graphviz import graphviz_escape_char, graphviz_escape_html, graph_to_html
 from pybgl.html     import html
 from pybgl.ipynb    import in_ipynb, ipynb_display_graph
+
+WEIRD_CHARS = "&<>\n\t\r[]{}" + "".join([chr(i) for i in range(32)])
+
+def test_graphviz_escape_char():
+    # All these characters must be escaped otherwise graphviz crashes.
+    invalid_escape = set()
+    chars = WEIRD_CHARS
+    for a in chars:
+        escaped = graphviz_escape_char(a)
+        print(ord(a), escaped)
+        if a == escaped:
+            invalid_escape.add(a)
+    assert not invalid_escape
+
+def test_graph_to_html_with_weird_chars():
+    from pybgl.automaton import Automaton, add_edge
+    g = Automaton(2)
+    add_edge(0, 1, WEIRD_CHARS, g)
+    graph_to_html(g)
+    if in_ipynb():
+        ipynb_display_graph(g)
 
 def test_graphviz_escape_html():
     assert graphviz_escape_html("<table><tr><td>foo</td></tr></table>") == "<table><tr><td>foo</td></tr></table>"

@@ -99,25 +99,34 @@ GRAPHVIZ_HTML_TOKENIZER = re.compile(
 )
 
 # The following characters makes crash graphviz when involved in a <label>,
-# so we replace them by their corresponding HTML representation.
+# so we replace them by their corresponding HTML representation. Note that
+# graphviz does not support HTML entity (e.g. "&amp;") and that is why we
+# rely on the HTML code (e.g. "&#38;").
 GRAPHIVZ_MAP_CHAR_ESCAPED = {
-    "<"  : "&#60;",
-    ">"  : "&#62;",
+    '&'  : "&#38;",  # &amp;
+    "<"  : "&#60;",  # &lt;
+    ">"  : "&#62;",  # &gt;
     "\n" : "\\n",
     "\t" : "\\t",
-    "["  : "&#91;",
-    "]"  : "&#93;",
-    "{"  : "&#123;",
-    "}"  : "&#125;",
+    "\r" : "\\r",
+    "["  : "&#91;",  # "&lbrack;"
+    "]"  : "&#93;",  # "&rbrack;"
+    "{"  : "&#123;", # "&lbrace;"
+    "}"  : "&#125;", # "&rbrace;"
 }
+
+def graphviz_escape_char(a :chr) -> str:
+    escaped = GRAPHIVZ_MAP_CHAR_ESCAPED.get(a)
+    if escaped is None and ord(a) < 32:
+        escaped = "\\x%02x;" % ord(a)
+    return escaped if escaped is not None else a
 
 class EscapeHtmlTokenizeVisitor(TokenizeVisitor):
     def __init__(self):
         self.out = ""
     def on_unmatched(self, unmatched :str, start :int, end :int, s :str):
         for a in unmatched:
-            escaped = GRAPHIVZ_MAP_CHAR_ESCAPED.get(a, a)
-            self.out += escaped
+            self.out += graphviz_escape_char(a)
     def on_matched(self, matched :str, start :int, end :int, s :str):
         self.out += matched
 

@@ -148,7 +148,7 @@ class Nfa(DirectedGraph):
             "label" : make_func_property_map(
                 lambda e: (
                     "<i>\u03b5</i>" if self.label(e) == self.epsilon
-                    else graphviz_escape_html(self.label(e))
+                    else self.label(e)
                 )
             )
         }
