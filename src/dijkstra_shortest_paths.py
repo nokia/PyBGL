@@ -299,15 +299,23 @@ class DijkstraTowardsVisitor(DijkstraVisitor):
     """
     `DijkstraTowardsVisitor` can be passed to `dijkstra_shortest_paths`
     to abort computation once the cost of the shortest path to `t` is
-    known. Note that if you want to process every input arcs of `t`,
-    this visitor should implement `finish_vertex` instead of `discover_vertex`
-    which stops once an arbiraty shortest path from `s` to `t` has been found.
+    known.
+
+    Important notes:
+    - stopping when discovering t does not guarantee that we have find
+    the shortest path.
+    - stopping when discovering a vertex u farther than t from s always
+    occur after finishing vertex t.
+
+    As a sequel, we must wait that t is examined to guarantee that a
+    a shortest path to t has been explored.
     """
     def __init__(self, t :int):
         self.t = t
-    def finish_vertex(self, u :int, g :DirectedGraph):
+
+    def examine_vertex(self, u :int, g :DirectedGraph):
         if u == self.t:
-            raise DijkstraStopException(u)
+            raise DijkstraStopException(self.t)
 
 def dijkstra_shortest_path(
     g            :DirectedGraph,
