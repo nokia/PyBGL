@@ -200,7 +200,10 @@ def parse_bracket(s :str, whole_alphabet :iter = None) -> set:
                 accepted.add(chr(c))
             i += 1
         else:
-            accepted.add(a)
+            if a == "\\":
+                accepted |= parse_escaped(s[i:i+2])
+            else:
+                accepted.add(a)
         last_non_hat = a
         i += 1
     return accepted if not reverse else set(whole_alphabet) - accepted
