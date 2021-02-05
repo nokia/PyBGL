@@ -219,6 +219,13 @@ def test_escaped_classes():
             assert accepts(a, nfa) == (a in allowed), \
                 f"regexp = {regexp} a = '{a}' ({ord(a)}) allowed = '{allowed}' obtained = {accepts(a, nfa)} expected = {a in allowed}"
 
+def test_class_s():
+    (nfa, q0, f) = thompson_compile_nfa(r"\s+")
+    assert nfa.accepts(" ")
+    assert nfa.accepts("   ")
+    assert nfa.accepts("\t\t")
+    assert nfa.accepts(" \t \t ")
+
 def test_thompson_compile_nfa():
     (nfa, q0, f) = thompson_compile_nfa("(a?b)*?c+d")
     if in_ipynb():
