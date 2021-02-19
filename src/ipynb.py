@@ -43,6 +43,13 @@ def display_svg(svg, filename_svg, background_color = None):
     template_html = background_template_html(background_color)
     html(template_html % svg)
 
+def display_body(body_html, filename_html, **kwargs):
+    return display_svg(
+        "<html><head><meta charset='UTF-8'></head><body>%s</body></html>" % body_html,
+        filename_html,
+        **kwargs
+    )
+
 def ipynb_get_background_color():
     """
     Retrieves the HTML background color of the Jupyter notebook.
