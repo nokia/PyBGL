@@ -48,9 +48,12 @@ def literal(a :chr) -> Nfa:
     set_final(1, nfa)
     return (nfa, 0, 1)
 
-def insert_automaton(g1 :Nfa, g2 :Nfa) -> dict:
-    map21 = dict()
+def insert_automaton(g1 :Nfa, g2 :Nfa, map21 :dict = None) -> dict:
+    if not map21:
+        map21 = dict()
     for q2 in vertices(g2):
+        if q2 in map21.keys():
+            continue
         q1 = add_vertex(g1)
         if is_final(q2, g2):
             set_final(q1, g1)
@@ -65,22 +68,16 @@ def insert_automaton(g1 :Nfa, g2 :Nfa) -> dict:
     return map21
 
 def concatenation(nfa1 :Nfa, q01 :int, f1 :int, nfa2 :Nfa, q02 :int, f2 :int) -> tuple:
-    eps = epsilon(nfa1)
-    map21 = insert_automaton(nfa1, nfa2)
-    q02 = map21[q02]
+    map21 = {q02 : f1}
+    map21 = insert_automaton(nfa1, nfa2, map21)
     f2 = map21[f2]
-    add_edge(f1, q02, eps, nfa1)
     set_final(f1, nfa1, False)
     return (nfa1, q01, f2)
 
 def alternation(nfa1 :Nfa, q01 :int, f1 :int, nfa2 :Nfa, q02 :int, f2 :int) -> tuple:
-    eps = epsilon(nfa1)
-    map21 = insert_automaton(nfa1, nfa2)
-    q02 = map21[q02]
+    map21 = {q02 : q01, f2 : f1}
+    map21 = insert_automaton(nfa1, nfa2, map21)
     f2  = map21[f2]
-    set_final(f1, nfa1, False)
-    add_edge(q01, q02, eps, nfa1)
-    add_edge(f1, f2, eps, nfa1)
     return (nfa1, q01, f2)
 
 def zero_or_one(nfa :Nfa, q0 :int, f :int) -> tuple:
@@ -90,16 +87,9 @@ def zero_or_one(nfa :Nfa, q0 :int, f :int) -> tuple:
 
 def zero_or_more(nfa :Nfa, q0 :int, f :int) -> tuple:
     eps = epsilon(nfa)
-    s = add_vertex(nfa)
-    t = add_vertex(nfa)
     add_edge(f, q0, eps, nfa)
-    add_edge(s, q0, eps, nfa)
-    add_edge(f, t, eps, nfa)
-    add_edge(s, t, eps, nfa)
-    set_initials({s}, nfa)
-    set_final(f, nfa, False)
-    set_final(t, nfa)
-    return (nfa, s, t)
+    add_edge(q0, f, eps, nfa)
+    return (nfa, q0, f)
 
 def one_or_more(nfa :Nfa, q0 :int, f :int) -> tuple:
     eps = epsilon(nfa)
