@@ -247,6 +247,10 @@ def parse_escaped(s :str, whole_alphabet :iter = None) -> set:
 #-------------------------------------------------------------
 
 def thompson_compile_nfa(expression :str, whole_alphabet = None) -> Nfa:
+    if not expression:
+        g = Nfa(1)
+        set_final(0, g)
+        return (g, 0, 0)
     if whole_alphabet is None:
         whole_alphabet = DEFAULT_ALPHABET
     expression = list(tokenizer_re(expression, cat = "."))
