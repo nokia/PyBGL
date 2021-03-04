@@ -96,7 +96,7 @@ def one_or_more(nfa :Nfa, q0 :int, f :int) -> tuple:
     add_edge(f, q0, eps, nfa)
     return (nfa, q0, f)
 
-def repetition(nfa :Nfa, q0 :int, f :int, m :int, do_0m :bool = False) -> tuple:
+def repetition(nfa :Nfa, q0 :int, f :int, m :int) -> tuple:
     assert m >= 0
     if m == 0:
         nfa = Nfa(1)
@@ -107,13 +107,9 @@ def repetition(nfa :Nfa, q0 :int, f :int, m :int, do_0m :bool = False) -> tuple:
         ori = copy.deepcopy(nfa)
         q0_ori = q0
         f_ori = f
-        if do_0m:
-            add_edge(q0, f, eps, nfa)
         for _ in range(m - 1):
             set_final(f, nfa, False)
             (nfa, q0, f) = concatenation(nfa, q0, f, ori, q0_ori, f_ori)
-            if do_0m:
-                add_edge(q0_ori, f, eps, nfa)
     return (nfa, q0, f)
 
 def repetition_range(nfa :Nfa, q0 :int, f :int, m :int, n :int) -> tuple:
@@ -131,13 +127,20 @@ def repetition_range(nfa :Nfa, q0 :int, f :int, m :int, n :int) -> tuple:
         (nfa2, q02, f2) = one_or_more(ori, q0, f)
         return concatenation(nfa1, q01, f1, nfa2, q02, f2)
     else:
-        (nfa1, q01, f1) = repetition(nfa, q0, f, m)
-        if n > m:
-            (nfa2, q02, f2) = repetition(ori, q0, f, n - m, do_0m = True)
-            return concatenation(nfa1, q01, f1, nfa2, q02, f2)
-        else:
-            assert m == n
-            return (nfa1, q01, f1)
+        (q0_ori, f_ori, ori) = (q0, f, copy.deepcopy(nfa))
+        (nfa, _, f) = repetition(nfa, q0, f, m)
+        finals = {f}
+        # The m-n following NFA instances are optional. We add them
+        # one by one to get their respective final states to build an
+        # epsilon-transition toward a same and unique final state.
+        for i in range(n - m):
+            (nfa, q0, f) = concatenation(nfa, q0, f, ori, q0_ori, f_ori)
+            finals.add(f)
+        eps = epsilon(nfa)
+        for pred_f in finals:
+            if pred_f != f:
+                add_edge(pred_f, f, eps, nfa)
+        return (nfa, q0, f)
 
 def bracket(chars :iter) -> tuple:
     nfa = Nfa(2)

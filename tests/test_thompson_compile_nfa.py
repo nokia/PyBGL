@@ -96,33 +96,25 @@ def test_parse_repetition():
             )
             assert parse_repetition(s) == (m, n)
 
-def test_repetition_0m():
+def test_repetition():
     (nfa, q0, f) = nfa_to_triple(make_nfa1())
     m = 4
-    (nfa, q0, f) = repetition(nfa, q0, f, m, do_0m = True)
-    words = ["x" * i for i in range(10)]
-    # Between 0 and m repetition
-    for (i, w) in enumerate(words):
-        assert accepts(w, nfa) == (i <= m)
-
-def test_repetition_mm():
-    (nfa, q0, f) = nfa_to_triple(make_nfa1())
-    m = 4
-    (nfa, q0, f) = repetition(nfa, q0, f, m, do_0m = False)
+    (nfa, q0, f) = repetition(nfa, q0, f, m)
     words = ["x" * i for i in range(10)]
     # Exactly m repetition
     for (i, w) in enumerate(words):
         assert accepts(w, nfa) == (i == m)
 
-def test_repetition_mn():
-    (nfa, q0, f) = nfa_to_triple(make_nfa1())
-    words = ["x" * i for i in range(10)]
-    # Between m and n repetition
-    for (m, n) in [(0, 1), (0, None), (1, None), (3, 3), (2, 4), (2, None)]:
-        (nfa, q0, f) = literal("x")
+def test_repetition_range():
+    a = "a"
+    for (m, n) in [(3, 5), (0, 3), (3, 3), (3, None)]:
+        (nfa, q0, f) = literal(a)
         (nfa, q0, f) = repetition_range(nfa, q0, f, m, n)
-        for (i, w) in enumerate(words):
-            assert accepts(w, nfa) == (i >= m and (n is None or i <= n))
+        for i in range(10):
+            expected = (m <= i) and (n is None or i <= n)
+            w = a * i
+            obtained = accepts(w, nfa)
+            assert obtained == expected, f"(m, n) = {(m, n)} i = {i} w = {w}"
 
 def test_parse_bracket():
     map_input_expected = {
