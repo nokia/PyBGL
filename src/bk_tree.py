@@ -73,6 +73,8 @@ class BKTree(Automaton):
             u = v
 
     def search(self, w :object, d_max = INFINITY, r :int = None) -> tuple:
+        if self.root is None:
+            return None
         if r is None:
             r = self.root
         to_process = deque([r])
@@ -85,7 +87,7 @@ class BKTree(Automaton):
                 (w_best, d_best) = (w_u, d_u)
             for e in self.out_edges(u):
                 d_uv = label(e, self)
-                if d_uv - d_u < d_best: # Cut-off criterion
+                if abs(d_uv - d_u) <= d_best: # Cut-off criterion
                     v = target(e, self)
                     to_process.appendleft(v)
         return (w_best, d_best) if w_best is not None else None
