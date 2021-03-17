@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+#
+# This implementation is inspired from https://signal-to-noise.xyz/post/bk-tree/
 
 __author__     = "Marc-Olivier Buob"
 __maintainer__ = "Marc-Olivier Buob"
@@ -9,32 +11,17 @@ __license__    = "BSD-3"
 
 
 import sys
-from collections import defaultdict, deque
-from pybgl.automaton import *
+from collections                import defaultdict, deque
+from pybgl.automaton            import *
+from pybgl.levenshtein_distance import levenshtein_distance
 
 INFINITY = sys.maxsize
 
-def levenshtein_distance(x :str, y :str) -> int:
-    x_1 = x[1:]
-    y_1 = y[1:]
-    return (
-        len(x) if not y else
-        len(y) if not x else
-        levenshtein_distance(x_1, y_1) if x[0] == y[0] else
-        1 + min(
-            levenshtein_distance(x_1, y),
-            levenshtein_distance(x, y_1),
-            levenshtein_distance(x_1, y_1),
-        )
-    )
-
 class BKTree(Automaton):
     """
-    A BK-tree is a metric tree suggested by Walter Austin Burkhard and Robert M. Keller specifically adapted to discrete metric spaces.
-    For simplicity, consider integer discrete metric d(x,y).
-    Then, BK-tree is defined as follows. An arbitrary element 𝑎 is selected as root node.
-    The root node may have zero or more subtrees. The 𝑘-th subtree is recursively built of all elements 𝑏 such that d(a,b)=k.
-    BK-trees can be used for approximate string matching in a dictionary.
+    A BK-tree is a metric tree suggested by Walter Austin Burkhard and
+    Robert M. Keller specifically adapted to discrete metric spaces.
+    https://en.wikipedia.org/wiki/BK-tree
     """
     def __init__(self, distance :callable):
         super().__init__()
