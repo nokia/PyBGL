@@ -67,13 +67,19 @@ def hopcroft_agglomerate_states(g: IncidenceAutomaton) -> set:
 def hopcroft_minimize(g :IncidenceAutomaton) -> IncidenceAutomaton:
     if is_empty(g):
         return g
-    aggregated_states = hopcroft_agglomerate_states(g)
-    map_set_idx = {qs: idx for idx, qs in enumerate(list(aggregated_states))}
-    q0_new = None
-    for qs in aggregated_states:
+    aggregated_states = list(hopcroft_agglomerate_states(g))
+    # Make sure that the initial state in the minimized automaton will be 0
+    for idx, qs in enumerate(aggregated_states):
         if any(is_initial(q, g) for q in qs):
-            q0_new = map_set_idx[qs]
+            q0_new = idx
             break
+    tmp = aggregated_states[0]
+    aggregated_states[0] = aggregated_states[q0_new]
+    aggregated_states[q0_new] = tmp
+    q0_new = 0
+    # Assign an index to each state in the new automaton
+    map_set_idx = {qs: idx for idx, qs in enumerate(list(aggregated_states))}
+    # Build the set of final states in the new automaton
     final_states_new = defaultdict(
         bool,
         {
@@ -81,6 +87,7 @@ def hopcroft_minimize(g :IncidenceAutomaton) -> IncidenceAutomaton:
             for qs in aggregated_states
         }
     )
+    # Build the minimized automaton
     min_g = IncidenceAutomaton(
         len(aggregated_states),
         q0_new,
