@@ -87,8 +87,6 @@ class Nfa(DirectedGraph):
         return (
             EdgeDescriptor(q, r, (a, n))
             for (a, rn) in self.adjacencies.get(q, dict()).items()
-            # for (q, arn) in self.adjacencies.get(q, dict()).items()
-            # for (a, rn) in arn.items()
             for (r, n) in rn.items()
         )
 
