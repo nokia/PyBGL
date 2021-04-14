@@ -73,7 +73,7 @@ class Heap:
     def pop(self) -> tuple:
         return heapq.heappop(self._data)[2]
     def __str__(self) -> str:
-        return str(heapq.heapify(self))
+        return str(self._data)
     def __repr__(self) -> str:
         return str(self)
     def __bool__(self) -> bool:
