@@ -10,7 +10,7 @@ __email__      = "marc-olivier.buob@nokia-bell-labs.com"
 __copyright__  = "Copyright (C) 2018, Nokia"
 __license__    = "BSD-3"
 
-import heapq, sys
+import sys
 from collections                import defaultdict
 from pybgl.algebra              import BinaryFunction, BinaryPredicate, Less, ClosedPlus
 from pybgl.breadth_first_search import DefaultBreadthFirstSearchVisitor
@@ -18,6 +18,7 @@ from pybgl.graph                import (
     DirectedGraph, EdgeDescriptor, source, target, out_edges, vertices
 )
 from pybgl.graph_traversal      import WHITE, GRAY, BLACK
+from pybgl.heap                 import Comparable, Heap
 from pybgl.property_map         import (
     ReadPropertyMap, ReadWritePropertyMap, make_assoc_property_map
 )
@@ -46,38 +47,6 @@ class DijkstraDebugVisitor(DijkstraVisitor):
         print(f"edge_not_relaxed({e}  {e.m_distinguisher})")
     def finish_vertex(self, u :int, g :DirectedGraph):
         print(f"finish_vertex({u})")
-
-# TODO How to pass Compare???
-# https://stackoverflow.com/questions/8875706/heapq-with-custom-compare-predicate
-class Heap:
-    def __init__(self, initial = None, key = lambda x: x):
-        self.key = key
-        self.index = 0
-        if initial:
-            self._data = [
-                (key(item), i, item)
-                for (i, item) in enumerate(initial)
-            ]
-            self.index = len(self._data) # Tie break on insertion order.
-            heapq.heapify(self._data)
-        else:
-            self._data = list()
-    def push(self, item :object):
-        heapq.heappush(self._data, (self.key(item), self.index, item))
-        self.index += 1
-    def decrease_key(self, item :object):
-        for (i, (key, index, x)) in enumerate(self._data):
-            if item == x:
-                self._data[i] = (self.key(item), index, item)
-                heapq.heapify(self._data)
-    def pop(self) -> tuple:
-        return heapq.heappop(self._data)[2]
-    def __str__(self) -> str:
-        return str(self._data)
-    def __repr__(self) -> str:
-        return str(self)
-    def __bool__(self) -> bool:
-        return bool(self._data)
 
 def dijkstra_shortest_paths_initialization(
     g           :DirectedGraph,
@@ -148,6 +117,8 @@ def dijkstra_shortest_paths_iteration(
     vis.finish_vertex(u, g)
     return w_su
 
+INFINITY = sys.maxsize
+
 def dijkstra_shortest_paths(
     g            :DirectedGraph,
     s            :int,
@@ -155,10 +126,10 @@ def dijkstra_shortest_paths(
     pmap_vpreds  :ReadWritePropertyMap,
     pmap_vdist   :ReadWritePropertyMap,
     pmap_vcolor  :ReadWritePropertyMap = None,
-    compare      :BinaryPredicate = Less(), # Ignored, see Heap class.
+    compare      :BinaryPredicate = None, # Ignored, see Heap class.
     combine      :BinaryFunction  = ClosedPlus(),
     zero         :int = 0,
-    infty        :int = sys.maxsize,
+    infty        :int = INFINITY,
     vis          :DijkstraVisitor = None
 ):
     """
@@ -208,7 +179,15 @@ def dijkstra_shortest_paths(
     )
 
     # Iteration
-    heap = Heap([s], key = lambda u: pmap_vdist[u])
+    if not compare:
+        compare = Less()
+        heap = Heap([s], to_comparable = lambda u: pmap_vdist[u])
+    else:
+        heap = Heap(
+            [s],
+            to_comparable = lambda u: Comparable(pmap_vdist[u], compare)
+        )
+
     while heap:
         dijkstra_shortest_paths_iteration(
             heap, g,
