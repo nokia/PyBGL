@@ -17,9 +17,26 @@ from pybgl.property_map import (
     make_assoc_property_map, make_func_property_map
 )
 from pybgl.dijkstra_shortest_paths import (
-    DijkstraVisitor,
+    INFINITY, DijkstraVisitor, DijkstraDebugVisitor,
     dijkstra_shortest_path, dijkstra_shortest_paths, make_path
 )
+
+# For debug purposes
+
+from pybgl.graphviz import GraphvizStyle
+from pybgl.ipynb import in_ipynb, ipynb_display_graph
+
+def display_graph(g, pmap_eweight = None, map_vpreds = None):
+    if in_ipynb():
+        dpe = dict()
+        if pmap_eweight:
+            dpe["label"] = pmap_eweight
+        if map_vpreds:
+            shortest_path_dag = {e for es in map_vpreds.values() for e in es}
+            dpe["color"] = make_func_property_map(
+                lambda e: "red" if e in shortest_path_dag else None
+            )
+        ipynb_display_graph(g, dpe = dpe)
 
 LINKS = [
     # (u, v, weight)
@@ -46,7 +63,7 @@ def make_graph(
 ):
     def add_node(un, g, d):
         u = d.get(un)
-        if not u:
+        if u is None:
             u = add_vertex(g)
             d[un] = u
         return u
@@ -155,22 +172,6 @@ def test_parallel_edges():
         v : w
     }
 
-class DebugVisitor(DijkstraVisitor):
-    def initialize_vertex(self, u :int, g :DirectedGraph):
-        print("initialize_vertex", u, g)
-    def examine_vertex(self, u :int, g :DirectedGraph):
-        print("examine_vertex", u, g)
-    def examine_edge(self, e :EdgeDescriptor, g :DirectedGraph):
-        print("examine_edge", e, g)
-    def discover_vertex(self, u :int, g :DirectedGraph):
-        print("discover_vertex", u, g)
-    def edge_relaxed(self, e :EdgeDescriptor, g :DirectedGraph):
-        print("edge_relaxed", e, g)
-    def edge_not_relaxed(self, e :EdgeDescriptor, g :DirectedGraph):
-        print("edge_not_relaxed", e, g)
-    def finish_vertex(self, u :int, g :DirectedGraph):
-        print("finish_vertex", u, g)
-
 def test_directed_graph(links :list = LINKS):
     map_eweight = dict()
     pmap_eweight = make_assoc_property_map(map_eweight)
@@ -183,35 +184,32 @@ def test_directed_graph(links :list = LINKS):
         pmap_eweight,
         make_assoc_property_map(map_vpreds),
         make_assoc_property_map(map_vdist),
-        vis = DebugVisitor()
+        vis = DijkstraDebugVisitor()
     )
 
-    infty = sys.maxsize
     E = {(source(e, g), target(e, g)) : e for e in edges(g)}
 
     assert map_vpreds == {
         1 : {E[0, 1]},
         2 : {E[1, 2]},
         3 : {E[1, 3]},
-        4 : {E[3, 4]},
-        5 : {E[4, 5]},
-        6 : {E[4, 6]},
+        4 : {E[0, 4]},
+        5 : {E[0, 5]},
+        6 : {E[5, 6]},
         7 : {E[6, 7]},
-        8 : {E[7, 8]},
-        9 : {E[7, 9]}
+        8 : {E[6, 8]},
     }
     assert map_vdist == {
-        0  : 0,
-        1  : 1,
-        2  : 2,
-        3  : 4,
-        4  : 5,
-        5  : 6,
-        6  : 6,
-        7  : 14,
-        8  : 15,
-        9  : 15,
-        10 : infty
+        0 : 0,
+        1 : 1,
+        2 : 2,
+        3 : 4,
+        4 : 1,
+        5 : 1,
+        6 : 9,
+        7 : 10,
+        8 : 10,
+        9 : INFINITY
     }
 
 def test_decrease_key():
@@ -234,6 +232,7 @@ def test_decrease_key():
         make_assoc_property_map(map_vpreds),
         make_assoc_property_map(map_vdist)
     )
+    display_graph(g, pmap_eweight, map_vpreds)
 
     assert map_vpreds[1] == {e21}
     assert map_vpreds[2] == {e02}
@@ -256,34 +255,32 @@ def test_directed_symmetric_graph(links :list = LINKS):
         make_assoc_property_map(map_vpreds),
         make_assoc_property_map(map_vdist)
     )
+    display_graph(g, pmap_eweight, map_vpreds)
 
-    infty = sys.maxsize
     E = {(source(e, g), target(e, g)) : e for e in edges(g)}
 
     assert map_vpreds == {
-        1  : {E[0, 1]},
-        2  : {E[1, 2]},
-        3  : {E[1, 3]},
-        4  : {E[3, 4]},
-        5  : {E[4, 5]},
-        6  : {E[4, 6]},
-        7  : {E[9, 7]},
-        8  : {E[7, 8]},
-        9  : {E[2, 9]},
-        10 : {E[2, 10]}
+        1 : {E[0, 1]},
+        2 : {E[1, 2]},
+        3 : {E[0, 3]},
+        4 : {E[0, 4]},
+        5 : {E[0, 5]},
+        6 : {E[8, 6]},
+        7 : {E[6, 7]},
+        8 : {E[2, 8]},
+        9 : {E[2, 9]}
     }
     assert map_vdist == {
-        0  : 0,
-        1  : 1,
-        2  : 2,
-        3  : 4,
-        4  : 5,
-        5  : 6,
-        6  : 6,
-        7  : 4,
-        8  : 5,
-        9  : 3,
-        10 : 3
+        0 : 0,
+        1 : 1,
+        2 : 2,
+        3 : 1,
+        4 : 1,
+        5 : 1,
+        6 : 4,
+        7 : 5,
+        8 : 3,
+        9 : 3
     }
 
 def test_dijkstra_shortest_path(links :list = LINKS):
@@ -296,7 +293,7 @@ def test_dijkstra_shortest_path(links :list = LINKS):
     map_vpreds = defaultdict(set)
     map_vdist = defaultdict(int)
     s = 0
-    t = 9
+    t = 8
     path = dijkstra_shortest_path(
         g, s, t,
         make_assoc_property_map(map_eweight),
@@ -306,5 +303,41 @@ def test_dijkstra_shortest_path(links :list = LINKS):
     assert [
         (source(e, g), target(e, g))
         for e in path
-    ] == [(0, 1), (1, 3), (3, 4), (4, 6), (6, 7), (7, 9)]
+    ] == [(0, 5), (5, 6), (6, 8)]
 
+def test_dijkstra_shortest_paths_bandwidth():
+    # Prepare graph
+    map_eweight = defaultdict(int)
+    pmap_eweight = make_assoc_property_map(map_eweight)
+    links = [
+        # (u, v, weight)
+        (0, 1, 100),
+        (1, 2, 80),
+        (1, 2, 70),
+        (1, 3, 30),
+        (3, 0, 10),
+    ]
+    g = make_graph(links, pmap_eweight, build_reverse_edge = False)
+
+    map_vpreds = defaultdict(set)
+    map_vdist = defaultdict(int)
+    s = 0
+
+    dijkstra_shortest_paths(
+        g, s,
+        make_assoc_property_map(map_eweight),
+        make_assoc_property_map(map_vpreds),
+        make_assoc_property_map(map_vdist),
+        compare = lambda a, b: a >= b,
+        combine = min,
+        zero    = INFINITY,
+        infty   = 0
+    )
+    display_graph(g, pmap_eweight)
+    print(map_vdist)
+    assert map_vdist == {
+        0 : INFINITY,
+        1 : 100,
+        2 : 80,
+        3 : 30
+    }
