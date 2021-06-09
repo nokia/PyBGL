@@ -73,7 +73,10 @@ class Heap:
         Example:
             heap = Heap([4, 2, 2, 1, 3], key=compare_to_key(lambda a, b: a >= b))
         """
-        self.to_comparable = to_comparable #if to_comparable is not None else (lambda x: x)
+        self.to_comparable = (
+            to_comparable if to_comparable is not None
+            else (lambda x: x)
+        )
         self.index = 0
         if elements:
             # We could use this heapsort as defined in this link, but sorted() is stable
