@@ -14,11 +14,11 @@ WORDS = [
     "boo", "boon", "cook", "cake", "cape", "cart"
 ]
 
-def test_levenshtein_identity():
+def test_levenshtein_distance_identity():
     for w in ["", "abc"]:
         assert levenshtein_distance(w, w) == 0
 
-def test_levenshtein_symmetry():
+def test_levenshtein_distance_symmetry():
     w1 = "abcd"
     w2 = "ebgce"
     assert levenshtein_distance(w1, "") == levenshtein_distance("", w1)
