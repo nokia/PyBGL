@@ -108,7 +108,7 @@ class Automaton(DirectedGraph):
         }
         kwargs = enrich_kwargs(dpv, "dpv", **kwargs)
         kwargs = enrich_kwargs(dpe, "dpe", **kwargs)
-        return to_dot(self, **kwargs)
+        return super().to_dot(**kwargs)
 
     def delta_word(self, q :int, w :str) -> int:
         for a in w:

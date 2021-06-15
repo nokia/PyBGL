@@ -104,7 +104,7 @@ class NodeAutomaton(Automaton):
             )
         }
         kwargs = enrich_kwargs(dpv, "dpv", **kwargs)
-        return to_dot(self, **kwargs)
+        return super().to_dot(**kwargs)
 
 def add_vertex(a :chr, g :NodeAutomaton) -> int:
     return g.add_vertex(a)

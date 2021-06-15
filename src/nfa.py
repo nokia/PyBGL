@@ -153,7 +153,7 @@ class Nfa(DirectedGraph):
         }
         kwargs = enrich_kwargs(dpv, "dpv", **kwargs)
         kwargs = enrich_kwargs(dpe, "dpe", **kwargs)
-        return to_dot(self, **kwargs)
+        return super().to_dot(**kwargs)
 
     def accepts(self, w) -> True:
         return any(is_final(q, self) for q in delta_word(w, self))
