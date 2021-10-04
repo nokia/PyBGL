@@ -7,38 +7,34 @@
 
 from setuptools import find_packages, setup
 
-__version__        = (0, 9, 2)
+__version__ = (0, 9, 3)
 
-README = ""
+README, HISTORY = "", ""
 try:
     with open("README.rst") as f_readme:
         README = f_readme.read()
 except:
     pass
 
-HISTORY = ""
 try:
     with open("HISTORY.rst") as f_history:
         HISTORY = f_history.read()
 except:
     pass
 
-LONG_DESCRIPTION = "%s\n\n%s" % (README, HISTORY)
-
-# Copy is only triggered if the file does not yet exists.
-
 setup(
     name             = "pybgl",
     version          = ".".join(["%s" % x for x in __version__]),
     description      = "pybgl",
-    long_description = LONG_DESCRIPTION,
+    long_description = "%s\n\n%s" % (README, HISTORY),
+    long_description_content_type = "text/x-rst",
     author           = "Marc-Olivier Buob",
     author_email     = "marc-olivier.buob@nokia-bell-labs.com",
     url              = "http://github.com/nokia/pybgl",
     license          = "BSD-3",
-    zip_safe         = False,
-    packages         = ["pybgl"],
-    package_dir      = {"pybgl" : "src"},
+    packages         = find_packages(),
+    package_dir      = {"pybgl" : "pybgl"},
+    python_requires  = ">=3",
     requires         = ["typing"],
     test_suite       = "tests",
 )

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# This file is part of the minifold project.
-# https://github.com/nokia/minifold
+# This file is part of the PyBGL project.
+# https://github.com/nokia/pybgl
 
 __author__     = "Marc-Olivier Buob"
 __maintainer__ = "Marc-Olivier Buob"
