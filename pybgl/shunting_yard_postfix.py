@@ -102,7 +102,7 @@ RE_OPERATORS_RE = [
     #"\\[.*\\]",
     '\\[([^]])*\\]',
     # Escape sequences (not exhaustive)
-    "(\\\\[abdDfnrsStvwW*+?.|\[\](){}])",
+    "(\\\\[abdDfnrsStvwW*+?.|\\[\\](){}])",
 ]
 
 class CatifyTokenizeVisitor(TokenizeVisitor):
