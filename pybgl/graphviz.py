@@ -12,58 +12,33 @@ __license__    = "BSD-3"
 
 import re, sys
 
+from html.parser    import HTMLParser
 from subprocess     import Popen, PIPE
 from .graph         import Graph, add_vertex, add_edge, EdgeDescriptor
 from .graphviz_impl import *
 
 #------------------------------------------------------------------
-# Graphviz parser
+# Graphviz read
 #------------------------------------------------------------------
 
-PATTERN_SPACE          = "\\s*"
-PATTERN_VERTEX_ID      = "([0-9]+)"
-PATTERN_EDGE_CONNECTOR = "->" #TODO manage -- for undirected graphs
-PATTERN_OPTS           = "\[(.*)\]"
-PATTERN_LINE_VERTEX    = PATTERN_SPACE.join([PATTERN_VERTEX_ID, PATTERN_OPTS, ";"])
-PATTERN_LINE_EDGE      = PATTERN_SPACE.join([PATTERN_VERTEX_ID, PATTERN_EDGE_CONNECTOR, PATTERN_VERTEX_ID, PATTERN_OPTS, ";"])
-
-RE_GRAPHVIZ_SVG = re.compile(".*(<svg.*>.*</svg>).*")
-RE_LINE_VERTEX = re.compile(PATTERN_LINE_VERTEX)
-RE_LINE_EDGE = re.compile(PATTERN_LINE_EDGE)
+class GraphVizOptsParser(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.d = dict()
+    def handle_starttag(self, tag, attrs):
+        for (k, v) in attrs:
+            self.d[k] = v
+    def feed(self, graphviz_opts):
+        if graphviz_opts:
+            graphviz_opts= "<fake_tag " + graphviz_opts[1:-1] + ">"
+            super().feed(graphviz_opts)
+    def items(self):
+        return self.d.items()
 
 class GraphvizVisitor():
     def on_vertex(self, line :str, u :int, opts :str):  pass
     def on_edge(self, line :str, u :int, v :int, opts :str): pass
     def on_else(self, line :str): pass
-
-def read_graphviz_vis(iterable, vis :GraphvizVisitor):
-    """
-    Process an iterable where each element is a line of a graphviz string.
-    This function expect at most one vertex per line and one edge per line.
-    Args:
-        iterable: An iterable (e.g. my_file.readlines() or my_str.splitlines())
-        vis: A GraphvizVisitor instance.
-    """
-    for line in iterable:
-        line = line.strip()
-        m_v = RE_LINE_VERTEX.match(line)
-        if m_v:
-            vis.on_vertex(line, int(m_v.group(1)), m_v.group(2))
-            continue
-        m_e = RE_LINE_EDGE.match(line)
-        if m_e:
-            vis.on_edge(line, int(m_e.group(1)), int(m_e.group(2)), m_e.group(3))
-            continue
-        vis.on_else(line)
-
-#------------------------------------------------------------------
-# Graphviz read
-#------------------------------------------------------------------
-
-# NOTE: Assumptions:
-# - vertices are identified using integer
-# - vertices are described in the dot file before the edges
-# - vertex/edge attributes are not too weird strings
 
 class ReadGraphvizVisitor(GraphvizVisitor):
     def __init__(self, g :Graph):
@@ -77,17 +52,38 @@ class ReadGraphvizVisitor(GraphvizVisitor):
     def on_install_edge_property(self, e, g, key, value):
         pass
 
+#    def on_vertex(self, line :str, u_alias :int, opts :str) -> int:
+#        u = add_vertex(self.m_g)
+#        self.m_aliases[u_alias] = u
+#        l = re.findall("\\w+=[^\\s]+", opts) # do not split on "," it fails if coma are in 'value'
+#        for opt in l:
+#            key, value = opt.split("=")
+#            key = key.strip().strip(",")
+#            value = value.strip().strip(",")
+#            value = value.strip("\"'").lstrip("<").rstrip(">")
+#            self.on_install_vertex_property(u, self.m_g, key, value)
+#        return u
+#
+#    def on_edge(self, line :str, u_alias :int, v_alias :int, opts :str) -> EdgeDescriptor:
+#        u = self.m_aliases[u_alias]
+#        v = self.m_aliases[v_alias]
+#        (e, added) = add_edge(u, v, self.m_g)
+#        assert added
+#        l = re.findall("\\w+=[^\\s]+", opts) # CRAPPY split
+#        for opt in l:
+#            key, value = opt.split("=")
+#            key = key.strip().strip(",")
+#            value = value.strip().strip(",")
+#            self.on_install_edge_property(e, self.m_g, key, value)
+#        return e
+
     def on_vertex(self, line :str, u_alias :int, opts :str) -> int:
         u = add_vertex(self.m_g)
         self.m_aliases[u_alias] = u
-        if self.on_install_vertex_property:
-            l = re.findall("\\w+=[^\\s]+",opts) # do not split on "," it fails if coma are in 'value'
-            for opt in l:
-                key, value = opt.split("=")
-                key = key.strip().strip(",")
-                value = value.strip().strip(",")
-                value = value.strip("\"'").lstrip("<").rstrip(">")
-                self.on_install_vertex_property(u, self.m_g, key, value)
+        parser = GraphVizOptsParser()
+        parser.feed(opts)
+        for (key, value) in parser.items():
+            self.on_install_vertex_property(u, self.m_g, key, value)
         return u
 
     def on_edge(self, line :str, u_alias :int, v_alias :int, opts :str) -> EdgeDescriptor:
@@ -95,27 +91,51 @@ class ReadGraphvizVisitor(GraphvizVisitor):
         v = self.m_aliases[v_alias]
         (e, added) = add_edge(u, v, self.m_g)
         assert added
-
-        if self.on_install_edge_property:
-            l = re.findall("\\w+=[^\\s]+",opts) # CRAPPY split
-            for opt in l:
-                key, value = opt.split("=")
-                key = key.strip().strip(",")
-                value = value.strip().strip(",")
-                self.on_install_edge_property(e, self.m_g, key, value)
+        parser = GraphVizOptsParser()
+        parser.feed(opts)
+        for (key, value) in parser.items():
+            self.on_install_edge_property(e, self.m_g, key, value)
         return e
 
-def read_graphviz(iterable, g :Graph, vis = None):
+PATTERN_SPACE          = "\\s*"
+PATTERN_VERTEX_ID      = "([0-9]+)"
+PATTERN_EDGE_CONNECTOR = "->" #TODO manage -- for undirected graphs
+PATTERN_OPTS           = "(\\[(.*)\\])?"
+PATTERN_LINE_VERTEX    = PATTERN_SPACE.join([PATTERN_VERTEX_ID, PATTERN_OPTS, ";"])
+PATTERN_LINE_EDGE      = PATTERN_SPACE.join([PATTERN_VERTEX_ID, PATTERN_EDGE_CONNECTOR, PATTERN_VERTEX_ID, PATTERN_OPTS, ";"])
+
+RE_GRAPHVIZ_SVG = re.compile(".*(<svg.*>.*</svg>).*")
+RE_LINE_VERTEX = re.compile(PATTERN_LINE_VERTEX)
+RE_LINE_EDGE = re.compile(PATTERN_LINE_EDGE)
+
+def read_graphviz(iterable, g :Graph, vis :ReadGraphvizVisitor = None):
     """
     Read an iterable where each element is a line of a graphviz string to
     extract a graph, but not its attributes. See read_graphviz_dp if needed.
     This function expect at most one vertex per line and one edge per line.
+
+    Assumptions:
+    - vertices are identified using integer
+    - vertices are described in the dot file before the edges
+    - vertex/edge attributes are not too weird strings
+
     Args:
         iterable: An iterable (e.g. my_file.readlines() or my_str.splitlines())
         g: Pass an empty DirectedGraph.
     """
-    if not vis: vis = ReadGraphvizVisitor(g)
-    read_graphviz_vis(iterable, vis)
+    if not vis:
+        vis = ReadGraphvizVisitor(g)
+    for line in iterable:
+        line = line.strip()
+        m_v = RE_LINE_VERTEX.match(line)
+        if m_v:
+            vis.on_vertex(line, int(m_v.group(1)), m_v.group(2))
+            continue
+        m_e = RE_LINE_EDGE.match(line)
+        if m_e:
+            vis.on_edge(line, int(m_e.group(1)), int(m_e.group(2)), m_e.group(3))
+            continue
+        vis.on_else(line)
 
 #------------------------------------------------------------------
 # Graphviz read with dynamic property (dp)

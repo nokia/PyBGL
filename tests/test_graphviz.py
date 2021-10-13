@@ -7,11 +7,11 @@ __email__      = "marc-olivier.buob@nokia-bell-labs.com"
 __copyright__  = "Copyright (C) 2020, Nokia"
 __license__    = "BSD-3"
 
-from pybgl.graph    import *
-from pybgl.graph_dp import GraphDp
-from pybgl.graphviz import graphviz_escape_char, graphviz_escape_html, graph_to_html
-from pybgl.html     import html
-from pybgl.ipynb    import in_ipynb, ipynb_display_graph
+from pybgl.graph        import *
+from pybgl.graph_dp     import GraphDp
+from pybgl.graphviz     import graphviz_escape_char, graphviz_escape_html, graph_to_html, read_graphviz
+from pybgl.html         import html
+from pybgl.ipynb        import in_ipynb, ipynb_display_graph
 
 WEIRD_CHARS = "&<>\n\t\r[]{}" + "".join([chr(i) for i in range(32)])
 
@@ -151,3 +151,57 @@ def test_graph_to_html_with_html_sequences():
         if in_ipynb():
             html(shtml)
             ipynb_display_graph(gdp)
+
+# Graphviz file parsing
+def test_read_graphviz_simple():
+    g = DirectedGraph()
+    dot = """digraph G {
+        0;
+        1;
+        2;
+        0->1;
+    }"""
+    read_graphviz(dot.splitlines(), g)
+    if in_ipynb():
+        ipynb_display_graph(g)
+    assert num_vertices(g) == 3
+    assert num_edges(g) == 1
+
+def test_read_graphviz_custom():
+    from collections        import defaultdict
+    from pybgl.property_map import ReadWritePropertyMap, make_assoc_property_map
+    from pybgl.graphviz     import ReadGraphvizVisitor
+
+    class MyReadGraphvizVisitor(ReadGraphvizVisitor):
+        def __init__(self, g :Graph, pmap_vlabel :ReadWritePropertyMap, pmap_elabel :ReadWritePropertyMap):
+            super().__init__(g)
+            self.pmap_vlabel = pmap_vlabel
+            self.pmap_elabel = pmap_elabel
+
+        def on_install_vertex_property(self, u, g, key, value):
+            if key == "label":
+                self.pmap_vlabel[u] = value
+
+        def on_install_edge_property(self, e, g, key, value):
+            if key == "label":
+                self.pmap_elabel[e] = value
+
+    map_vlabel = defaultdict(str)
+    map_elabel = defaultdict(str)
+    g = DirectedGraph()
+    dot = """digraph G {
+        0 [fontsize=8 label='red'];
+        1 [label='green'];
+        2 [label='blue' fontsize=10];
+        0->1 [label='my_label'];
+    }"""
+    vis = MyReadGraphvizVisitor(
+        g,
+        make_assoc_property_map(map_vlabel),
+        make_assoc_property_map(map_elabel)
+    )
+    read_graphviz(dot.splitlines(), g, vis)
+    if in_ipynb(): ipynb_display_graph(g)
+    assert map_vlabel == {0: "red", 1: "green", 2: "blue"}, map_vlabel
+    e_01 = next(iter(edges(g)))
+    assert map_elabel == {e_01 : "my_label"}, map_vlabel
