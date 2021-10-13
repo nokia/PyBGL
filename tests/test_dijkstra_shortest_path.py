@@ -296,10 +296,18 @@ def test_dijkstra_shortest_path(links :list = LINKS):
     t = 8
     path = dijkstra_shortest_path(
         g, s, t,
-        make_assoc_property_map(map_eweight),
+        pmap_eweight,
         make_assoc_property_map(map_vpreds),
         make_assoc_property_map(map_vdist)
     )
+    if in_ipynb():
+        ipynb_display_graph(
+            g,
+            dpe = {
+                "color" : make_func_property_map(lambda e: "green" if e in path else "red"),
+                "label" : pmap_eweight
+            }
+        )
     assert [
         (source(e, g), target(e, g))
         for e in path
