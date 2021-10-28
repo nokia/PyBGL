@@ -52,31 +52,6 @@ class ReadGraphvizVisitor(GraphvizVisitor):
     def on_install_edge_property(self, e, g, key, value):
         pass
 
-#    def on_vertex(self, line :str, u_alias :int, opts :str) -> int:
-#        u = add_vertex(self.m_g)
-#        self.m_aliases[u_alias] = u
-#        l = re.findall("\\w+=[^\\s]+", opts) # do not split on "," it fails if coma are in 'value'
-#        for opt in l:
-#            key, value = opt.split("=")
-#            key = key.strip().strip(",")
-#            value = value.strip().strip(",")
-#            value = value.strip("\"'").lstrip("<").rstrip(">")
-#            self.on_install_vertex_property(u, self.m_g, key, value)
-#        return u
-#
-#    def on_edge(self, line :str, u_alias :int, v_alias :int, opts :str) -> EdgeDescriptor:
-#        u = self.m_aliases[u_alias]
-#        v = self.m_aliases[v_alias]
-#        (e, added) = add_edge(u, v, self.m_g)
-#        assert added
-#        l = re.findall("\\w+=[^\\s]+", opts) # CRAPPY split
-#        for opt in l:
-#            key, value = opt.split("=")
-#            key = key.strip().strip(",")
-#            value = value.strip().strip(",")
-#            self.on_install_edge_property(e, self.m_g, key, value)
-#        return e
-
     def on_vertex(self, line :str, u_alias :int, opts :str) -> int:
         u = add_vertex(self.m_g)
         self.m_aliases[u_alias] = u
