@@ -75,10 +75,19 @@ def concatenation(nfa1 :Nfa, q01 :int, f1 :int, nfa2 :Nfa, q02 :int, f2 :int) ->
     return (nfa1, q01, f2)
 
 def alternation(nfa1 :Nfa, q01 :int, f1 :int, nfa2 :Nfa, q02 :int, f2 :int) -> tuple:
-    map21 = {q02 : q01, f2 : f1}
-    map21 = insert_automaton(nfa1, nfa2, map21)
-    f2  = map21[f2]
-    return (nfa1, q01, f2)
+    map21 = insert_automaton(nfa1, nfa2)
+    q0 = add_vertex(nfa1)
+    add_edge(q0, q01, epsilon(nfa1), nfa1)
+    add_edge(q0, map21[q02], epsilon(nfa1), nfa1)
+    set_initials({q0}, nfa1)
+    f = add_vertex(nfa1)
+    add_edge(f1, f, epsilon(nfa1), nfa1)
+    add_edge(map21[f2], f, epsilon(nfa1), nfa1)
+    set_final(f1, nfa1, False)
+    set_final(map21[f2], nfa1, False)
+    set_final(f, nfa1, True)
+    return (nfa1, q0, f)
+
 
 def zero_or_one(nfa :Nfa, q0 :int, f :int) -> tuple:
     eps = epsilon(nfa)
