@@ -231,6 +231,13 @@ def test_thompson_compile_nfa():
     w = "babbbababcccccd"
     assert accepts(w, nfa) == True
 
+def test_thompson_compile_nfa_2():
+    (nfa, q0, f) = thompson_compile_nfa("a*|b")
+    if in_ipynb():
+        ipynb_display_graph(nfa)
+    w = "bbbbb"
+    assert accepts(w, nfa) == False
+
 def test_thompson_compile_nfa_bracket_repetitions():
     (nfa, q0, f) = thompson_compile_nfa("[x-z]{1,3}")
     if in_ipynb():
