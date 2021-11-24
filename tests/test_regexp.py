@@ -39,13 +39,13 @@ def test_compile_dfa_ipv6():
 def test_nfa_dfa_ipv6_correctness():
     for f in [make_nfa_ipv6, make_dfa_ipv6]:
         g = f()
-        assert accepts("::1", g) == True
-        assert accepts("2a02:a802:23::1", g) == True
-        assert accepts("2a01:e35:2e49:10c0:eeb3:6f16:6bd4:d833", g) == True
-        assert accepts("2A01:E35:2E49:10C0:EEB3:6F16:6BD4:D833", g) == True
-        assert accepts("2A01:X35:2E49:10C0:EEB3:6F16:6BD4:D833", g) == False
-        assert accepts(":", g) == False
-        assert accepts("A", g) == False
-        assert accepts(":A", g) == False
-        assert accepts("1", g) == False
-        assert accepts(":1", g) == False
+        assert accepts("::1", g)
+        assert accepts("2a02:a802:23::1", g)
+        assert accepts("2a01:e35:2e49:10c0:eeb3:6f16:6bd4:d833", g)
+        assert accepts("2A01:E35:2E49:10C0:EEB3:6F16:6BD4:D833", g)
+        assert not accepts("2A01:X35:2E49:10C0:EEB3:6F16:6BD4:D833", g)
+        assert not accepts(":", g)
+        assert not accepts("A", g)
+        assert not accepts(":A", g)
+        assert not accepts("1", g)
+        assert not accepts(":1", g)

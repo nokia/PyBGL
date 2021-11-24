@@ -11,7 +11,7 @@ from pybgl.ipynb import in_ipynb, ipynb_get_background_color, ipynb_get_foregrou
 
 if not in_ipynb():
     def test_in_ipynb():
-        assert in_ipynb() == False
+        assert in_ipynb() is False
 
     def test_ipynb_get_background_color():
         assert ipynb_get_background_color() is None
@@ -20,11 +20,10 @@ if not in_ipynb():
         assert ipynb_get_background_color() is None
 else:
     def test_in_ipynb():
-        assert in_ipynb() == True
+        assert in_ipynb() is True
 
     def test_ipynb_get_background_color():
         assert isinstance(ipynb_get_background_color(), str)
 
     def test_ipynb_get_foreground_color():
         assert isinstance(ipynb_get_background_color(), str)
-

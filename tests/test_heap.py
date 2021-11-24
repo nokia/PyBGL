@@ -8,7 +8,7 @@ __copyright__  = "Copyright (C) 2021, Nokia"
 __license__    = "BSD-3"
 
 import heapq
-from pybgl.heap import Comparable, Heap, compare_to_key
+from pybgl.heap import Comparable, Heap
 
 def test_comparable_le():
     le = lambda a, b: a <= b

@@ -8,16 +8,15 @@ __copyright__  = "Copyright (C) 2018, Nokia"
 __license__    = "BSD-3"
 
 from pybgl.graphviz        import graph_to_html
-from pybgl.property_map    import make_assoc_property_map
 from pybgl.node_automaton  import *
 
 (u, v, w) = (0, 1, 2)
 
 def make_g1() -> NodeAutomaton:
     g1 = NodeAutomaton()
-    u = add_vertex(None, g1)
-    v = add_vertex("a", g1)
-    w = add_vertex("b", g1)
+    add_vertex(None, g1)
+    add_vertex("a", g1)
+    add_vertex("b", g1)
     return g1
 
 def make_g2() -> NodeAutomaton:
@@ -53,7 +52,7 @@ def test_node_automaton_num_vertices():
     g = make_g2()
     assert num_vertices(g) == 3
     m = 0
-    for q in vertices(g):
+    for _ in vertices(g):
         m += 1
     assert m == 3
 
@@ -61,22 +60,22 @@ def test_node_automaton_num_edges():
     g = make_g2()
     assert num_edges(g) == 3
     n = 0
-    for e in edges(g):
+    for _ in edges(g):
         n += 1
     assert n == 3
 
 def test_node_automaton_symbol():
     g1 = make_g1()
-    assert symbol(u, g1) == None
+    assert symbol(u, g1) is None
     assert symbol(v, g1) == "a"
     assert symbol(w, g1) == "b"
 
 def test_node_automaton_pmap_vlabel():
-    map_vlabel = {u : None, v : "a", w : "b"}
-    g = NodeAutomaton(3, pmap_vsymbol = make_assoc_property_map(map_vlabel))
+    map_vlabel = defaultdict(lambda: None, {v : "a", w : "b"})
+    g = NodeAutomaton(3, pmap_vsymbol=make_assoc_property_map(map_vlabel))
     assert num_vertices(g) == 3
     print(g.adjacencies)
-    assert symbol(u, g) == None
+    assert symbol(u, g) is None
     assert symbol(v, g) == "a"
     assert symbol(w, g) == "b"
     assert num_edges(g) == 0
@@ -170,3 +169,4 @@ def test_node_automaton_remove_vertex():
 def test_node_automaton_graphviz():
     g = make_g2()
     svg = graph_to_html(g)
+    assert isinstance(svg, str)

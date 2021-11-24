@@ -38,7 +38,7 @@ def test_make_func_property_map():
     check_rot13(pmap_rot13)
 
 def _test_make_assoc_property_map(with_dict :bool):
-    # Build the underlying dictionnary
+    # Build the underlying dictionary
     d = dict() if with_dict else defaultdict(str) # Here we use str instead of chr, because chr() does not exists!
 
     # Initialize the property map (and its underlying dict)

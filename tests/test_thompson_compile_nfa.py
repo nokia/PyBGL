@@ -90,7 +90,7 @@ def test_one_or_more():
 def test_parse_repetition():
     for (m, n) in [(0, 1), (0, None), (1, None), (3, 3), (2, 4), (2, None)]:
         for fmt in ["{%s,%s}", "{   %s , %s  }"]:
-            s = "{%s, %s}" % (
+            s = fmt % (
                 m if m is not None else "",
                 n if n is not None else ""
             )
@@ -143,14 +143,14 @@ def test_parse_bracket():
     for (s, expected) in map_input_expected.items():
         assert sorted(parse_bracket(s)) == expected
 
-def test_parse_bracket():
+def test_parse_bracket_custom():
     s = "[X-Z03a-e]"
     chars = parse_bracket(s)
     (nfa, q0, f) = bracket(chars)
     for a in "XYZ03abcde":
-        assert accepts(a, nfa) == True
+        assert accepts(a, nfa) is True
     for a in "ABC12456789fghi":
-        assert accepts(a, nfa) == False
+        assert accepts(a, nfa) is False
 
 def test_parse_bracket_escaped():
     s = r"[\s]"
@@ -236,9 +236,9 @@ def test_thompson_compile_nfa_bracket_repetitions():
     if in_ipynb():
         ipynb_display_graph(nfa)
     for w in ["x", "y", "xx", "xy", "zy", "xxx", "yyy", "zzz", "xyz", "zyx"]:
-        assert accepts(w, nfa) == True
+        assert accepts(w, nfa) is True
     for w in ["", "xxxx", "aaa"]:
-        assert accepts(w, nfa) == False
+        assert accepts(w, nfa) is False
 
     (nfa, q0, f) = thompson_compile_nfa("x{3}")
     assert accepts("xxx", nfa)

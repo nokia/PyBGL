@@ -7,7 +7,7 @@
 from pybgl.ipynb             import in_ipynb
 from pybgl.graph             import DirectedGraph, add_edge, source, target, vertices
 from pybgl.graph_dp          import GraphDp
-from pybgl.graphviz          import dotstr_to_html, graph_to_html
+from pybgl.graphviz          import graph_to_html
 from pybgl.html              import html
 from pybgl.strong_components import strong_components
 from pybgl.property_map      import make_assoc_property_map, make_func_property_map
@@ -30,27 +30,25 @@ def edge_color(e, g, pmap_component, pmap_color, default_color = "black"):
     color_v = pmap_color[pmap_component[v]]
     return color_u if color_u == color_v else default_color
 
-def display_strong_components(g, pmap_color, pmap_component) -> str:
+def strong_components_to_html(g, pmap_color, pmap_component) -> str:
     """
     Args:
         g: A DirectedGraph.
         pmap_component: A ReadPropertyMap, mapping a vertex with its strongly
             connected component.
     """
-    html = dotstr_to_html(GraphDp(
+    return graph_to_html(
         g,
-        {
-            "color" : make_func_property_map(lambda u : pmap_color[pmap_component[u]])
-        }, {
-            "color" : make_func_property_map(lambda e : edge_color(e, g, pmap_component, pmap_color)),
-            "style" : make_func_property_map(lambda e : \
-                "solid" if edge_color(e, g, pmap_component, pmap_color, None) else \
-                "dashed"
-            ),
+        dpv={
+            "color" : make_func_property_map(lambda u: pmap_color[pmap_component[u]])
+        },
+        dpe={
+            "color" : make_func_property_map(lambda e: edge_color(e, g, pmap_component, pmap_color)),
+            "style" : make_func_property_map(lambda e: (
+                "solid" if edge_color(e, g, pmap_component, pmap_color, None) else "dashed"
+            )),
         }
-    ).to_dot())
-
-    return html
+    )
 
 #-------------------------------------------------------------
 # Main program
@@ -91,5 +89,5 @@ def test_strong_components():
     }
 
     if in_ipynb():
-        html(display_strong_components(g, pmap_color, pmap_component).replace("\\n", ""))
+        html(strong_components_to_html(g, pmap_color, pmap_component).replace("\\n", ""))
 

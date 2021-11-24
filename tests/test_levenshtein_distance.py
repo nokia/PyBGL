@@ -33,7 +33,7 @@ def test_levenshtein_distance():
                 d2 = levenshtein_distance(wi, wj)
                 assert d1 == d2
 
-def test_levenshtein_distance():
+def test_levenshtein_distance_explicit():
     map_xy_expected = {
         ("books", "book")  : 1,
         ("books", "books") : 0,

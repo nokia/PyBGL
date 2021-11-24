@@ -107,6 +107,7 @@ def test_graph_to_html_with_pmaps():
 
         # Method1: call helper (ipynb_display_graph, graph_to_html)
         shtml = graph_to_html(g, dpv=dpv, dpe=dpe, dv=dv, de=de, vs=vs, es=es)
+        assert isinstance(shtml, str)
         if in_ipynb():
             ipynb_display_graph(g, dpv=dpv, dpe=dpe, dv=dv, de=de, vs=vs, es=es)
 
@@ -116,7 +117,9 @@ def test_graph_to_html_with_pmaps():
 
         # These two commands have the same outcome
         shtml = graph_to_html(gdp, vs=vs, es=es)
+        assert isinstance(shtml, str)
         shtml = graph_to_html(gdp, dpv=dpv, dpe=dpe, dv=dv, de=de, vs=vs, es=es)
+        assert isinstance(shtml, str)
 
         if in_ipynb():
             # These two commands have the same outcome

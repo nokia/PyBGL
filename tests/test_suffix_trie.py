@@ -49,7 +49,7 @@ def test_make_suffix_tree_max_len():
     assert not is_final(BOTTOM, t)
 
 def test_max_suffix_tree_g():
-    t = make_suffix_trie("ananas", g = Automaton())
+    t = make_suffix_trie("ananas")
     if in_ipynb(): html(graph_to_html(t))
     assert num_vertices(t) == 16
     for q in vertices(t):

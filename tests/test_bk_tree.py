@@ -16,7 +16,7 @@ WORDS = [
 
 TREE = make_bk_tree(WORDS)
 
-def test_bk_tree_completness():
+def test_bk_tree_completeness():
     assert set(WORDS) == {
         TREE.element(u)
         for u in vertices(TREE)
@@ -45,7 +45,7 @@ def test_bk_tree_fuzzy_match():
 def test_bk_tree_caped_fuzzy_match():
     assert TREE.search("boy", 2) == ("boo", 1)
     assert TREE.search("boy", 1) == ("boo", 1)
-    assert TREE.search("curry", 2) == None, TREE.search("curry", 2)
+    assert TREE.search("curry", 2) is None, TREE.search("curry", 2)
 
 def test_bk_tree_duplicate():
     n = num_vertices(TREE)
@@ -56,4 +56,4 @@ def test_bk_tree_duplicate():
 def test_bk_tree_graphviz():
     from pybgl.graphviz import graph_to_html
     s = graph_to_html(TREE)
-
+    assert isinstance(s, str)

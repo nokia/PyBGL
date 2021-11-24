@@ -4,29 +4,14 @@
 # Authors:
 #   Marc-Olivier Buob <marc-olivier.buob@nokia-bell-labs.com>
 
-import sys
-from collections import defaultdict
-
-from pybgl.graph import (
-    DirectedGraph, EdgeDescriptor, UndirectedGraph,
-    add_edge, add_vertex, edges, source, target, vertices
-)
+from pybgl.dijkstra_shortest_paths import *
+from pybgl.graph import *
 from pybgl.ipynb import in_ipynb, ipynb_display_graph
-from pybgl.property_map import (
-    ReadWritePropertyMap,
-    make_assoc_property_map, make_func_property_map
-)
-from pybgl.dijkstra_shortest_paths import (
-    INFINITY, DijkstraVisitor, DijkstraDebugVisitor,
-    dijkstra_shortest_path, dijkstra_shortest_paths, make_path
-)
+from pybgl.property_map import ReadPropertyMap, ReadWritePropertyMap, make_func_property_map
 
 # For debug purposes
 
-from pybgl.graphviz import GraphvizStyle
-from pybgl.ipynb import in_ipynb, ipynb_display_graph
-
-def display_graph(g, pmap_eweight = None, map_vpreds = None):
+def display_graph(g :Graph, pmap_eweight :ReadPropertyMap = None, map_vpreds :dict = None):
     if in_ipynb():
         dpe = dict()
         if pmap_eweight:
@@ -59,7 +44,7 @@ def make_graph(
     links :list,
     pmap_eweight :ReadWritePropertyMap,
     directed :bool = True,
-    build_reverse_edge = True
+    build_reverse_edge :bool = True
 ):
     def add_node(un, g, d):
         u = d.get(un)
@@ -87,11 +72,11 @@ def test_isolated_vertices():
     # Create 10 isolated vertices
     infty = sys.maxsize
     g = DirectedGraph(10)
-    map_eweight = dict()
+    map_eweight = defaultdict()
 
     for s in vertices(g):
         map_vpreds = defaultdict(set)
-        map_vdist = dict()
+        map_vdist = defaultdict()
         dijkstra_shortest_paths(
             g, s,
             make_assoc_property_map(map_eweight),
@@ -113,13 +98,12 @@ def test_simple_graph():
     e, added = add_edge(u, v, g)
     assert added
     w = 1
-    map_eweight = {
-        e : w,
-    }
+    map_eweight = defaultdict()
+    map_eweight[e] = w
 
     # Call Dijkstra
     map_vpreds = defaultdict(set)
-    map_vdist = dict()
+    map_vdist = defaultdict()
     dijkstra_shortest_paths(
         g, u,
         make_assoc_property_map(map_eweight),
@@ -147,14 +131,12 @@ def test_parallel_edges():
     (e2, added) = add_edge(u, v, g)
     assert added
     w = 1
-    map_eweight = {
-        e1 : w,
-        e2 : w,
-    }
+    map_eweight = defaultdict()
+    map_eweight[e1] = map_eweight[e2] = w
 
     # Call Dijkstra
     map_vpreds = defaultdict(set)
-    map_vdist = dict()
+    map_vdist = defaultdict()
     dijkstra_shortest_paths(
         g, u,
         make_assoc_property_map(map_eweight),
@@ -172,13 +154,15 @@ def test_parallel_edges():
         v : w
     }
 
-def test_directed_graph(links :list = LINKS):
-    map_eweight = dict()
+def test_directed_graph(links :list = None):
+    if links is None:
+        links = LINKS
+    map_eweight = defaultdict()
     pmap_eweight = make_assoc_property_map(map_eweight)
     g = make_graph(links, pmap_eweight, directed = True, build_reverse_edge = False)
 
     map_vpreds = defaultdict(set)
-    map_vdist = dict()
+    map_vdist = defaultdict()
     dijkstra_shortest_paths(
         g, 0,
         pmap_eweight,
@@ -187,17 +171,17 @@ def test_directed_graph(links :list = LINKS):
         vis = DijkstraDebugVisitor()
     )
 
-    E = {(source(e, g), target(e, g)) : e for e in edges(g)}
+    edge_dict = {(source(e, g), target(e, g)) : e for e in edges(g)}
 
     assert map_vpreds == {
-        1 : {E[0, 1]},
-        2 : {E[1, 2]},
-        3 : {E[1, 3]},
-        4 : {E[0, 4]},
-        5 : {E[0, 5]},
-        6 : {E[5, 6]},
-        7 : {E[6, 7]},
-        8 : {E[6, 8]},
+        1 : {edge_dict[0, 1]},
+        2 : {edge_dict[1, 2]},
+        3 : {edge_dict[1, 3]},
+        4 : {edge_dict[0, 4]},
+        5 : {edge_dict[0, 5]},
+        6 : {edge_dict[5, 6]},
+        7 : {edge_dict[6, 7]},
+        8 : {edge_dict[6, 8]},
     }
     assert map_vdist == {
         0 : 0,
@@ -217,15 +201,18 @@ def test_decrease_key():
     (e01, _) = add_edge(0, 1, g)
     (e02, _) = add_edge(0, 2, g)
     (e21, _) = add_edge(2, 1, g)
-    map_eweight = {
-        e01 : 9,
-        e02 : 1,
-        e21 : 1,
-    }
+    map_eweight = defaultdict(
+        lambda: None,
+        {
+            e01 : 9,
+            e02 : 1,
+            e21 : 1,
+        }
+    )
     pmap_eweight = make_assoc_property_map(map_eweight)
 
     map_vpreds = defaultdict(set)
-    map_vdist = dict()
+    map_vdist = defaultdict()
     dijkstra_shortest_paths(
         g, 0,
         pmap_eweight,
@@ -242,13 +229,15 @@ def test_decrease_key():
         2  : 1,
     }
 
-def test_directed_symmetric_graph(links :list = LINKS):
-    map_eweight = dict()
+def test_directed_symmetric_graph(links :list = None):
+    if links is None:
+        links = LINKS
+    map_eweight = defaultdict()
     pmap_eweight = make_assoc_property_map(map_eweight)
     g = make_graph(LINKS, pmap_eweight, directed = True, build_reverse_edge = True)
 
     map_vpreds = defaultdict(set)
-    map_vdist = dict()
+    map_vdist = defaultdict()
     dijkstra_shortest_paths(
         g, 0,
         pmap_eweight,
@@ -283,7 +272,9 @@ def test_directed_symmetric_graph(links :list = LINKS):
         9 : 3
     }
 
-def test_dijkstra_shortest_path(links :list = LINKS):
+def test_dijkstra_shortest_path(links :list = None):
+    if links is None:
+        links = LINKS
     # Prepare graph
     map_eweight = defaultdict(int)
     pmap_eweight = make_assoc_property_map(map_eweight)

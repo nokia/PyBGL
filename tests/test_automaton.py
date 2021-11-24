@@ -74,9 +74,6 @@ def test_automaton_set_final():
     set_final(q, g, False)
     assert not is_final(q, g)
 
-def test_automaton_alphabet():
-    assert alphabet(G1) == {"a", "b"}
-
 def test_automaton_is_deterministic():
     assert is_deterministic(G1) == True
 
@@ -112,6 +109,7 @@ def test_automaton_add_vertex():
     assert num_vertices(g) == 2
     assert num_edges(g) == 0
     q = add_vertex(g)
+    assert isinstance(q, int)
     assert num_vertices(g) == 3
     assert num_edges(g) == 0
 
@@ -212,3 +210,4 @@ def test_automaton_remove_vertex():
 
 def test_automaton_graphviz():
     svg = graph_to_html(G1)
+    assert isinstance(svg, str)

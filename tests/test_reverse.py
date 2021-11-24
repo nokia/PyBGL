@@ -11,16 +11,8 @@ from pybgl.breadth_first_search import (
     DefaultBreadthFirstSearchVisitor,
     breadth_first_search
 )
-from pybgl.depth_first_search import (
-    DefaultDepthFirstSearchVisitor,
-    depth_first_search
-)
-from pybgl.incidence_graph    import (
-    IncidenceGraph,
-    add_edge, in_edges, out_edges,
-    source, target,
-    num_vertices
-)
+from pybgl.depth_first_search import *
+from pybgl.incidence_graph    import *
 from pybgl.reverse            import reverse_dict, reverse_graph
 
 def test_revert_dict():
@@ -51,10 +43,13 @@ class RecordMixin:
     def __init__(self):
         self.vertices = list()
         self.edges = list()
+
     def discover_vertex(self, u, g):
         self.vertices.append(u)
+
     def examine_edge(self, e, g):
         self.edges.append(e)
+
     def edges_to_pairs(self, g):
         return [(source(e, g), target(e, g)) for e in self.edges]
 
@@ -94,4 +89,3 @@ def test_reverse_traversal():
         # are also swapped.
         reverse_graph(g)
         assert bwd_vis.edges_to_pairs(g) == [(2, 3), (1, 2), (0, 1)]
-

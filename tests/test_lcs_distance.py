@@ -33,7 +33,7 @@ def test_lcs_distance():
                 d2 = lcs_distance(wi, wj)
                 assert d1 == d2
 
-def test_lcs_distance():
+def test_lcs_distance_explicit():
     map_xy_expected = {
         ("books", "book")  : 1,
         ("books", "books") : 0,

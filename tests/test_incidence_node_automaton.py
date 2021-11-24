@@ -10,20 +10,15 @@ __license__    = "BSD-3"
 from collections                        import defaultdict
 from pybgl.graphviz                     import graph_to_html
 from pybgl.property_map                 import make_assoc_property_map, make_func_property_map
-from pybgl.incidence_node_automaton     import \
-    BOTTOM, IncidenceNodeAutomaton, add_vertex, add_edge, delta, edge, \
-    in_edges, in_degree, is_initial, is_final, edges, label, \
-    make_incidence_node_automaton, num_edges, num_vertices, \
-    out_degree, out_edges, remove_vertex, remove_edge, \
-    source, symbol, target, vertices
+from pybgl.incidence_node_automaton     import *
 
 (u, v, w) = (0, 1, 2)
 
 def make_g1() -> IncidenceNodeAutomaton:
     g1 = IncidenceNodeAutomaton()
-    u = add_vertex(None, g1)
-    v = add_vertex("a", g1)
-    w = add_vertex("b", g1)
+    add_vertex(None, g1)
+    add_vertex("a", g1)
+    add_vertex("b", g1)
     return g1
 
 def make_g2() -> IncidenceNodeAutomaton:
@@ -89,16 +84,18 @@ def test_incidence_node_automaton_num_edges():
 
 def test_incidence_node_automaton_symbol():
     g1 = make_g1()
-    assert symbol(u, g1) == None
+    assert symbol(u, g1) is None
     assert symbol(v, g1) == "a"
     assert symbol(w, g1) == "b"
 
 def test_incidence_node_automaton_pmap_vlabel():
-    map_vlabel = {u : None, v : "a", w : "b"}
+    map_vlabel = defaultdict(lambda: None)
+    map_vlabel[v] = "a"
+    map_vlabel[w] = "b"
     g = IncidenceNodeAutomaton(3, pmap_vsymbol = make_assoc_property_map(map_vlabel))
     assert num_vertices(g) == 3
     print(g.adjacencies)
-    assert symbol(u, g) == None
+    assert symbol(u, g) is None, f"Got {symbol(u, g)}"
     assert symbol(v, g) == "a"
     assert symbol(w, g) == "b"
     assert num_edges(g) == 0
@@ -197,7 +194,12 @@ def test_make_incidence_node_automaton():
     g = make_incidence_node_automaton(
         [(0, 1), (0, 2), (1, 2)],
         q0n = 0,
-        pmap_vlabel = make_assoc_property_map({1 : "a", 2 : "b"}),
+        pmap_vlabel = make_assoc_property_map(
+            defaultdict(
+                lambda: None,
+                {1: "a", 2: "b"}
+            )
+        ),
         pmap_vfinal = make_func_property_map(lambda u: u in {0, 2})
     )
     assert num_vertices(g) == 3
@@ -205,6 +207,6 @@ def test_make_incidence_node_automaton():
     for u in vertices(g):
         assert is_initial(u, g) == (u == 0)
         assert is_final(u, g) == (u in {0, 2})
-    assert symbol(0, g) == None
+    assert symbol(0, g) is None
     assert symbol(1, g) == "a"
     assert symbol(2, g) == "b"

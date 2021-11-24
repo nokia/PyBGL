@@ -4,7 +4,7 @@
 # Authors:
 #   Marc-Olivier Buob <marc-olivier.buob@nokia-bell-labs.com>
 
-from pybgl.incidence_graph import IncidenceGraph, add_vertex, add_edge, edge, in_edges, in_degree, num_edges, num_vertices, out_degree, out_edges, remove_vertex, remove_edge
+from pybgl.incidence_graph import *
 
 def test_incidence_graph():
     print("Testing num_vertices")

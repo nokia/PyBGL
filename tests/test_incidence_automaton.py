@@ -10,13 +10,7 @@ __license__    = "BSD-3"
 
 from pybgl.graphviz             import graph_to_html
 from pybgl.property_map         import make_func_property_map
-from pybgl.incidence_automaton  import \
-    BOTTOM, IncidenceAutomaton, accepts, add_edge, add_vertex, alphabet, delta, edge, \
-    finals, initial, is_complete, is_deterministic, is_final, is_finite, is_initial, \
-    in_degree, in_edges, \
-    is_minimal, label, make_incidence_automaton, num_edges, num_vertices, \
-    out_edges, out_degree, set_final, sigma, \
-    remove_edge, remove_vertex, source, target, vertices
+from pybgl.incidence_automaton  import *
 
 G1 = make_incidence_automaton(
     [
@@ -58,21 +52,18 @@ def test_incidence_automaton_initial():
 def test_incidence_automaton_final():
     assert finals(G1) == {1}
 
-def test_incidence_automaton_alphabet():
-    assert alphabet(G1) == {"a", "b"}
-
 def test_incidence_automaton_is_deterministic():
-    assert is_deterministic(G1) == True
+    assert is_deterministic(G1) is True
 
 def test_incidence_automaton_is_finite():
-    assert is_finite(G1) == True
+    assert is_finite(G1) is True
 
 def test_incidence_automaton_is_complete():
-    assert is_complete(G1) == True
-    assert is_complete(G2) == False
-    assert is_complete(G3) == False
-    assert is_complete(G4) == True
-    assert is_complete(G5) == True
+    assert is_complete(G1) is True
+    assert is_complete(G2) is False
+    assert is_complete(G3) is False
+    assert is_complete(G4) is True
+    assert is_complete(G5) is True
 
 def test_incidence_automaton_accepts():
     assert accepts("", G1) == False

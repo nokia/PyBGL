@@ -5,8 +5,8 @@
 #   Marc-Olivier Buob <marc-olivier.buob@nokia-bell-labs.com>
 #   Maxime Raynal     <maxime.raynal@nokia.com>
 
+from collections           import defaultdict
 from pybgl.graph           import DirectedGraph, Graph, add_edge
-from pybgl.graph_dp        import GraphDp
 from pybgl.graph_traversal import DefaultTreeTraversalVisitor, dfs_tree, bfs_tree
 from pybgl.property_map    import ReadWritePropertyMap, make_assoc_property_map
 
@@ -29,7 +29,7 @@ def make_binary_tree(n = 10):
     return g
 
 def test_bfs_tree():
-    map_order = dict()
+    map_order = defaultdict()
     pmap_order = make_assoc_property_map(map_order)
     g = make_binary_tree(10)
     vis = MyVisitor(pmap_order)
@@ -48,7 +48,7 @@ def test_bfs_tree():
     }
 
 def test_dfs_tree():
-    map_order = dict()
+    map_order = defaultdict()
     pmap_order = make_assoc_property_map(map_order)
     g = make_binary_tree(10)
     vis = MyVisitor(pmap_order)

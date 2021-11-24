@@ -8,12 +8,7 @@ __email__      = "marc-olivier.buob@nokia-bell-labs.com"
 __copyright__  = "Copyright (C) 2020, Nokia"
 __license__    = "BSD-3"
 
-from pybgl.digital_sequence import \
-    BOTTOM, DigitalSequence, \
-    accepts, delta, edge, edges, \
-    is_initial, in_degree, initial, is_final, is_finite, finals, \
-    num_edges, num_vertices, out_degree, out_edges, set_final, \
-    sigma, source, target, vertices
+from pybgl.digital_sequence import *
 
 def test_num_vertices():
     assert num_vertices(DigitalSequence("")) == 1

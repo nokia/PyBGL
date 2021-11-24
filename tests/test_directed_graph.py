@@ -8,19 +8,14 @@ __copyright__  = "Copyright (C) 2018, Nokia"
 __license__    = "BSD-3"
 
 
-from collections           import defaultdict
-from pybgl.property_map    import make_assoc_property_map
-from pybgl.graph import \
-    DirectedGraph, add_vertex, add_edge, edge, edges, num_edges, num_vertices, \
-    out_degree, out_edges, remove_vertex, remove_edge, vertices
-
+from pybgl.graph import *
 (u, v, w) = (0, 1, 2)
 
 def make_g1() -> DirectedGraph:
     g1 = DirectedGraph()
-    u = add_vertex(g1)
-    v = add_vertex(g1)
-    w = add_vertex(g1)
+    add_vertex(g1) # u
+    add_vertex(g1) # v
+    add_vertex(g1) # w
     return g1
 
 def make_g2() -> DirectedGraph:
@@ -95,13 +90,13 @@ def test_directed_graph_iterators():
     g = make_g2()
 
     m = 0
-    for u in vertices(g):
+    for _ in vertices(g):
         m += 1
     assert m == num_vertices(g)
     assert m == 3
 
     n = 0
-    for u in edges(g):
+    for _ in edges(g):
         n += 1
     assert n == num_edges(g)
     assert n == 5

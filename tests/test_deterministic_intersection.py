@@ -30,7 +30,7 @@ def make_dafsa2():
         make_func_property_map(lambda q: q in {4})
     )
 
-def test_deterministic_intersection(show_g1 = True, show_g2 = True, show_g12 = True):
+def test_deterministic_intersection(show_g1 :bool = True, show_g2 :bool = True, show_g12 :bool = True):
     g1 = make_dafsa1()
     g2 = make_dafsa2()
     g12 = deterministic_intersection(g1, g2)
