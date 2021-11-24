@@ -24,7 +24,7 @@ def in_ipynb() -> bool:
     try:
         from IPython import get_ipython
         return str(type(get_ipython())) == "<class 'ipykernel.zmqshell.ZMQInteractiveShell'>"
-    except NameError:
+    except:
         return False
 
 def background_template_html(background_color = None):
