@@ -37,7 +37,7 @@ def moore_determination(nfa :Nfa, dfa :Automaton = None, complete :bool = True) 
         dfa = Automaton()
     map_qs_q = dict() # Maps subset of states of nfa with the corresponding dfa state.
 
-    q0s = frozenset(initials(nfa))
+    q0s = frozenset(nfa.delta_epsilon(initials(nfa)))
     unprocessed_qs = set() # Keeps track of qs for which delta is not yet installed in dfa
     unprocessed_qs.add(q0s)
     q0 = dfa_add_state(q0s)
