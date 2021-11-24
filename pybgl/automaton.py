@@ -19,7 +19,7 @@ BOTTOM = None
 class Automaton(DirectedGraph):
     # Convention: EdgeDescriptor(q, r, a)
     # Convention: self.m_adjacencies[q][a] == r
-    def __init__(self, num_vertices :int = 0, q0 :int = 0, pmap_final = None):
+    def __init__(self, num_vertices :int = 0, q0 :int = 0, pmap_final :ReadPropertyMap = None):
         super().__init__(num_vertices)
         self.m_q0 = q0
         if not pmap_final:

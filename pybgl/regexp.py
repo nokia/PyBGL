@@ -15,7 +15,7 @@ from pybgl.nfa                  import Nfa
 from pybgl.thompson_compile_nfa import thompson_compile_nfa
 from pybgl.moore_determination  import moore_determination
 
-def compile_nfa(regexp :str) -> tuple:
+def compile_nfa(regexp :str) -> Nfa:
     (nfa, q0, f) = thompson_compile_nfa(regexp)
     return nfa
 

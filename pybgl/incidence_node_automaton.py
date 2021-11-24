@@ -13,17 +13,12 @@ __license__    = "BSD-3"
 
 from collections                import defaultdict
 from pybgl.graph                import __len_gen__
-from pybgl.property_map         import ReadPropertyMap, make_assoc_property_map
-from pybgl.incidence_automaton  import in_degree, in_edges
-from pybgl.node_automaton       import (
-    BOTTOM, NodeAutomaton, EdgeDescriptor, accepts, accepts_debug, add_edge, add_vertex,
-    alphabet, delta, edge, edges, graphviz_arc, initial, is_initial, is_final, is_finite,
-    finals, label, num_edges, num_vertices, out_degree, out_edges, set_final, symbol,
-    remove_vertex, remove_edge, set_initial, set_final, source, sigma, target, vertices
-)
+from pybgl.property_map         import ReadPropertyMap
+from pybgl.incidence_automaton  import in_degree, in_edges # Forward import
+from pybgl.node_automaton       import *
 
 class IncidenceNodeAutomaton(NodeAutomaton):
-    def __init__(self, *args, pmap_vsymbol = None):
+    def __init__(self, *args, pmap_vsymbol :ReadPropertyMap = None):
         self.predecessors = defaultdict(set) # predecessors[r] = {q}
         super().__init__(*args, pmap_vsymbol = pmap_vsymbol) # UGLY
 

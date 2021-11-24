@@ -58,6 +58,6 @@ def deterministic_inclusion(
         vis = DeterministicInclusionVisitor()
     try:
         parallel_breadth_first_search(g1, g2, vis = vis)
-    except ContradictionException as e:
+    except ContradictionException:
         return None
     return vis.ret

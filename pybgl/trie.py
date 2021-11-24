@@ -10,15 +10,8 @@ __email__      = "marc-olivier.buob@nokia-bell-labs.com"
 __copyright__  = "Copyright (C) 2020, Nokia"
 __license__    = "BSD-3"
 
-from pybgl.automaton import \
-    BOTTOM, Automaton, DirectedGraph, EdgeDescriptor, \
-    accepts, add_edge, add_vertex, add_edge, alphabet, \
-    automaton_insert_string, delta, delta_best_effort, edge, edges, initial, \
-    is_initial, initial, is_final, is_finite, finals, \
-    num_edges, num_vertices, out_degree, out_edges, set_initial, set_final, \
-    remove_vertex, remove_edge, source, sigma, label, target, vertices
-from pybgl.parallel_breadth_first_search import \
-    WHITE, ParallelBreadthFirstSearchVisitor, parallel_breadth_first_search
+from pybgl.automaton import *
+from pybgl.parallel_breadth_first_search import WHITE, ParallelBreadthFirstSearchVisitor, parallel_breadth_first_search
 from pybgl.property_map import make_constant_property_map
 
 class Trie(Automaton):
@@ -48,10 +41,12 @@ class TrieDeterministicFusion(ParallelBreadthFirstSearchVisitor):
     def examine_edge(self, e1 :EdgeDescriptor, g1 :Trie, e2 :EdgeDescriptor, g2 :Trie, a :chr):
         r2 = target(e2, g2) if e2 else BOTTOM
         if e1 is None or target(e1, g1) is BOTTOM:
+            q1 = None
             if e1 is None: # new arc, disconnect from the original g1
                 q1 = self.map_q2_q1[source(e2, g2)]
             elif target(e1, g1) is BOTTOM: # new arc, connected to the original g1
                 q1 = source(e1, g1)
+            assert q1 is not None
             r1 = add_vertex(g1)
             self.map_q2_q1[r2] = r1
             add_edge(q1, r1, a, g1)

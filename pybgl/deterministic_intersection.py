@@ -35,9 +35,10 @@ def deterministic_intersection(
         vis = DeterministicIntersectionVisitor(g12)
     parallel_breadth_first_search(
         g1, g2, vis = vis,
-        if_push = lambda e1, g1, e2, g2: \
-            e1 is not None and target(e1, g1) and \
+        if_push = lambda e1, g1, e2, g2: (
+            e1 is not None and target(e1, g1) and
             e2 is not None and target(e2, g2)
+        )
     )
     return g12
 

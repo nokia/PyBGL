@@ -11,7 +11,7 @@ __copyright__  = "Copyright (C) 2020, Nokia"
 __license__    = "BSD-3"
 
 # This file must have NO dependency on .graph to avoid mutual inclusion
-import copy, re
+import re
 from .singleton     import Singleton
 from .tokenize      import TokenizeVisitor, tokenize
 
@@ -102,7 +102,7 @@ GRAPHVIZ_HTML_TOKENIZER = re.compile(
 # so we replace them by their corresponding HTML representation. Note that
 # graphviz does not support HTML entity (e.g. "&amp;") and that is why we
 # rely on the HTML code (e.g. "&#38;").
-GRAPHIVZ_MAP_CHAR_ESCAPED = {
+GRAPHVIZ_MAP_CHAR_ESCAPED = {
     '&'  : "&#38;",  # &amp;
     "<"  : "&#60;",  # &lt;
     ">"  : "&#62;",  # &gt;
@@ -116,7 +116,7 @@ GRAPHIVZ_MAP_CHAR_ESCAPED = {
 }
 
 def graphviz_escape_char(a :chr) -> str:
-    escaped = GRAPHIVZ_MAP_CHAR_ESCAPED.get(a)
+    escaped = GRAPHVIZ_MAP_CHAR_ESCAPED.get(a)
     if escaped is None and ord(a) < 32:
         escaped = "\\x%02x;" % ord(a)
     return escaped if escaped is not None else a

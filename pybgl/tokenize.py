@@ -14,8 +14,6 @@ __email__      = "marc-olivier.buob@nokia-bell-labs.com"
 __copyright__  = "Copyright (C) 2018, Nokia"
 __license__    = "BSD-3"
 
-import re
-
 class TokenizeVisitor:
     def on_unmatched(self, unmatched :str, start :int, end :int, s :str): pass
     def on_matched(self, matched :str, start :int, end :int, s :str): pass

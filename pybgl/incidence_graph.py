@@ -12,11 +12,7 @@ __email__      = "marc-olivier.buob@nokia-bell-labs.com"
 __copyright__  = "Copyright (C) 2018, Nokia"
 __license__    = "BSD-3"
 
-from pybgl.graph    import DirectedGraph, \
-    EdgeDescriptor, source, target, \
-    add_vertex, vertices, num_vertices, remove_vertex, \
-    add_edge, edge, edges, num_edges, remove_edge, \
-    out_degree, out_edges
+from pybgl.graph import *
 
 class IncidenceGraph(DirectedGraph):
     def __init__(self, num_vertices :int = 0):

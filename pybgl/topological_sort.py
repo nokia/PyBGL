@@ -14,12 +14,13 @@ __copyright__  = "Copyright (C) 2018, Nokia"
 __license__    = "BSD-3"
 
 from collections              import defaultdict, deque
-from pybgl.graph              import DirectedGraph, EdgeDescriptor, add_edge
+from pybgl.graph              import DirectedGraph, EdgeDescriptor
 from pybgl.depth_first_search import DefaultDepthFirstSearchVisitor, depth_first_search_graph
 from pybgl.property_map       import make_assoc_property_map
 
-class TopoSortVisitor(DefaultDepthFirstSearchVisitor):
+class TopologicalSortVisitor(DefaultDepthFirstSearchVisitor):
     def __init__(self, stack):
+        super().__init__()
         self.stack = stack
     def back_edge(self, e :EdgeDescriptor, g :DirectedGraph):
         raise RuntimeError("Not a DAG")
@@ -31,6 +32,6 @@ def topological_sort(g :DirectedGraph, stack :deque = None) -> deque:
     depth_first_search_graph(
         g,
         pmap_vcolor = make_assoc_property_map(defaultdict(int)),
-        vis = TopoSortVisitor(stack)
+        vis = TopologicalSortVisitor(stack)
     )
     return stack

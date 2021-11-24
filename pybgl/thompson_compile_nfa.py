@@ -10,11 +10,7 @@ __license__    = "BSD-3"
 import copy, re, string
 from collections import deque
 
-from pybgl.nfa import (
-    Nfa, add_edge, add_vertex, edges, epsilon,
-    label, is_final, set_initials, set_final,
-    source, target, vertices
-)
+from pybgl.nfa import *
 from pybgl.shunting_yard_postfix import (
     MAP_OPERATORS_RE, DefaultShuntingYardVisitor,
     shunting_yard_postfix, tokenizer_re
@@ -129,15 +125,15 @@ def repetition_range(nfa :Nfa, q0 :int, f :int, m :int, n :int) -> tuple:
     else:
         (q0_ori, f_ori, ori) = (q0, f, copy.deepcopy(nfa))
         (nfa, _, f) = repetition(nfa, q0, f, m)
-        finals = {f}
+        final_states = {f}
         # The m-n following NFA instances are optional. We add them
         # one by one to get their respective final states to build an
         # epsilon-transition toward a same and unique final state.
         for i in range(n - m):
             (nfa, q0, f) = concatenation(nfa, q0, f, ori, q0_ori, f_ori)
-            finals.add(f)
+            final_states.add(f)
         eps = epsilon(nfa)
-        for pred_f in finals:
+        for pred_f in final_states:
             if pred_f != f:
                 add_edge(pred_f, f, eps, nfa)
         return (nfa, q0, f)
@@ -202,8 +198,7 @@ def parse_bracket(s :str, whole_alphabet :iter = None) -> set:
         i += 1
     return accepted if not reverse else set(whole_alphabet) - accepted
 
-def parse_escaped(s :str, whole_alphabet :iter = None) -> set:
-    MAP_ESCAPED_BRACKET = {
+MAP_ESCAPED_BRACKET = {
         r"\d" : "[0-9]",
         r"\D" : "[^0-9]",
         r"\s" : "[ \t]",
@@ -211,16 +206,19 @@ def parse_escaped(s :str, whole_alphabet :iter = None) -> set:
         # \w and \W should depend on the locale. Here, we assume ASCII.
         r"\w" : "[0-9A-Za-z]",
         r"\W" : "[^0-9A-Za-z]",
-    }
-    MAP_ESCAPED_SPECIAL = {
-        r"\a" : "\a",
-        r"\b" : "\b",
-        r"\f" : "\f",
-        r"\n" : "\n",
-        r"\r" : "\r",
-        r"\t" : "\t",
-        r"\v" : "\v",
-    }
+}
+
+MAP_ESCAPED_SPECIAL = {
+    r"\a" : "\a",
+    r"\b" : "\b",
+    r"\f" : "\f",
+    r"\n" : "\n",
+    r"\r" : "\r",
+    r"\t" : "\t",
+    r"\v" : "\v",
+}
+
+def parse_escaped(s :str, whole_alphabet :iter = None) -> set:
     if len(s) == 2:
         if s in {
             r"\+", r"\*", r"\?", r"\.", r"\|",

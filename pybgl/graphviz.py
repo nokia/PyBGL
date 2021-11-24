@@ -130,7 +130,7 @@ class ReadGraphvizDpVisitor(ReadGraphvizVisitor):
         pmap = self.m_dpe[key] if self.m_dpe else None
         if pmap: pmap[e] = value
 
-def read_graphviz_dp(iterable, g :Graph, dpv = None, dpe = None):
+def read_graphviz_dp(iterable, g :Graph, dpv :dict = None, dpe :dict = None):
     """
     Read an iterable where each element is a line of a graphviz string to
     extract a graph and its node/edge attributes.
@@ -144,7 +144,7 @@ def read_graphviz_dp(iterable, g :Graph, dpv = None, dpe = None):
             dict mapping each specified graphviz attributes with its value.
     """
     vis = ReadGraphvizDpVisitor(g, dpv, dpe)
-    read_graphviz_vis(iterable, vis)
+    read_graphviz(iterable, g, vis)
 
 #------------------------------------------------------------------
 # Graphviz call
@@ -163,18 +163,20 @@ def run_graphviz(s_dot, layout_engine = "dot", format = "svg") -> bytes:
         format: The output graphviz terminal.
             See "man dot" for more details.
     Returns:
-        The bytes of the output image iff successful, None otherwise.
+        The bytes/str of the output image iff successful, None otherwise.
     """
     cmd = ['dot', '-T' + format, '-K', layout_engine]
     dot = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-    stdoutdata, stderrdata = dot.communicate(s_dot.encode("utf-8"))
+    stdout_data, stderr_data = dot.communicate(s_dot.encode("utf-8"))
     status = dot.wait()
     if status == 0:
-        return stdoutdata.decode("utf-8")
+        if format == "svg":
+            return stdout_data.decode("utf-8")
+        else:
+            return stdout_data
     else:
-        fstr = "dot returned {}\n[==== stderr ====]\n{}"
-        error(fstr.format(status, stderrdata.decode('utf-8')))
-        error("Input dot string was:\n%s\n" % s_dot);
+        error(f"dot returned {status}\n[==== stderr ====]\n{stderr_data.decode('utf-8')}")
+        error("Input dot string was:\n%s\n" % s_dot)
         raise RuntimeError("run_graphviz: invalid string")
 
 def dot_to_svg(s_dot :str, layout_engine = "dot", format = "svg") -> str:
@@ -186,8 +188,7 @@ def dot_to_svg(s_dot :str, layout_engine = "dot", format = "svg") -> str:
         return bytes_img[i:]
     return None
 
-# TODO Swap format / engine parameters
-def write_graphviz(s_dot :str, filename, format = "svg", engine = "dot") -> bool:
+def write_graphviz(s_dot :str, filename, engine = "dot", format = "svg") -> bool:
     """
     Write a dot string (graphviz format) into a graphic file.
     Args:
@@ -197,21 +198,21 @@ def write_graphviz(s_dot :str, filename, format = "svg", engine = "dot") -> bool
             See "man dot" for more details.
         engine: A graphviz engine (e.g. "dot", "fp", "neato", ...).
     Returns:
-        True iff successfull.
+        True iff successful.
     """
-    def write_graphviz_impl(s_dot :str, f_img, format = "svg", engine = "dot") -> bool:
+    def write_graphviz_impl(s_dot :str, filename, format = "svg", engine = "dot") -> bool:
         ret = False
         bytes_img = run_graphviz(s_dot, engine, format)
         if bytes_img:
-            print(bytes_img.decode("utf-8"), file = f_img)
+            print(bytes_img.decode("utf-8"), file = filename)
             ret = True
         return ret
 
     if isinstance(filename, str):
         with open(filename, "w") as f_img:
-            return write_graphviz_impl(s_dot, f_img, format, engine)
+            return write_graphviz_impl(s_dot, filename, format, engine)
     else:
-        return write_graphviz_impl(s_dot, f_img, format, engine)
+        return write_graphviz_impl(s_dot, filename, format, engine)
 
 def dotstr_to_html(s_dot :str, engine = "dot") -> str:
     """
@@ -222,7 +223,7 @@ def dotstr_to_html(s_dot :str, engine = "dot") -> str:
     Returns:
         The corresponding HTML string.
     """
-    return run_graphviz(s_dot, engine)
+    return str(run_graphviz(s_dot, engine, format="svg"))
 
 def graph_to_html(g, engine = "dot", **kwargs) -> str:
     """

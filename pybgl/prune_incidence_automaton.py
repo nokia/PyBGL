@@ -35,7 +35,7 @@ def find_reachable_vertices(g: Graph, sources: set) -> set:
 def prune_incidence_automaton(g: IncidenceAutomaton):
     """
     Prunes the vertices of an IncidenceAutomaton that cannot be reached
-    from the intial state, or that cannot reach a final state.
+    from the initial state, or that cannot reach a final state.
     Args:
         g: IncidenceAutomaton, an instance of IncidenceAutomaton
     """

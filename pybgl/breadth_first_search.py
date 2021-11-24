@@ -20,7 +20,7 @@ from pybgl.graph_traversal import WHITE, GRAY, BLACK
 from pybgl.property_map    import ReadWritePropertyMap, make_assoc_property_map
 
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# /!\ DO NOT MODIFY THIS FILE
+# DO NOT MODIFY THIS FILE
 # It conforms to https://www.boost.org/doc/libs/1_68_0/boost/graph/breadth_first_search.hpp
 # We just moved some parameters.
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

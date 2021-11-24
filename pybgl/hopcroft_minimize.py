@@ -10,11 +10,7 @@ __license__    = "BSD-3"
 from collections import defaultdict
 from functools import reduce
 from pybgl.property_map import make_assoc_property_map
-from pybgl.incidence_automaton import (
-    IncidenceAutomaton, alphabet, add_edge, is_final, label,
-    source, target, in_edges, is_initial,
-    make_incidence_automaton, out_edges, num_vertices, vertices
-)
+from pybgl.incidence_automaton import *
 
 def is_empty(g) -> bool:
     for u in vertices(g):
@@ -68,15 +64,22 @@ def hopcroft_minimize(g :IncidenceAutomaton) -> IncidenceAutomaton:
     if is_empty(g):
         return g
     aggregated_states = list(hopcroft_agglomerate_states(g))
-    # Make sure that the initial state in the minimized automaton will be 0
+
+    # Find the aggregated state corresponding to the initial state
+    q0 = None
     for idx, qs in enumerate(aggregated_states):
         if any(is_initial(q, g) for q in qs):
-            q0_new = idx
+            q0 = idx
             break
-    tmp = aggregated_states[0]
-    aggregated_states[0] = aggregated_states[q0_new]
-    aggregated_states[q0_new] = tmp
-    q0_new = 0
+    assert q0 is not None
+
+    # Swap q0 and 0 so that the initial state is 0.
+    if q0 != 0:
+        tmp = aggregated_states[0]
+        aggregated_states[0] = aggregated_states[q0]
+        aggregated_states[q0] = tmp
+    q0 = 0
+
     # Assign an index to each state in the new automaton
     map_set_idx = {qs: idx for idx, qs in enumerate(list(aggregated_states))}
     # Build the set of final states in the new automaton
@@ -90,7 +93,7 @@ def hopcroft_minimize(g :IncidenceAutomaton) -> IncidenceAutomaton:
     # Build the minimized automaton
     min_g = IncidenceAutomaton(
         len(aggregated_states),
-        q0_new,
+        q0,
         make_assoc_property_map(final_states_new)
     )
     for qs in aggregated_states:

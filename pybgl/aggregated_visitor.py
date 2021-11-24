@@ -14,13 +14,13 @@ __copyright__  = "Copyright (C) 2018, Nokia"
 __license__    = "BSD-3"
 
 class AggregatedVisitor:
-    def __init__(self, visitors = list()):
+    def __init__(self, visitors :list = None):
         """
         Constructor.
         Args:
             visitors: A list of visitors exposing the same callbacks.
         """
-        self.m_visitors = visitors
+        self.m_visitors = visitors if visitors else list()
 
     def __getattr__(self, method_name :str):
         """
@@ -46,7 +46,7 @@ class AggregatedVisitor:
         """
         return {AggregatedVisitor.type_to_key(vis) for vis in self.m_visitors}
 
-    def get(self, key, ret_if_not_found = None):
+    def get(self, key :str, ret_if_not_found = None):
         """
         Retrieve a specific visitor.
         """

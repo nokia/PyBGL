@@ -31,7 +31,7 @@ def parallel_breadth_first_search(
     g2 :Automaton,
     source_pairs = None,
     pmap_vcolor :ReadWritePropertyMap = None,
-    vis = ParallelBreadthFirstSearchVisitor(),
+    vis :ParallelBreadthFirstSearchVisitor = ParallelBreadthFirstSearchVisitor(),
     if_push = None,
     delta = delta
 ):

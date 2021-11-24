@@ -11,7 +11,7 @@ __license__    = "BSD-3"
 
 
 import sys
-from collections                import defaultdict, deque
+from collections                import deque
 from pybgl.automaton            import *
 from pybgl.levenshtein_distance import levenshtein_distance
 

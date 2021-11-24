@@ -13,7 +13,6 @@ __license__    = "BSD-3"
 
 from collections            import defaultdict
 from pybgl.automaton        import *
-from pybgl.graph            import add_edge, add_vertex, edge
 from pybgl.property_map     import (
     ReadWritePropertyMap, make_assoc_property_map, make_func_property_map
 )
@@ -112,3 +111,8 @@ def add_vertex(a :chr, g :NodeAutomaton) -> int:
 def symbol(q :int, g :NodeAutomaton) -> chr:
     return g.symbol(q)
 
+def add_edge(u :int, v :int, g :NodeAutomaton) -> tuple:
+    return g.add_edge(u, v)
+
+def edge(u :int, v :int, g :NodeAutomaton) -> tuple:
+    return g.edge(u, v)

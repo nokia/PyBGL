@@ -35,7 +35,7 @@ def dfs_tree(root, g :Graph, vis = DefaultTreeTraversalVisitor()):
         for e in out_edges(u, g):
             vis.examine_edge(e, g)
             v = target(e, g)
-            if vis.if_push(e, g) == True:
+            if vis.if_push(e, g):
                 stack.append(v)
         vis.finish_vertex(u, g)
 
@@ -48,6 +48,6 @@ def bfs_tree(root, g :Graph, vis = DefaultTreeTraversalVisitor()):
         for e in out_edges(u, g):
             vis.examine_edge(e, g)
             v = target(e, g)
-            if vis.if_push(e, g) == True:
+            if vis.if_push(e, g):
                 stack.appendleft(v)
         vis.finish_vertex(u, g)

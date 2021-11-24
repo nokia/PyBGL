@@ -8,15 +8,7 @@ __copyright__  = "Copyright (C) 2018, Nokia"
 __license__    = "BSD-3"
 
 
-from pybgl.automaton import (
-    BOTTOM, Automaton, EdgeDescriptor,
-    accepts, accepts_debug, add_edge, add_vertex, add_edge, alphabet, delta, edge, edges,
-    finals, initial, is_complete, is_deterministic, is_initial, is_final,
-    is_finite, is_minimal, label,
-    num_edges, num_vertices, out_degree, out_edges, set_final,
-    remove_vertex, remove_edge, source, sigma, target, vertices,
-    make_automaton
-)
+from pybgl.automaton import *
 from pybgl.property_map import ReadPropertyMap
 
 class IncidenceAutomaton(Automaton):
