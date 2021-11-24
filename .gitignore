@@ -10,3 +10,4 @@ pybgl.egg-info
 *.tar.gz
 .minifoldrc
 .pytest_cache
+.idea
