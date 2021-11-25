@@ -64,11 +64,11 @@ def insert_automaton(g1 :Nfa, g2 :Nfa, map21 :dict = None) -> dict:
     return map21
 
 def concatenation(nfa1 :Nfa, q01 :int, f1 :int, nfa2 :Nfa, q02 :int, f2 :int) -> tuple:
-    map21 = {q02 : f1}
-    map21 = insert_automaton(nfa1, nfa2, map21)
-    f2 = map21[f2]
+    map21 = insert_automaton(nfa1, nfa2)
+    add_edge(f1, map21[q02], epsilon(nfa1), nfa1)
+    set_initials({q01}, nfa1)
     set_final(f1, nfa1, False)
-    return (nfa1, q01, f2)
+    return (nfa1, q01, map21[f2])
 
 def alternation(nfa1 :Nfa, q01 :int, f1 :int, nfa2 :Nfa, q02 :int, f2 :int) -> tuple:
     map21 = insert_automaton(nfa1, nfa2)
@@ -87,19 +87,40 @@ def alternation(nfa1 :Nfa, q01 :int, f1 :int, nfa2 :Nfa, q02 :int, f2 :int) -> t
 
 def zero_or_one(nfa :Nfa, q0 :int, f :int) -> tuple:
     eps = epsilon(nfa)
-    add_edge(q0, f, eps, nfa)
-    return (nfa, q0, f)
+    new_q0 = add_vertex(nfa)
+    new_f = add_vertex(nfa)
+    add_edge(new_q0, q0, eps, nfa)
+    add_edge(f, new_f, eps, nfa)
+    add_edge(new_q0, new_f, eps, nfa)
+    set_initials({new_q0}, nfa)
+    set_final(f, nfa, False)
+    set_final(new_f, nfa, True)
+    return (nfa, new_q0, new_f)
 
 def zero_or_more(nfa :Nfa, q0 :int, f :int) -> tuple:
     eps = epsilon(nfa)
-    add_edge(f, q0, eps, nfa)
-    add_edge(q0, f, eps, nfa)
-    return (nfa, q0, f)
+    new_q0 = add_vertex(nfa)
+    new_f = add_vertex(nfa)
+    add_edge(new_q0, q0, eps, nfa)
+    add_edge(f, new_f, eps, nfa)
+    add_edge(new_q0, new_f, eps, nfa)
+    add_edge(new_f, new_q0, eps, nfa)
+    set_initials({new_q0}, nfa)
+    set_final(f, nfa, False)
+    set_final(new_f, nfa, True)
+    return (nfa, new_q0, new_f)
 
 def one_or_more(nfa :Nfa, q0 :int, f :int) -> tuple:
     eps = epsilon(nfa)
-    add_edge(f, q0, eps, nfa)
-    return (nfa, q0, f)
+    new_q0 = add_vertex(nfa)
+    new_f = add_vertex(nfa)
+    add_edge(new_q0, q0, eps, nfa)
+    add_edge(f, new_f, eps, nfa)
+    add_edge(new_f, new_q0, eps, nfa)
+    set_initials({new_q0}, nfa)
+    set_final(f, nfa, False)
+    set_final(new_f, nfa, True)
+    return (nfa, new_q0, new_f)
 
 def repetition(nfa :Nfa, q0 :int, f :int, m :int) -> tuple:
     assert m >= 0
