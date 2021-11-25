@@ -84,18 +84,10 @@ def alternation(nfa1 :Nfa, q01 :int, f1 :int, nfa2 :Nfa, q02 :int, f2 :int) -> t
     set_final(f, nfa1, True)
     return (nfa1, q0, f)
 
-
 def zero_or_one(nfa :Nfa, q0 :int, f :int) -> tuple:
     eps = epsilon(nfa)
-    new_q0 = add_vertex(nfa)
-    new_f = add_vertex(nfa)
-    add_edge(new_q0, q0, eps, nfa)
-    add_edge(f, new_f, eps, nfa)
-    add_edge(new_q0, new_f, eps, nfa)
-    set_initials({new_q0}, nfa)
-    set_final(f, nfa, False)
-    set_final(new_f, nfa, True)
-    return (nfa, new_q0, new_f)
+    add_edge(q0, f, eps, nfa)
+    return (nfa, q0, f)
 
 def zero_or_more(nfa :Nfa, q0 :int, f :int) -> tuple:
     eps = epsilon(nfa)

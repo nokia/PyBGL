@@ -228,23 +228,61 @@ def test_thompson_compile_nfa():
     (nfa, q0, f) = thompson_compile_nfa("(a?b)*?c+d")
     if in_ipynb():
         ipynb_display_graph(nfa)
-    w = "babbbababcccccd"
-    assert accepts(w, nfa) == True
+    assert accepts("babbbababcccccd", nfa)
 
-def test_thompson_compile_nfa_2():
+def test_thompson_compile_nfa_alternation():
     (nfa, q0, f) = thompson_compile_nfa("a*|b")
     if in_ipynb():
         ipynb_display_graph(nfa)
-    w = "bbbbb"
-    assert accepts(w, nfa) == False
+    assert not accepts("bbbbb", nfa)
+    assert accepts("b", nfa)
+    assert accepts("aaaaaa", nfa)
 
-def test_thompson_compile_nfa_3():
+def test_thompson_compile_nfa_concatenation():
+    (nfa, q0, f) = thompson_compile_nfa("a+b+")
+    if in_ipynb():
+        ipynb_display_graph(nfa)
+    assert not accepts("abab", nfa)
+    assert not accepts("aaa", nfa)
+    assert not accepts("bbb", nfa)
+    assert accepts("ab", nfa)
+    assert accepts("aaaaaabbbbbb", nfa)
+
+def test_thompson_compile_nfa_zero_or_one():
+    (nfa, q0, f) = thompson_compile_nfa("(ab?)*")
+    if in_ipynb():
+        ipynb_display_graph(nfa)
+    assert accepts("", nfa)
+    assert not accepts("b", nfa)
+    assert accepts("a", nfa)
+    assert accepts("ab", nfa)
+    assert accepts("aba", nfa)
+    assert not accepts("abb", nfa)
+
+def test_thompson_compile_nfa_zero_or_more():
     (nfa, q0, f) = thompson_compile_nfa("(ab+)*")
     if in_ipynb():
         ipynb_display_graph(nfa)
-    w = "b"
-    assert accepts(w, nfa) == False
+    assert accepts("", nfa)
+    assert not accepts("b", nfa)
+    assert accepts("abbbbb", nfa)
+    assert accepts("abbbbbabbbbbabbbbb", nfa)
 
+def test_thompson_compile_nfa_one_or_more():
+    (nfa, q0, f) = thompson_compile_nfa("(ab+)+")
+    if in_ipynb():
+        ipynb_display_graph(nfa)
+    assert not accepts("", nfa)
+    assert not accepts("b", nfa)
+    assert accepts("abbbbb", nfa)
+    assert accepts("abbbbbabbbbbabbbbb", nfa)
+
+def test_thompson_compile_nfa_repetition():
+    (nfa, q0, f) = thompson_compile_nfa("((ab){3})*")
+    if in_ipynb():
+        ipynb_display_graph(nfa)
+    for i in range(7):
+        assert accepts("ab" * i, nfa) == (i % 3 == 0), f"w = {'ab' * i}, i = {i}"
 
 def test_thompson_compile_nfa_bracket_repetitions():
     (nfa, q0, f) = thompson_compile_nfa("[x-z]{1,3}")
