@@ -261,8 +261,12 @@ def make_path(
         an arbitrary path.
     """
     arcs = make_dag(g, s, t, pmap_vpreds, single_path=True)
-    path = list(arcs)
-    path.sort(key=lambda e: (source(e, g), target(e, g)))
+    u = t
+    path = list()
+    while u != s:
+        e = list(pmap_vpreds[u])[0]
+        path.insert(0, e)
+        u = g.source(e)
     return path
 
 #--------------------------------------------------------------------
