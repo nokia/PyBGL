@@ -244,10 +244,11 @@ def shunting_yard_postfix(
 # on-the-fly the RPN expression returned by shunting_yard_postfix.
 #------------------------------------------------------------------------
 
-from collections        import defaultdict
-from pybgl.graph        import DirectedGraph, add_edge
-from pybgl.graphviz     import enrich_kwargs
-from pybgl.property_map import (
+from collections            import defaultdict
+from pybgl.graph            import *
+from pybgl.node_automaton   import add_vertex, add_edge, symbol
+from pybgl.graphviz         import enrich_kwargs
+from pybgl.property_map     import (
     ReadWritePropertyMap, make_assoc_property_map, make_func_property_map
 )
 
@@ -278,27 +279,49 @@ class Ast(DirectedGraph):
     """
     Abstract Syntax Tree.
     """
-    def __init__(self, pmap_vlabel :ReadWritePropertyMap = None, num_vertices = 0):
+    def __init__(self, pmap_vsymbol :ReadWritePropertyMap = None, num_vertices :int = 0, root :int = None):
         super().__init__(num_vertices)
-        if not pmap_vlabel:
+        if not pmap_vsymbol:
             self.map_vlabel = defaultdict()
-            self.pmap_vlabel = make_assoc_property_map(self.map_vlabel)
+            self.pmap_vsymbol = make_assoc_property_map(self.map_vlabel)
         else:
-            self.pmap_vlabel = pmap_vlabel
+            self.pmap_vsymbol = pmap_vsymbol
+        self.root = root
 
-    def add_vertex(self, a :chr):
+    def add_vertex(self, a :chr) -> int:
         u = super().add_vertex()
-        self.pmap_vlabel[u] = a
+        self.pmap_vsymbol[u] = a
         return u
 
-    def to_dot(self, **kwargs):
+    def to_dot(self, **kwargs) -> str:
         dpv = {
             "label" : make_func_property_map(
-                lambda u: "%s %s" % (u, self.pmap_vlabel[u])
+                lambda u: "%s %s" % (u, self.pmap_vsymbol[u])
             )
         }
         kwargs = enrich_kwargs(dpv, "dpv", **kwargs)
         return super().to_dot(**kwargs)
+
+    def symbol(self, u: int) -> str:
+        return self.pmap_vsymbol[u]
+
+    def children(self, u: int) -> list:
+        es = out_edges(u, self)
+        return [target(e, self) for e in out_edges(u, self)]
+
+    def to_expr(self) -> str:
+        def to_expr_rec(u) -> str:
+            if out_degree(u, self) == 0:
+                return str(symbol(u, self))
+            else:
+                a = str(symbol(u, self))
+                return a.join(
+                    to_expr_rec(child)
+                    for child in self.children(u)
+                )
+        if self.root:
+            raise RuntimeError("self.root is not initialized")
+        return to_expr_rec(self.root)
 
 class RpnDequeAst(RpnDequeOperation):
     """
