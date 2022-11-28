@@ -311,11 +311,15 @@ class Ast(DirectedGraph):
 
     def to_expr(self) -> str:
         def to_expr_rec(u) -> str:
-            if out_degree(u, self) == 0:
-                return str(symbol(u, self))
+            a = str(symbol(u, self))
+            d = out_degree(u, self)
+            if d == 0:
+                return a
+            elif d == 1:
+                child = self.children(u)[0]
+                return f"({to_expr_rec(child)}){a}"
             else:
-                a = str(symbol(u, self))
-                return a.join(
+                return "(%s)" % a.join(
                     to_expr_rec(child)
                     for child in self.children(u)
                 )
