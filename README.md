@@ -1,4 +1,4 @@
-# Minifold
+# PyBGL
 
 [![PyPI](https://img.shields.io/pypi/v/pybgl.svg)](https://pypi.python.org/pypi/pybgl/)
 [![Build](https://github.com/nokia/pybgl/workflows/build/badge.svg)](https://github.com/nokia/pybgl/actions/workflows/build.yml)
