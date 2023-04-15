@@ -1,0 +1,50 @@
+[tool.poetry]
+name = "PyBGL"
+version = '0.9.3'
+description = "PyBGL is a pure Python graph library inspited from the BGL (Boost Graph Library). It gathers algorithms from the graph theory, language theory and dynamic programming background."
+authors = ["Marc-Olivier Buob <marc-olivier.buob@nokia-bell-labs.com>"]
+license = "BSD-3 license"
+readme = "README.md"
+packages = [{include = "pybgl", from = "src"}]
+
+# https://docs.pytest.org/en/7.1.x/reference/customize.html
+[tool.pytest.ini_options]
+pythonpath = "src"
+minversion = "7.2.1"
+addopts = "--doctest-modules --showlocals --capture=no --exitfirst --failed-first"
+testpaths = [
+    "tests"
+]
+
+[tool.poetry.dependencies]
+python = ">=3.7"
+
+[tool.poetry.group.test]
+optional = true
+
+[tool.poetry.group.test.dependencies]
+pytest = ">=7.2.1"
+pytest-runner = "*"
+
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+pip = "*"
+bump2version = "*"
+flake8 = "*"
+tox = "*"
+coverage = "*"
+
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
+nbsphinx = "*"
+Sphinx = ">=1.4"
+sphinx-rtd-theme = "*"
+sphinx_mdinclude = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
