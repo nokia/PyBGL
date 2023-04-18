@@ -1,47 +1,132 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Non-recursive implementation of Depth First Search algorithm.
-#
-# Based on http://www.boost.org/doc/libs/1_61_0/boost/graph/depth_first_search.hpp by Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
-#
 # This file is part of the pybgl project.
 # https://github.com/nokia/pybgl
 
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2018, Nokia"
-__license__    = "BSD-3"
+from collections import deque, defaultdict
+from .graph import Graph, EdgeDescriptor, out_edges, target, vertices
+from .graph_traversal import WHITE, GRAY, BLACK
+from .property_map import ReadWritePropertyMap, make_assoc_property_map
 
-from collections           import deque, defaultdict
-from pybgl.graph           import Graph, EdgeDescriptor, out_edges, target, vertices
-from pybgl.graph_traversal import WHITE, GRAY, BLACK
-from pybgl.property_map    import ReadWritePropertyMap, make_assoc_property_map
+class DefaultDepthFirstSearchVisitor:
+    """
+    The :py:class:`DefaultDepthFirstSearchVisitor` class is the base class
+    for any visitor that can be passed to the
+    :py:func:`depth_first_search` and
+    :py:func:`depth_first_search_graph` functions.
+    """
+    def initialize_vertex(self, u: int, g: Graph):
+        """
+        Method invoked on every vertex before the start of the search
 
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# /!\ DO NOT MODIFY THIS FILE
-# It conforms to http://www.boost.org/doc/libs/1_61_0/libs/graph/doc/depth_first_search.html
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        Args:
+            u (int): The vertex being initialized.
+            g (Graph): The considered graph.
+        """
+        pass
 
-class DefaultDepthFirstSearchVisitor():
-    def __init__(self): super().__init__()
-    def start_vertex(self, s :int, g :Graph): pass
-    def discover_vertex(self, u :int, g :Graph): pass
-    def examine_edge(self, e :EdgeDescriptor, g :Graph): pass
-    def tree_edge(self, e :EdgeDescriptor, g :Graph): pass
-    def back_edge(self, e :EdgeDescriptor, g :Graph): pass
-    def forward_or_cross_edge(self, e :EdgeDescriptor, g :Graph): pass
-    def finish_vertex(self, u :int, g :Graph): pass
+    def start_vertex(self, s: int, g: Graph):
+        """
+        Method invoked on the source vertex once before the start of the search.
+
+        Args:
+            s (int): The source vertex.
+            g (Graph): The considered graph.
+        """
+        pass
+
+    def discover_vertex(self, u: int, g: Graph):
+        """
+        Method invoked when a vertex is encountered for the first time.
+
+        Args:
+            u (int): The vertex being discovered.
+            g (Graph): The considered graph.
+        """
+        pass
+
+    def examine_edge(self, e: EdgeDescriptor, g: Graph):
+        """
+        Method invoked on every out-edge of each vertex after it is discovered.
+
+        Args:
+            e (EdgeDescriptor): The edge being examined.
+            g (Graph): The considered graph.
+        """
+        pass
+
+    def tree_edge(self, e: EdgeDescriptor, g: Graph):
+        """
+        Method invoked on each edge as it becomes a member of the edges that
+        form the search tree. If you wish to record predecessors, do so at this
+        event point.
+
+        Args:
+            e (EdgeDescriptor): The considered tree edge.
+            g (Graph): The considered graph.
+        """
+        pass
+
+    def back_edge(self, e: EdgeDescriptor, g: Graph):
+        """
+        Method invoked on the back edges in the graph.
+
+        Args:
+            e (EdgeDescriptor): The considered back edge.
+            g (Graph): The considered graph.
+        """
+        pass
+
+    def forward_or_cross_edge(self, e: EdgeDescriptor, g: Graph):
+        """
+        Method invoked on forward or cross edges in the graph.
+        In an undirected graph this method is never called.
+
+        Args:
+            e (EdgeDescriptor): The considered edge.
+            g (Graph): The considered graph.
+        """
+        pass
+
+    def finish_vertex(self, u: int, g: Graph):
+        """
+        Method invoked on a vertex after all of its out edges have been
+        added to the search tree and all of the adjacent vertices have
+        been discovered (but before their out-edges have been examined).
+
+        Args:
+            u (int): The vertex being finished.
+            g (Graph): The considered graph.
+        """
+        pass
 
 def depth_first_search(
-    s :int,
-    g :Graph,
-    pmap_vcolor :ReadWritePropertyMap = None,
-    vis         :DefaultDepthFirstSearchVisitor = None,
+    s: int,
+    g: Graph,
+    pmap_vcolor: ReadWritePropertyMap = None,
+    vis: DefaultDepthFirstSearchVisitor = None,
     # N.B: The following parameters does not exist in libboost:
-    if_push     = None # if_push(e :EdgeDecriptor, g :Graph) -> bool returns True iff e is relevant
+    if_push: callable = None
 ):
+    """
+    Non-recursive implementation of Depth First Search algorithm, from a single source.
+    Based on `depth_first_search.hpp <https://www.boost.org/doc/libs/1_67_0/libs/graph/doc/depth_first_search.html>`__,
+    by Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+
+    Args:
+        s (int): The vertex descriptor of the source vertex.
+        g (Graph): The graph being explored.
+        pmap_vcolor (ReadWritePropertyMap): A property map that maps each vertex
+            with its current color (:py:data:`WHITE`, :py:data:`GRAY`
+            or :py:data:`BLACK`)
+        vis (DefaultBreadthFirstSearchVisitor): An optional visitor.
+        if_push (callable): A `callback(e, g) -> bool` where ``e`` is the
+            an arc of ``g`` that returns ``True`` if and only if the arc
+            ``e`` is relevant.
+            This is a legacy parameter. You should rather consider
+            to filter the irrelevant arcs using the :py:class:`GraphView` class.
+    """
     if pmap_vcolor is None:
         map_vcolor = defaultdict(int)
         pmap_vcolor = make_assoc_property_map(map_vcolor)
@@ -96,12 +181,30 @@ def depth_first_search(
 
 # N.B: The following function is also named depth_first_search in boost.
 def depth_first_search_graph(
-    g           :Graph,
-    sources     :set = None, # Or a generator e.g. vertices(g)
-    pmap_vcolor :ReadWritePropertyMap = None,
-    vis         :DefaultDepthFirstSearchVisitor = None,
-    if_push     :bool = None # if_push(e :EdgeDecriptor) -> bool
+    g: Graph,
+    sources: iter = None,
+    pmap_vcolor: ReadWritePropertyMap = None,
+    vis: DefaultDepthFirstSearchVisitor = None,
+    if_push: bool = None
 ):
+    """
+    Non-recursive implementation of Depth First Search algorithm, from multiple sources.
+    Based on `depth_first_search.hpp <https://www.boost.org/doc/libs/1_67_0/libs/graph/doc/depth_first_search.html>`__,
+    by Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+
+    Args:
+        g (Graph): The graph being explored.
+        s (iter): An iterable over the sources, e.g., ``g.vertices()``.
+        pmap_vcolor (ReadWritePropertyMap): A property map that maps each vertex
+            with its current color (:py:data:`WHITE`, :py:data:`GRAY`
+            or :py:data:`BLACK`)
+        vis (DefaultBreadthFirstSearchVisitor): An optional visitor.
+        if_push (callable): A `callback(e, g) -> bool` where ``e`` is the
+            an arc of ``g`` that returns ``True`` if and only if the arc
+            ``e`` is relevant.
+            This is a legacy parameter. You should rather consider
+            to filter the irrelevant arcs using the :py:class:`GraphView` class.
+    """
     if pmap_vcolor is None:
         map_vcolor = defaultdict(int)
         pmap_vcolor = make_assoc_property_map(map_vcolor)

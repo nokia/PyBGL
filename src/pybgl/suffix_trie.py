@@ -4,15 +4,9 @@
 # This file is part of the pybgl project.
 # https://github.com/nokia/pybgl
 
-__author__     = "Marc-Olivier Buob, Elie de Panafieu"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "{marc-olivier.buob,elie.de_panafieu}@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2020, Nokia"
-__license__    = "BSD-3"
-
-from itertools          import chain
-from pybgl.property_map import make_func_property_map
-from pybgl.trie         import BOTTOM, Trie, add_vertex, add_edge, delta, initial, num_vertices
+from itertools import chain
+from .property_map import make_func_property_map
+from .trie import BOTTOM, Trie, add_vertex, add_edge, delta, initial, num_vertices
 
 def slices(n, max_len :int = None):
     return chain(
@@ -33,7 +27,9 @@ def make_suffix_trie(w :str = "", max_len :int = None, g :Trie = None) -> Trie:
         g = Trie()
     if num_vertices(g) == 0:
         add_vertex(g)
-    g.m_pmap_final = make_func_property_map(lambda q: q != BOTTOM)
+
+    # TODO do this in SuffixTrie.__init__ the internal property map of Automaton
+    g.m_pmap_vfinal = make_func_property_map(lambda q: q != BOTTOM)
 
     # Naive implementation (slow)
     # g.insert("")

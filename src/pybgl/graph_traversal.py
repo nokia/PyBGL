@@ -19,35 +19,90 @@ GRAY  = 1
 BLACK = 2
 
 class DefaultTreeTraversalVisitor:
-    def __init__(self): pass
-    def discover_vertex(self, u :int, g :Graph): pass
-    def examine_edge(self, e :EdgeDescriptor, g :Graph): pass
-    def start_vertex(self, s :int, g :Graph): pass
-    def if_push(self, e :EdgeDescriptor, g :Graph) -> bool: return True
-    def finish_vertex(self, u :int, g :Graph): pass
+    def discover_vertex(self, u: int, g: Graph):
+        """
+        Method invoked when a vertex is encountered for the first time.
 
-def dfs_tree(root, g :Graph, vis = DefaultTreeTraversalVisitor()):
-    vis.start_vertex(root, g)
-    stack = deque([root])
+        Args:
+            u (int): The vertex being discovered.
+            g (Graph): The considered tree.
+        """
+        pass
+
+    def examine_edge(self, e: EdgeDescriptor, g: Graph):
+        """
+        Method invoked on every out-edge of each vertex after it is discovered.
+
+        Args:
+            e (EdgeDescriptor): The edge being examined.
+            g (Graph): The considered tree.
+        """
+        pass
+
+    def start_vertex(self, s: int, g: Graph):
+        """
+        Method invoked on the source vertex once before the start of the search.
+
+        Args:
+            s (int): The source vertex.
+            g (Graph): The considered tree.
+        """
+        pass
+
+    def finish_vertex(self, u: int, g: Graph):
+        """
+        Method invoked on a vertex after all of its out edges have been
+        added to the search tree and all of the adjacent vertices have
+        been discovered (but before their out-edges have been examined).
+
+        Args:
+            u (int): The vertex being finished.
+            g (Graph): The considered tree.
+        """
+        pass
+
+def dfs_tree(s: int, g: Graph, vis: DefaultTreeTraversalVisitor = None):
+    """
+    Simplified implementation Depth First Search algorithm for trees
+    See also :py:func:`depth_first_search`.
+
+    Args:
+        s (int): The vertex descriptor of the source.
+        g (Graph): The graph being explored.
+        vis (DefaultTreeTraversalVisitor): An optional visitor.
+    """
+    if vis is None:
+        vis = DefaultTreeTraversalVisitor()
+    vis.start_vertex(s, g)
+    stack = deque([s])
     while stack:
         u = stack.pop()
         vis.discover_vertex(u, g)
         for e in out_edges(u, g):
             vis.examine_edge(e, g)
             v = target(e, g)
-            if vis.if_push(e, g):
-                stack.append(v)
+            stack.append(v)
         vis.finish_vertex(u, g)
 
-def bfs_tree(root, g :Graph, vis = DefaultTreeTraversalVisitor()):
-    vis.start_vertex(root, g)
-    stack = deque([root])
+def bfs_tree(s: int, g: Graph, vis: DefaultTreeTraversalVisitor):
+    """
+    Simplified implementation Breadth First Search algorithm for trees
+    See also :py:func:`breadth_first_search`.
+
+    Args:
+        s (int): The vertex descriptor of the source.
+        g (Graph): The graph being explored.
+        vis (DefaultTreeTraversalVisitor): An optional visitor.
+    """
+    if vis is None:
+        vis = DefaultTreeTraversalVisitor()
+    vis.start_vertex(s, g)
+    stack = deque([s])
     while stack:
         u = stack.pop()
         vis.discover_vertex(u, g)
         for e in out_edges(u, g):
             vis.examine_edge(e, g)
             v = target(e, g)
-            if vis.if_push(e, g):
-                stack.appendleft(v)
+            stack.appendleft(v)
         vis.finish_vertex(u, g)

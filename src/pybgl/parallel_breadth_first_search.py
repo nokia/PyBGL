@@ -4,34 +4,45 @@
 # This file is part of the pybgl project.
 # https://github.com/nokia/pybgl
 
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2020, Nokia"
-__license__    = "BSD-3"
-
-from collections            import defaultdict, deque
-from pybgl.automaton        import BOTTOM, Automaton, EdgeDescriptor, delta, initial, sigma
-from pybgl.graph_traversal  import WHITE, GRAY, BLACK
-from pybgl.property_map     import ReadWritePropertyMap, make_assoc_property_map
+from collections import defaultdict, deque
+from .automaton import BOTTOM, Automaton, EdgeDescriptor, delta, initial, sigma
+from .graph_traversal import WHITE, GRAY, BLACK
+from .property_map import ReadWritePropertyMap, make_assoc_property_map
 
 class ParallelBreadthFirstSearchVisitor:
-    def start_vertex   (self, s1 :int, g1 :Automaton, s2 :int, g2 :Automaton): pass
-    def examine_vertex (self, q1 :int, g1 :Automaton, q2 :int, g2 :Automaton): pass
-    def discover_vertex(self, q1 :int, g1 :Automaton, q2 :int, g2 :Automaton): pass
-    def finish_vertex  (self, q1 :int, g1 :Automaton, q2 :int, g2 :Automaton): pass
-    def examine_symbol (self, q1 :int, g1 :Automaton, q2 :int, g2 :Automaton, a :chr): pass
-    def examine_edge   (self, e1 :EdgeDescriptor, g1 :Automaton, e2 :EdgeDescriptor, g2 :Automaton, a :chr): pass
-    def tree_edge      (self, e1 :EdgeDescriptor, g1 :Automaton, e2 :EdgeDescriptor, g2 :Automaton, a :chr): pass
-    def gray_target    (self, e1 :EdgeDescriptor, g1 :Automaton, e2 :EdgeDescriptor, g2 :Automaton, a :chr): pass
-    def black_target   (self, e1 :EdgeDescriptor, g1 :Automaton, e2 :EdgeDescriptor, g2 :Automaton, a :chr): pass
+    def start_vertex(self, s1: int, g1: Automaton, s2: int, g2: Automaton):
+        pass
+
+    def examine_vertex(self, q1: int, g1: Automaton, q2: int, g2: Automaton):
+        pass
+
+    def discover_vertex(self, q1: int, g1: Automaton, q2: int, g2: Automaton):
+        pass
+
+    def finish_vertex(self, q1: int, g1: Automaton, q2: int, g2: Automaton):
+        pass
+
+    def examine_symbol(self, q1: int, g1: Automaton, q2: int, g2: Automaton, a: chr):
+        pass
+
+    def examine_edge(self, e1: EdgeDescriptor, g1: Automaton, e2: EdgeDescriptor, g2: Automaton, a: chr):
+        pass
+
+    def tree_edge(self, e1: EdgeDescriptor, g1: Automaton, e2: EdgeDescriptor, g2: Automaton, a: chr):
+        pass
+
+    def gray_target(self, e1: EdgeDescriptor, g1: Automaton, e2: EdgeDescriptor, g2: Automaton, a: chr):
+        pass
+
+    def black_target(self, e1: EdgeDescriptor, g1: Automaton, e2: EdgeDescriptor, g2: Automaton, a: chr):
+        pass
 
 def parallel_breadth_first_search(
-    g1 :Automaton,
-    g2 :Automaton,
+    g1: Automaton,
+    g2: Automaton,
     source_pairs = None,
-    pmap_vcolor :ReadWritePropertyMap = None,
-    vis :ParallelBreadthFirstSearchVisitor = ParallelBreadthFirstSearchVisitor(),
+    pmap_vcolor: ReadWritePropertyMap = None,
+    vis: ParallelBreadthFirstSearchVisitor = ParallelBreadthFirstSearchVisitor(),
     if_push = None,
     delta = delta
 ):

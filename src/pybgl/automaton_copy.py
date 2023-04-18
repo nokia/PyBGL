@@ -6,24 +6,23 @@
 
 from collections import defaultdict
 
-from pybgl.automaton import (
+from .automaton import (
     Automaton, EdgeDescriptor, add_vertex, add_edge,
     label, out_edges, source, target
 )
-from pybgl.depth_first_search import depth_first_search
-from pybgl.property_map import (
+from .depth_first_search import depth_first_search
+from .property_map import (
     ReadWritePropertyMap, ReadPropertyMap,
     make_assoc_property_map, make_func_property_map
 )
-from pybgl.graph_copy import (
-    DepthFirstSearchCopyVisitor as DepthFirstSearchCopyVisitor_
-)
+from .graph_copy import DepthFirstSearchCopyVisitor
 
-# NOTE: This almost the same than graph_copy, but we have to manage here the signature of add_edge, which differs :(
+# NOTE: This almost the same than graph_copy, but we have to manage
+# here the signature of add_edge, which differs :(
 
-class DepthFirstSearchCopyVisitor(DepthFirstSearchCopyVisitor_):
+class AutomatonCopyVisitor(DepthFirstSearchCopyVisitor):
     """
-    The :py:class:`DepthFirstSearchCopyVisitor` is the internal visitor
+    The :py:class:`AutomatonCopyVisitor` is the internal visitor
     used in :py:func:`automaton_copy`.
     """
     def __init__(self, *args):
@@ -55,15 +54,15 @@ class DepthFirstSearchCopyVisitor(DepthFirstSearchCopyVisitor_):
             self.m_callback_dup_edge(e, g, e_dup, self.m_g_dup)
 
 def automaton_copy(
-    s                   :int,
-    g                   :Automaton,
-    g_dup               :Automaton,
-    pmap_vrelevant      :ReadPropertyMap = None,
-    pmap_erelevant      :ReadPropertyMap = None,
-    pmap_vertices       :ReadWritePropertyMap = None,
-    pmap_edges          :ReadWritePropertyMap = None,
-    callback_dup_vertex = None,
-    callback_dup_edge   = None
+    s: int,
+    g: Automaton,
+    g_dup: Automaton,
+    pmap_vrelevant: ReadPropertyMap = None,
+    pmap_erelevant: ReadPropertyMap = None,
+    pmap_vertices: ReadWritePropertyMap = None,
+    pmap_edges: ReadWritePropertyMap = None,
+    callback_dup_vertex: callable = None,
+    callback_dup_edge: callable  = None
 ):
     """
     Copies a sub-graph from an Automaton according to an edge-based filtering
@@ -94,7 +93,7 @@ def automaton_copy(
     if not pmap_erelevant:
         pmap_erelevant = make_func_property_map(lambda e: True)
 
-    # Prepare the DepthFirstSearchCopyVisitor.
+    # Prepare the AutomatonCopyVisitor
     if not pmap_vertices:
         map_vertices = dict()
         pmap_vertices = make_assoc_property_map(map_vertices)
@@ -102,7 +101,7 @@ def automaton_copy(
         map_edges = dict()
         pmap_edges = make_assoc_property_map(map_edges)
 
-    vis = DepthFirstSearchCopyVisitor(
+    vis = AutomatonCopyVisitor(
         g_dup,
         pmap_vrelevant,
         pmap_erelevant,

@@ -108,7 +108,8 @@ def test_simple_graph():
         g, u,
         make_assoc_property_map(map_eweight),
         make_assoc_property_map(map_vpreds),
-        make_assoc_property_map(map_vdist)
+        make_assoc_property_map(map_vdist),
+        vis = DijkstraDebugVisitor()
     )
 
     # Check
@@ -153,6 +154,28 @@ def test_parallel_edges():
         u : 0,
         v : w
     }
+
+class DijkstraDebugVisitor(DijkstraVisitor):
+    def initialize_vertex(self, u: int, g: DirectedGraph):
+        print(f"initialize_vertex({u})")
+
+    def examine_vertex(self, u: int, g: DirectedGraph):
+        print(f"examine_vertex({u})")
+
+    def examine_edge(self, e: EdgeDescriptor, g: DirectedGraph):
+        print(f"examine_edge({e} {e.m_distinguisher})")
+
+    def discover_vertex(self, u: int, g: DirectedGraph):
+        print(f"discover_vertex({u})")
+
+    def edge_relaxed(self, e: EdgeDescriptor, g: DirectedGraph):
+        print(f"edge_relaxed({e}  {e.m_distinguisher})")
+
+    def edge_not_relaxed(self, e: EdgeDescriptor, g: DirectedGraph):
+        print(f"edge_not_relaxed({e}  {e.m_distinguisher})")
+
+    def finish_vertex(self, u: int, g: DirectedGraph):
+        print(f"finish_vertex({u})")
 
 def test_directed_graph(links :list = None):
     if links is None:

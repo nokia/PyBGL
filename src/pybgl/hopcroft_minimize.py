@@ -1,20 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__author__     = "Maxime Raynal"
-__maintainer__ = "Maxime Raynal"
-__email__      = "maxime.raynal@nokia.com"
-__copyright__  = "Copyright (C) 2020, Nokia"
-__license__    = "BSD-3"
-
 from collections import defaultdict
 from functools import reduce
-from pybgl.property_map import make_assoc_property_map
-from pybgl.incidence_automaton import *
+from .property_map import make_assoc_property_map
+from .incidence_automaton import *
 
 def hopcroft_agglomerate_states(g: IncidenceAutomaton) -> set:
     """
-    Agglomerates the states of an automaton
+    Initialization step of the
+    `Hopcroft minimization algorithm <https://fr.wikipedia.org/wiki/Algorithme_de_Hopcroft_de_minimisation_d%27un_automate_fini>`__.
 
     Args:
         g (IncidenceAutomaton): The input automaton.

@@ -14,10 +14,10 @@ def cut(s: int, g: Graph, in_cut: callable) -> set:
     Finds a vertex cut given an edge cut.
 
     Args:
-        g: A `Graph` instance corresponding to an acyclic graph.
-        s: The `VertexDescriptor` corresponding to the source vertex.
-        in_cut: `Callback(EdgeDescriptor, Graph) -> bool` indicating whether an
-            edge belong to the considered cut.
+        s (int): The `VertexDescriptor` corresponding to the source vertex.
+        g (Graph): An acyclic graph.
+        in_cut (callable): A ``Callback(EdgeDescriptor, Graph) -> bool``,
+            indicating whether an edge belong to the considered cut.
 
     Returns:
         The set of vertices that are in the vertex cut.

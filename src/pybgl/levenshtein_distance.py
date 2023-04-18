@@ -6,7 +6,10 @@
 
 def levenshtein_distance_naive(x :str, y :str) -> int:
     """
-    Inefficient implementation of the `Levenshtein distance <https://en.wikipedia.org/wiki/Levenshtein_distance>`__ (no memoization).
+    Inefficient implementation of the
+    `Levenshtein distance <https://en.wikipedia.org/wiki/Levenshtein_distance>`__
+    (no memoization).
+    Prefer the :py:func:`levenshtein_distance` function.
 
     Args:
         x (str): The left operand.
@@ -74,7 +77,9 @@ class LevenshteinDistance:
 
 def levenshtein_distance(x: str, y: str) -> int:
     """
-    Computes the `Levenshtein distance <https://en.wikipedia.org/wiki/Levenshtein_distance>`__, with memoization.
+    Computes the
+    `Levenshtein distance <https://en.wikipedia.org/wiki/Levenshtein_distance>`__,
+    with memoization.
 
     Args:
         x (str): The left operand.

@@ -4,44 +4,81 @@
 # This file is part of the pybgl project.
 # https://github.com/nokia/pybgl
 
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2018, Nokia"
-__license__    = "BSD-3"
-
-
-from collections            import defaultdict
-from pybgl.automaton        import *
-from pybgl.property_map     import (
+from collections import defaultdict
+from .automaton import *
+from .property_map import (
     ReadWritePropertyMap, make_assoc_property_map, make_func_property_map
 )
 
 class NodeAutomaton(Automaton):
+    """
+    The :py:class:`NodeAutomaton` implements a
+    `Deterministic Finite Automaton <https://en.wikipedia.org/wiki/Deterministic_finite_automaton>`__.
+    whose symbols are installed on the states instead of the transitions.
+    This is a particular case of DFA, whose transitions targetting a same given
+    target are all labeled by the same symbol.
+    """
     def __init__(
         self,
-        num_vertices :int = 0,
-        q0 :int = 0,
-        pmap_final = None,
-        pmap_vsymbol :ReadWritePropertyMap = None
+        num_vertices: int = 0,
+        q0: int = 0,
+        pmap_vfinal = None,
+        pmap_vsymbol: ReadWritePropertyMap = None
     ):
+        """
+        Constructor.
+
+        Args:
+            num_vertices (int): The number of states.
+            q0 (int): The vertex descriptor of the initial state.
+            pmap_vfinal (ReadPropertyMap): A property map which maps
+                each state with a boolean indicating whether its
+                a final state or not.
+            pmap_vsymbol (ReadPropertyMap): A property map which maps
+                each state with its corresponding symbol.
+        """
         # Convention: self.adjacencies[q][a] = r
-        super().__init__(num_vertices, q0, pmap_final)
+        super().__init__(num_vertices, q0, pmap_vfinal)
         if pmap_vsymbol is None:
             map_vsymbol = defaultdict(lambda: None)
             pmap_vsymbol = make_assoc_property_map(map_vsymbol)
         self.pmap_vsymbol = pmap_vsymbol
 
-    def add_vertex(self, a :chr = None) -> int:
+    def add_vertex(self, a: str = None) -> int:
         u = super().add_vertex()
         if a is not None:
             self.pmap_vsymbol[u] = a
         return u
 
-    def delta(self, q :int, a :chr) -> int:
+    def delta(self, q: int, a: str) -> int:
+        """
+        Transition function, allowing to move from a state ``q`` to its
+        ``a``-successor, if any.
+
+        Args:
+            q (int): The vertex descriptor of a state of this
+                :py:class:`NodeAutomaton` instance.
+            a (str): The symbol.
+
+        Returns:
+            The reached state (if any), :py:data:`BOTTOM` otherwise.
+        """
         return self.adjacencies[q].get(a, BOTTOM)
 
-    def add_edge(self, q :int, r :int) -> tuple:
+    def add_edge(self, q: int, r: int) -> tuple:
+        """
+        Adds a transition to this :py:class:`NodeAutomaton` instance.
+
+        Args:
+            q (int): The vertex descriptor of source state of the new transition.
+            r (int): The vertex descriptor of target state of the new transition.
+            a (str): The label of the new transition.
+
+        Returns:
+            A tuple ``(e, success)`` where ``e`` is an :py:class:`EdgeDescriptor`
+            compliant with this :py:class:`Automaton` class and ``success == True``
+            if successful, ``(None, False)`` otherwise.
+        """
         assert q is not None
         assert r is not None
         a = symbol(r, self)
@@ -50,7 +87,20 @@ class NodeAutomaton(Automaton):
         self.adjacencies[q][a] = r
         return (EdgeDescriptor(q, r, a), True)
 
-    def edge(self, q :int, r :int) -> tuple:
+    def edge(self, q: int, r: int) -> tuple:
+        """
+        Retrieves the edge from a state ``q`` to state ``r`` such
+        that ``r`` is a ``a``-successor of ``q`` in this
+        :py:class:`Automaton` instance, if any.
+
+        Args:
+            q (int): The source of the edge.
+            r (int): The target of the edge.
+
+        Returns:
+            ``(e, True)`` if it exists a single edge from ``q`` to ``r``,
+            ``(None, False)`` otherwise.
+        """
         adj_q = self.adjacencies.get(q)
         (e, found) = (None, False)
         if adj_q:
@@ -61,13 +111,44 @@ class NodeAutomaton(Automaton):
                     break
         return (e, found)
 
-    def symbol(self, q :int) -> chr:
+    def symbol(self, q: int) -> str:
+        """
+        Retrieves the symbol installed on a state.
+
+        Args:
+            q (int): The vertex descriptor of the state.
+
+        Raises:
+            :py:class:`KeyError` if ``q`` is not a valid vertex descriptor
+
+        Returns:
+            The corresponding symbol.
+        """
         return self.pmap_vsymbol[q]
 
-    def out_edges(self, q :int):
-        return (EdgeDescriptor(q, r, a) for (a, r) in self.adjacencies[q].items())
+    def out_edges(self, q: int) -> iter:
+        """
+        Retrieves an iterator over the out-transitions of a state ``q``
+        involved in this :py:class:`Automaton` instance.
 
-    def remove_edge(self, e :EdgeDescriptor):
+        Args:
+            q (int): The source state.
+
+        Returns:
+            An iterator over the out-edges of ``u``.
+        """
+        return (
+            EdgeDescriptor(q, r, a)
+            for (a, r) in self.adjacencies[q].items()
+        )
+
+    def remove_edge(self, e: EdgeDescriptor):
+        """
+        Removes a transition from this :py:class:`NodeAutomaton` instance.
+
+        Args:
+            e (EdgeDescriptor): The edge descriptor of the transition to be removed.
+        """
         q = source(e, self)
         r = target(e, self)
         a = symbol(r, self)
@@ -76,43 +157,86 @@ class NodeAutomaton(Automaton):
             if a in adj_q:
                 del adj_q[a]
 
-    def sigma(self, q :int) -> set:
+    def sigma(self, q: int) -> set:
+        """
+        Computes sub-alphabet related to a given state of this
+        :py:class:`NodeAutomaton` instance.
+
+        Args:
+            q (int): The vertex descriptor of the considered state.
+
+        Returns:
+            The corresponding set of symbols.
+        """
         return set(self.adjacencies.get(q, dict()).keys()) if q is not BOTTOM \
           else set()
 
     def alphabet(self) -> set:
+        """
+        Computes the (minimal) alphabet related to this
+        :py:class:`NodeAutomaton` instance.
+
+        Returns:
+            The corresponding set of symbols.
+        """
         return {symbol(q, self) for q in vertices(self) if not is_initial(q, self)}
 
-    def edges(self):
+    def edges(self) -> iter:
+        """
+        Retrieves an iterator over the transitions involved in this
+        :py:class:`NodeAutomaton` instance.
+
+        Returns:
+            An iterator over the transitions.
+        """
         return (
             EdgeDescriptor(q, r, a) \
             for (q, adj_q) in self.adjacencies.items()
             for (a, r) in adj_q.items()
         )
 
-    def label(self, e :EdgeDescriptor) -> chr:
+    def label(self, e: EdgeDescriptor) -> str:
+        """
+        Overloads :py:meth:`Automaton.label` to retrieve the label
+        assigned to a transition. The label is just the
+        symbol of the target of the transition.
+
+        Args:
+            e (EdgeDescriptor): The edge descriptor of the considered
+                transition.
+
+        Returns:
+            The symbol assigned to the considered transition.
+        """
         return symbol(target(e, self), self)
 
     def to_dot(self, **kwargs) -> str:
+        """
+        Exports this :py:class:`Automaton` instance to a Graphviz string.
+        See the :py:func:`to_dot` function.
+
+        Returns:
+            The corresponding Graphviz string.
+        """
         dpv = {
-            "shape" : make_func_property_map(
+            "shape":  make_func_property_map(
                 lambda u: "doublecircle" if self.is_final(u) else "circle"
             ),
-            "label" : make_func_property_map(
+            "label":  make_func_property_map(
                 lambda u: "^" if self.is_initial(u) else self.symbol(u)
             )
         }
         kwargs = enrich_kwargs(dpv, "dpv", **kwargs)
         return super().to_dot(**kwargs)
 
-def add_vertex(a :chr, g :NodeAutomaton) -> int:
+def add_vertex(a: str, g: NodeAutomaton) -> int:
     return g.add_vertex(a)
 
-def symbol(q :int, g :NodeAutomaton) -> chr:
+def symbol(q: int, g: NodeAutomaton) -> str:
     return g.symbol(q)
 
-def add_edge(u :int, v :int, g :NodeAutomaton) -> tuple:
+def add_edge(u: int, v: int, g: NodeAutomaton) -> tuple:
     return g.add_edge(u, v)
 
-def edge(u :int, v :int, g :NodeAutomaton) -> tuple:
+def edge(u: int, v: int, g: NodeAutomaton) -> tuple:
     return g.edge(u, v)

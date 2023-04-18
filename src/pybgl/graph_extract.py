@@ -8,33 +8,47 @@ from collections import defaultdict
 
 from .graph import Graph, EdgeDescriptor, out_edges, target
 from .depth_first_search import BLACK, DefaultDepthFirstSearchVisitor, depth_first_search
-from .property_map import ReadWritePropertyMap, ReadPropertyMap, make_assoc_property_map, make_func_property_map
+from .property_map import (
+    ReadWritePropertyMap, ReadPropertyMap,
+    make_assoc_property_map, make_func_property_map
+)
 
+# TODO GraphView
 class DepthFirstSearchExtractVisitor(DefaultDepthFirstSearchVisitor):
     """
-    This Visitor limits the DFS walk to traverse only relevant arcs.
+    The :py:class:`DepthFirstSearchExtractVisitor`
+    limits the DFS walk to traverse only relevant arcs.
+
+    See also the :py:class:`DepthFirstSearchCopyVisitor` class.
     """
     def __init__(
         self,
-        pmap_vrelevant          :ReadPropertyMap,
-        pmap_erelevant          :ReadPropertyMap,
-        pmap_vcolor             :ReadWritePropertyMap,
-        callback_vertex_extract = None,
-        callback_edge_extract   = None
+        pmap_vrelevant: ReadPropertyMap,
+        pmap_erelevant: ReadPropertyMap,
+        pmap_vcolor: ReadWritePropertyMap,
+        callback_vertex_extract: callable = None,
+        callback_edge_extract: callable = None
     ):
         """
         Constructor.
 
         Args:
-            pmap_vrelevant: A ReadPropertyMap{VertexDescriptor : bool} which indicates
+            pmap_vrelevant (ReadPropertyMap): A
+                ``ReadPropertyMap{VertexDescriptor: bool}`` which indicates
                 for each vertex whether if it must be duped or not.
-            pmap_erelevant: A ReadPropertyMap{EdgeDescriptor : bool} which indicates
+                You shoud consider the :py:class:`GraphView` class.
+            pmap_erelevant (ReadPropertyMap): A
+                ``ReadPropertyMap{EdgeDescriptor: bool}`` which indicates
                 for each edge whether it is relevant or not.
-            pmap_vcolor: A ReadWritePropertyMap{VertexDescriptor : Color} which maps
-                each vertex with its status in the DFS walk. See pybgl.depth_first_search for
-                further details.
-            callback_vertex_extract:
-            callback_edge_extract:
+                You shoud consider the :py:class:`GraphView` class.
+            pmap_vcolor (ReadWritePropertyMap): A
+                ``ReadWritePropertyMap{VertexDescriptor: Color}`` which maps
+                each vertex with its status in the DFS walk.
+                See the :py:func:`depth_first_search` function.
+            callback_vertex_extract (callable): Callback triggered when discovering
+                a vertex to extract.
+            callback_edge_extract (callable): Callback triggered when discovering
+                an edge to extract.
         """
         super().__init__()
         self.m_pmap_vrelevant = pmap_vrelevant
@@ -43,37 +57,47 @@ class DepthFirstSearchExtractVisitor(DefaultDepthFirstSearchVisitor):
         self.m_callback_vertex_extract = callback_vertex_extract
         self.m_callback_edge_extract   = callback_edge_extract
 
-    def discover_vertex(self, u :int, g :Graph):
+    def discover_vertex(self, u: int, g: Graph):
         """
-        Event triggered when the DFS discover a vertex not yet visited.
+        Method invoked when the DFS discover a relevant vertex not yet visited.
+
         Args:
-            u: The VertexDescriptor of the discovered vertex.
-            g: The Graph.
+            u (int): The discovered vertex.
+            g (Graph): The considered graph.
         """
         if self.m_callback_vertex_extract:
             self.m_callback_vertex_extract(u, g)
 
-    def examine_relevant_edge(self, e :EdgeDescriptor, g :Graph):
+    def examine_relevant_edge(self, e: EdgeDescriptor, g: Graph):
+        """
+        Method triggered when discovering a relevant edge not yet visited.
+
+        Args:
+            e (EdgeDescriptor): The discovered edge.
+            g (Graph): The considered graph.
+        """
         if self.m_callback_edge_extract:
             self.m_callback_edge_extract(e, g)
 
-    def examine_edge(self, e :EdgeDescriptor, g :Graph):
+    def examine_edge(self, e: EdgeDescriptor, g: Graph):
         """
-        Event triggered when the DFS discover a vertex not yet visited.
+        Method invoked when the DFS discover a vertex not yet visited.
+
         Args:
-            e: The EdgeDescriptor of the discovered vertex.
-            g: The Graph.
+            e (EdgeDescriptor): The discovered edge.
+            g (Graph): The considered graph.
         """
         if self.m_pmap_erelevant[e] and self.m_pmap_vrelevant[target(e, g)]:
             self.examine_relevant_edge(e, g)
 
+# TODO GraphView
 def graph_extract(
-    s                       :int,
-    g                       :Graph,
-    pmap_vrelevant          = None,
-    pmap_erelevant          = None,
+    s: int,
+    g: Graph,
+    pmap_vrelevant = None,
+    pmap_erelevant = None,
     callback_vertex_extract = None,
-    callback_edge_extract   = None
+    callback_edge_extract = None
 ):
     """
     Extract the edges of a given Graph according to an edge-based filtering starting
@@ -82,12 +106,16 @@ def graph_extract(
     Args:
         s: The VertexDescriptor of the source node.
         g: A Graph instance.
-        pmap_vrelevant: A ReadPropertyMap{VertexDescriptor : bool} which indicates
+        pmap_vrelevant: A ReadPropertyMap{VertexDescriptor:  bool} which indicates
             for each vertex whether if it must be duped or not.
-        pmap_erelevant: A ReadPropertyMap{EdgeDescriptor : bool} which indicates
+            You shoud consider the :py:class:`GraphView` class.
+        pmap_erelevant: A ReadPropertyMap{EdgeDescriptor:  bool} which indicates
             each edge of the Graph with a boolean equal to True iff the edge is relevant.
-        callback_vertex_extract:
-        callback_edge_extract:
+            You shoud consider the :py:class:`GraphView` class.
+        callback_vertex_extract (callable): Callback triggered when discovering
+            a vertex to extract.
+        callback_edge_extract (callable): Callback triggered when discovering
+            an edge to extract.
     """
     if not pmap_vrelevant:
         pmap_vrelevant = make_func_property_map(lambda u: True)

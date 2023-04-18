@@ -4,22 +4,40 @@
 # This file is part of the pybgl project.
 # https://github.com/nokia/pybgl
 
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2020, Nokia"
-__license__    = "BSD-3"
+from .automaton import Automaton
+from .nfa import Nfa
+from .thompson_compile_nfa import thompson_compile_nfa
+from .moore_determination import moore_determination
 
-from pybgl.automaton            import Automaton
-from pybgl.nfa                  import Nfa
-from pybgl.thompson_compile_nfa import thompson_compile_nfa
-from pybgl.moore_determination  import moore_determination
+def compile_nfa(regexp: str) -> Nfa:
+    """
+    Builds a
+    `Non-deterministic Finite Automaton <https://en.wikipedia.org/wiki/Nondeterministic_finite_automaton>`__
+    from a
+    `regular expression <https://en.wikipedia.org/wiki/Regular_expression>`__.
 
-def compile_nfa(regexp :str) -> Nfa:
+    Args:
+        regexp (str): A regular expression.
+
+    Returns:
+        A corresponding NFA.
+    """
     (nfa, q0, f) = thompson_compile_nfa(regexp)
     return nfa
 
-def compile_dfa(regexp :str, complete :bool = False) -> Automaton:
+def compile_dfa(regexp: str, complete: bool = False) -> Automaton:
+    """
+    Builds a
+    `Deterministic Finite Automaton <https://en.wikipedia.org/wiki/Deterministic_finite_automaton>`__.
+    from a
+    `regular expression <https://en.wikipedia.org/wiki/Regular_expression>`__.
+
+    Args:
+        regexp (str): A regular expression.
+
+    Returns:
+        A corresponding DFA.
+    """
     (nfa, q0, f) = thompson_compile_nfa(regexp)
     dfa = moore_determination(nfa, complete=complete)
     return dfa

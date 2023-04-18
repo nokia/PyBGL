@@ -1,43 +1,80 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# This implementation is inspired from https://signal-to-noise.xyz/post/bk-tree/
-
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2021, Nokia"
-__license__    = "BSD-3"
-
+# This file is part of the pybgl project.
+# https://github.com/nokia/pybgl
 
 import sys
-from collections                import deque
-from pybgl.automaton            import *
-from pybgl.levenshtein_distance import levenshtein_distance
-
-INFINITY = sys.maxsize
+from collections import deque
+from .automaton import *
+from .algebra import INFINITY
+from .levenshtein_distance import levenshtein_distance
 
 class BKTree(Automaton):
     """
-    A BK-tree is a metric tree suggested by Walter Austin Burkhard and
+    A `BK-tree <https://en.wikipedia.org/wiki/BK-tree>` is a
+    metric tree suggested by Walter Austin Burkhard and
     Robert M. Keller specifically adapted to discrete metric spaces.
-    https://en.wikipedia.org/wiki/BK-tree
+
+    This implementation is inspired from
+    `this link <https://signal-to-noise.xyz/post/bk-tree/>`__.
+
+    We inherit :py:class:`Automaton` because a BK-tree can be seen
+    as a deterministic automaton whose alphabet
+    it the weight assigned to its edge;
     """
-    def __init__(self, distance :callable):
+    def __init__(self, distance: callable):
+        """
+        Constructor.
+
+        Args:
+            distance (callable): An arbitrary string distance.
+                _Example:_ :py:func:`levenshtein_distance`.
+        """
         super().__init__()
         self.distance = distance
         self.map_velement = dict()
         self.root = None
 
-    def add_vertex(self, w :object) -> int:
+    def add_vertex(self, w: str) -> int:
+        """
+        Adds a vertex to this :py:class:`BKTree` instance.
+
+        Args:
+            w (str): The word assigned to the added node.
+
+        Returns:
+            The corresponding vertex descriptor.
+        """
         u = super().add_vertex()
         self.map_velement[u] = w
         return u
 
-    def element(self, u :int) -> object:
+    def element(self, u: int) -> str:
+        """
+        Retrieves the element assigned to a node of this :py:class:`BKTree` instance.
+
+        Args:
+            u (int): The vertex descriptor of the considered node.
+
+        Returns:
+            The element assigned to ``u``.
+        """
         return self.map_velement[u]
 
-    def insert(self, w :object, u :int = None) -> int:
+    def insert(self, w: str, u: int = None) -> int:
+        """
+        Inserts an element in this :py:class:`BKTree` instance from
+        a given node.
+
+        Args:
+            w (str): The element to be inserted.
+            u (int): The vertex descriptor of the considered node.
+                You may pass ``None`` to start from the root.
+
+        Returns:
+            The vertex descriptor of the word mapped to ``w``.
+        """
         if self.root is None:
             # The tree is empty
             self.root = self.add_vertex(w)
@@ -59,7 +96,23 @@ class BKTree(Automaton):
                 return v
             u = v
 
-    def search(self, w :object, d_max = INFINITY, r :int = None) -> tuple:
+    def search(self, w: str, d_max: int = INFINITY, r: int = None) -> tuple:
+        """
+        Searches an element in this :py:class:`BKTree` instance from
+        a given node, assuming its distance with the element assigned to
+        the root does not exceed ``d_max``.
+
+        Args:
+            w (object): The element to be inserted.
+            d_max (int): The radius search. Defaults to :py:class:`INFINITY`.
+            r (int): The vertex descriptor of the considered node.
+                You may pass ``None`` to start from the root.
+
+        Returns:
+            A pair ``(w_best, d_best)`` where ``w_best`` is the best match
+            and ``d_best`` the distance between the root element and ``w_best``
+            if found, ``None`` otherwise.
+        """
         if self.root is None:
             return None
         if r is None:
@@ -80,17 +133,59 @@ class BKTree(Automaton):
         return (w_best, d_best) if w_best is not None else None
 
     def to_dot(self, **kwargs) -> str:
-        dpv = {"label" : make_assoc_property_map(self.map_velement)}
+        """
+        Exports this :py:class:`Automaton` instance to a Graphviz string.
+        See the :py:func:`to_dot` function.
+
+        Returns:
+            The corresponding graphviz string.
+        """
+        dpv = {"label":  make_assoc_property_map(self.map_velement)}
         kwargs = enrich_kwargs(dpv, "dpv", **kwargs)
         return super().to_dot(**kwargs)
 
-def add_vertex(x, t :BKTree) -> int:
-    return t.add_vertex(x)
+def add_vertex(w: str, t: BKTree) -> int:
+    """
+    Adds a vertex to a :py:class:`BKTree` instance.
 
-def bk_tree_insert(w :object, t :BKTree, u = None) -> int:
+    Args:
+        w (str): The word assigned to the added node.
+        t (BKTree): The considered BK-tree.
+
+    Returns:
+        The corresponding vertex descriptor.
+    """
+    return t.add_vertex(w)
+
+# TODO move to methods
+def bk_tree_insert(w: str, t: BKTree, u = None) -> int:
+    """
+    Inserts an element in a :py:class:`BKTree` instance from
+    a given node.
+
+    Args:
+        w (str): The element to be inserted.
+        t (BKTree) The BK-tree.
+        u (int): The vertex descriptor of the considered node.
+            You may pass ``None`` to start from the root.
+
+    Returns:
+        The vertex descriptor of the word mapped to ``w``.
+    """
     return t.insert(w, u)
 
-def make_bk_tree(elements :iter, distance :callable = None) -> BKTree:
+def make_bk_tree(elements: iter, distance: callable = None) -> BKTree:
+    """
+    Makes a BK Tree from a list of words.
+
+    Args:
+        elements: The list of elements organized in the BK-tree.
+        distance (callable): The distance over the set of elements
+            used to organize the BK-tree.
+
+    Returns:
+        The resulting BK-tree.
+    """
     if distance is None:
         distance = levenshtein_distance
     t = BKTree(distance)

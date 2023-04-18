@@ -1,16 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# HTML utilities.
-#
 # This file is part of the pybgl project.
 # https://github.com/nokia/pybgl
-
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2018, Nokia"
-__license__    = "BSD-3"
 
 def html(s :str):
     """
@@ -29,17 +21,17 @@ def beside(
     contents2: str,
     title: str = "",
     title1: str = "",
-    title2:str = ""
+    title2: str = ""
 ) -> str:
     """
     Exports two HTML contents so that they are displayed beside.
 
     Args:
-        contents1: A :py:class:`str` containing the content displayed on the right.
-        contents2: A :py:class:`str` containing the content displayed on the left.
-        title: A :py:class:`str` containing the title of the figure.
-        title1: A :py:class:`str` containing the caption of the left content.
-        title2: A :py:class:`str` containing the caption of the right content.
+        contents1 (str): A string containing the content displayed on the right.
+        contents2 (str): A string containing the content displayed on the left.
+        title (str): A string containing the title of the figure.
+        title1 (str): A string containing the caption of the left content.
+        title2 (str): A string containing the caption of the right content.
 
     Returns:
         The corresponding HTML `str` instance.

@@ -4,18 +4,34 @@
 # This file is part of the PyBGL project.
 # https://github.com/nokia/pybgl
 
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2018, Nokia"
-__license__    = "BSD-3"
-
-# Based on https://stackoverflow.com/questions/6760685/creating-a-singleton-in-python
-
 class Singleton(type):
+    """
+    The :py:class:`Singleton` allows to define singleton classes, i.e.
+    classes that can be instantiated at most once.
+
+    >>> class MyClass(metaclass=Singleton): pass
+    >>> x = MyClass()
+    >>> y = MyClass()
+    >>> x is y
+    True
+
+    Based on this `thread <https://stackoverflow.com/questions/6760685/creating-a-singleton-in-python>`__.
+    """
+
     s_instances = dict()
 
     def __call__(cls, *args, **kwargs):
+        """
+        Functor method.
+
+        Args:
+            cls: The class using the singleton pattern.
+            *args: The args of the class constructor of ``cls``.
+            **kwargs: The kwargs of the class constructor of ``cls``.
+
+        Returns:
+            The singleton corresponding to ``cls``.
+        """
         if cls not in cls.s_instances:
             cls.s_instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
         return cls.s_instances[cls]

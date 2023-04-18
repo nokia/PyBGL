@@ -34,7 +34,8 @@ def test_factors():
 
 def test_make_suffix_tree():
     t = make_suffix_trie("ananas")
-    if in_ipynb(): html(graph_to_html(t))
+    if in_ipynb():
+        html(graph_to_html(t))
     assert num_vertices(t) == 16
     for q in vertices(t):
         assert is_final(q, t)
@@ -42,7 +43,8 @@ def test_make_suffix_tree():
 
 def test_make_suffix_tree_max_len():
     t = make_suffix_trie("ananas", max_len = 3)
-    if in_ipynb(): html(graph_to_html(t))
+    if in_ipynb():
+        html(graph_to_html(t))
     assert num_vertices(t) == 10
     for q in vertices(t):
         assert is_final(q, t)

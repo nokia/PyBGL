@@ -4,20 +4,39 @@
 # This file is part of the PyBGL project.
 # https://github.com/nokia/pybgl
 
-from pybgl.automaton import Automaton, is_final
-from pybgl.parallel_breadth_first_search import (
+from .automaton import Automaton, is_final
+from .parallel_breadth_first_search import (
     ParallelBreadthFirstSearchVisitor, parallel_breadth_first_search
 )
-from pybgl.suffix_trie import make_suffix_trie
+from .suffix_trie import make_suffix_trie
 
-class ContradictionException(Exception):
+class ContradictionException(RuntimeError):
+    """
+    Exception raised when an automaton cannot be included in another one.
+    """
     pass
 
 class DeterministicInclusionVisitor(ParallelBreadthFirstSearchVisitor):
+    """
+    The :py:class:`DeterministicInclusionVisitor` class is used
+    to implement the :py:func:`deterministic_inclusion` function.
+    """
     def __init__(self):
-        self.ret = 0
+        """
+        Constructor.
+        """
+        self.ret = 0  # Status inclusion
 
-    def update(self, q1 :int, g1 :Automaton, q2 :int, g2 :Automaton):
+    def update(self, q1: int, g1: Automaton, q2: int, g2: Automaton):
+        """
+        Internal method, invoked when processing a ``(q1, q2)`` pair of states.
+
+        Args:
+            q1 (int): A state of ``g1``.
+            g1 (Automaton): The automaton corresponding to left operand of the inclusion.
+            q2 (int): A state of ``g2``.
+            g2 (Automaton): The automaton corresponding to right operand of the inclusion.
+        """
         f1 = is_final(q1, g1)
         f2 = is_final(q2, g2)
         if f1 ^ f2:
@@ -27,10 +46,28 @@ class DeterministicInclusionVisitor(ParallelBreadthFirstSearchVisitor):
             elif self.ret != ret:
                 raise ContradictionException()
 
-    def start_vertex(self, s1 :int, g1 :Automaton, s2 :int, g2 :Automaton):
+    def start_vertex(self, s1: int, g1: Automaton, s2: int, g2: Automaton):
+        """
+        Method invoked when processing the initial pair of initial states.
+
+        Args:
+            s1 (int): A initial state of ``g1``.
+            g1 (Automaton): The automaton corresponding to left operand of the inclusion.
+            s2 (int): A initial of ``g2``.
+            g2 (Automaton): The automaton corresponding to right operand of the inclusion.
+        """
         self.update(s1, g1, s2, g2)
 
-    def discover_vertex(self, q1 :int, g1 :Automaton, q2 :int, g2 :Automaton):
+    def discover_vertex(self, q1: int, g1: Automaton, q2: int, g2: Automaton):
+        """
+        Method invoked when discovering the first time a ``(q1, q2)`` pair of states.
+
+        Args:
+            q1 (int): A state of ``g1``.
+            g1 (Automaton): The automaton corresponding to left operand of the inclusion.
+            q2 (int): A state of ``g2``.
+            g2 (Automaton): The automaton corresponding to right operand of the inclusion.
+        """
         self.update(q1, g1, q2, g2)
 
 def deterministic_inclusion(

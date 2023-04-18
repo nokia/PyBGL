@@ -65,5 +65,3 @@ def test_dfs_tree():
         8 : 8,
         9 : 6,
     }
-
-

@@ -1,39 +1,75 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+#
+# This file is part of the pybgl project.
+# https://github.com/nokia/pybgl
 
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2020, Nokia"
-__license__    = "BSD-3"
-
-from pybgl.automaton import *
-from pybgl.property_map import ReadWritePropertyMap
+from .automaton import *
+from .property_map import ReadWritePropertyMap
 
 EPSILON = "\u03b5"
 
 class Nfa(DirectedGraph):
+    """
+    The :py:class:`Nfa` implements a
+    `Non-deterministic Finite Automaton <https://en.wikipedia.org/wiki/Nondeterministic_finite_automaton>`__.
+    """
     def __init__(
         self,
-        num_vertices :int = 0,
-        initials     :set = None,
-        pmap_final   :ReadWritePropertyMap = None,
-        epsilon      :str = EPSILON
+        num_vertices: int = 0,
+        initials: set = None,
+        pmap_vfinal: ReadWritePropertyMap = None,
+        epsilon: str = EPSILON
     ):
+        """
+        Constructor.
+
+        Args:
+            num_vertices (int): Pass the (initial) number of vertices.
+            initials (str): The vertex descriptors of the initial states.
+            pmap_vfinal (ReadPropertyMap): A :py:class:`ReadPropertyMap`
+                that maps a vertex descriptor with a boolean which
+                equals ``True`` if the vertex is a final state
+                ``None`` otherwise.
+            epsilon (str): The symbol assigned to the epsilon-transition.
+        """
         super().__init__(num_vertices)
         self.initials = initials if initials else {0}
-        if not pmap_final:
-            self.map_final = defaultdict(bool)
-            self.pmap_final = make_assoc_property_map(self.map_final)
+        if not pmap_vfinal:
+            self.map_vfinal = defaultdict(bool)
+            self.pmap_vfinal = make_assoc_property_map(self.map_vfinal)
         else:
-            self.pmap_final = pmap_final
+            self.pmap_vfinal = pmap_vfinal
         self.epsilon = epsilon
 
-    def delta_one_step(self, qs, a) -> set:
+    def delta_one_step(self, qs: iter, a: str) -> set:
+        """
+        Determines the target states reached by consuming a symbol
+        from a subset of states.
+        This function is an implementation detail of
+        the :py:meth:`Nfa.delta` method.
+
+        Args:
+            qs (iter): The subset of states.
+            a (str): The consumed symbol.
+
+        Returns:
+            The set of reached states.
+        """
         sets = [set(self.adjacencies.get(q, dict()).get(a, dict()).keys()) for q in qs]
         return set.union(*sets) if sets else set()
 
-    def delta_epsilon(self, qs) -> set:
+    def delta_epsilon(self, qs: set) -> set:
+        """
+        Determines the states reached without consuming any symbol
+        from a subset of states.
+
+        Args:
+            qs (iter): The subset of states.
+
+        Returns:
+            The set of reached states.
+        """
         ret = set()
         qs_new = set(qs)
         while qs_new:
@@ -42,13 +78,36 @@ class Nfa(DirectedGraph):
             qs_new -= ret
         return ret
 
-    def delta(self, q :int, a :chr) -> set:
+    def delta(self, q: int, a: str) -> set:
+        """
+        Transition function, allowing to move from a state ``q`` to its
+        ``a``-successor, if any.
+        See also :py:meth:`Nfa.delta_word`.
+
+        Args:
+            q (int): The vertex descriptor of a state of this
+                :py:class:`Nfa` instance.
+            a (str): The symbol.
+
+        Returns:
+            The reached states
+        """
         qs = self.delta_epsilon({q})
         qs = self.delta_one_step(qs, a)
         qs = self.delta_epsilon(qs)
         return qs
 
-    def sigma(self, q :int) -> set:
+    def sigma(self, q: int) -> set:
+        """
+        Computes sub-alphabet related to a given state of this
+        :py:class:`Nfa` instance.
+
+        Args:
+            q (int): The vertex descriptor of the considered state.
+
+        Returns:
+            The corresponding set of symbols.
+        """
         qs = self.delta_epsilon({q})
         return (
             set() if q is BOTTOM else
@@ -60,7 +119,20 @@ class Nfa(DirectedGraph):
             }
         )
 
-    def add_edge(self, q :int, r :int, a :chr) -> tuple:
+    def add_edge(self, q: int, r: int, a: str) -> tuple:
+        """
+        Adds a transition to this :py:class:`Nfa` instance.
+
+        Args:
+            q (int): The vertex descriptor of source state of the new transition.
+            r (int): The vertex descriptor of target state of the new transition.
+            a (str): The symbol labeling this transition.
+
+        Returns:
+            A tuple ``(e, success)`` where ``e`` is an :py:class:`EdgeDescriptor`
+            compliant with this :py:class:`Nfa` class and ``success == True``
+            if successful, ``(None, False)`` otherwise.
+        """
         arn = self.adjacencies.get(q)
         if arn is None:
             arn = self.m_adjacencies[q] = dict()
@@ -74,7 +146,13 @@ class Nfa(DirectedGraph):
         s.add(n)
         return (EdgeDescriptor(q, r, (a, n)), True)
 
-    def remove_edge(self, e :EdgeDescriptor):
+    def remove_edge(self, e: EdgeDescriptor):
+        """
+        Removes a transition from this :py:class:`Nfa` instance.
+
+        Args:
+            e (EdgeDescriptor): The edge descriptor of the transition to be removed.
+        """
         q = source(e, self)
         r = target(e, self)
         (a, n) = e.m_distinguisher
@@ -83,7 +161,17 @@ class Nfa(DirectedGraph):
         except KeyError:
             pass
 
-    def out_edges(self, q :int):
+    def out_edges(self, q: int):
+        """
+        Retrieves an iterator over the out-edges of a state ``q``
+        involved in this :py:class:`Nfa` instance.
+
+        Args:
+            u (int): The source state.
+
+        Returns:
+            An iterator over the out-edges of ``u``.
+        """
         return (
             EdgeDescriptor(q, r, (a, n))
             for (a, rn) in self.adjacencies.get(q, dict()).items()
@@ -91,6 +179,13 @@ class Nfa(DirectedGraph):
         )
 
     def edges(self):
+        """
+        Retrieves an iterator over the transitions involved in this
+        :py:class:`Nfa` instance.
+
+        Returns:
+            An iterator over the transitions.
+        """
         return (
             EdgeDescriptor(q, r, (a, n))
             for (q, arn) in self.adjacencies.items()
@@ -99,6 +194,13 @@ class Nfa(DirectedGraph):
         )
 
     def alphabet(self) -> set:
+        """
+        Computes the (minimal) alphabet related to this
+        :py:class:`Nfa` instance.
+
+        Returns:
+            The corresponding set of symbols.
+        """
         return {
             a
             for (q, arn) in self.adjacencies.items()
@@ -106,45 +208,110 @@ class Nfa(DirectedGraph):
             if a != self.epsilon
         }
 
-    def set_initial(self, q :int, is_initial :bool = True):
-        if is_initial:
-            self.initials.add(q)
-        elif q in self.initials:
-            self.initials.remove(q)
+    def set_initial(self, q: int, is_initial: bool = True):
+        """
+        Sets the status of a state as an initial state of this
+        :py:class:`Nfa` instance.
 
-    def initials(self) -> set:
-        return self.initials
-
-    def is_initial(self, q :int) -> bool:
-        return q in self.initials
-
-    def set_initial(self, q :int, is_initial :bool = True):
+        Args:
+            q (int): The vertex descriptor of the new initial state.
+            is_initial (bool): Pass ``True`` if ``q`` must be the
+                new initial state, ``False`` otherwise.
+        """
         if is_initial:
             self.initials.add(q)
         else:
             self.initials.discard(q)
 
-    def set_initials(self, q0s :set):
+    def initials(self) -> set:
+        """
+        Retrieves the initial states of this :py:class:`Nfa` instance.
+
+        Returns:
+            The initial states of the NFA.
+        """
+        return self.initials
+
+    def is_initial(self, q: int) -> bool:
+        """
+        Tests whether state is an initial state of this
+        :py:class:`Nfa` instance.
+
+        Args:
+            q (int): The vertex descriptor of the considered state.
+
+        Returns:
+            ``True`` if ``q`` is the initial state,
+            ``None`` otherwise.
+        """
+        return q in self.initials
+
+    def set_initials(self, q0s: set):
+        """
+        Sets the initial states of this :py:class:`Nfa` instance.
+
+        Args:
+            q0s (iter): The new set of initial states.
+        """
         self.initials = {q0 for q0 in q0s}
 
-    def label(self, e :EdgeDescriptor) -> chr:
+    def label(self, e: EdgeDescriptor) -> str:
+        """
+        Retrieves the symbol assigned to a transition of this
+        :py:class:`Nfa` instance.
+
+        Args:
+            e (EdgeDescriptor): The edge descriptor of the considered
+                transition.
+
+        Returns:
+            The symbol assigned to the considered transition.
+        """
         (a, n) = e.m_distinguisher
         return a
 
-    def set_final(self, q :int, is_final :bool = True):
-        self.pmap_final[q] = is_final
+    def set_final(self, q: int, is_final: bool = True):
+        """
+        Sets the status of a state as a final state of this
+        :py:class:`Nfa` instance.
 
-    def is_final(self, q :int) -> bool:
-        return self.pmap_final[q]
+        Args:
+            q (int): The vertex descriptor of the new initial state.
+            is_initial (bool): Pass ``True`` if ``q`` must be the
+                new initial state, ``False`` otherwise.
+        """
 
-    def to_dot(self, **kwargs):
+        self.pmap_vfinal[q] = is_final
+
+    def is_final(self, q: int) -> bool:
+        """
+        Tests whether state is a final state of this
+        :py:class:`Nfa` instance.
+
+        Args:
+            q (int): The vertex descriptor of the considered state.
+
+        Returns:
+            ``True`` if ``q`` is the final state,
+            ``None`` otherwise.
+        """
+        return self.pmap_vfinal[q]
+
+    def to_dot(self, **kwargs) -> str:
+        """
+        Exports this :py:class:`Nfa` instance to a Graphviz string.
+        See the :py:func:`to_dot` function.
+
+        Returns:
+            The corresponding graphviz string.
+        """
         dpv = {
-            "shape" : make_func_property_map(
+            "shape":  make_func_property_map(
                 lambda u: "doublecircle" if self.is_final(u) else "circle"
             ),
         }
         dpe = {
-            "label" : make_func_property_map(
+            "label":  make_func_property_map(
                 lambda e: (
                     "<i>\u03b5</i>" if self.label(e) == self.epsilon
                     else self.label(e)
@@ -155,10 +322,33 @@ class Nfa(DirectedGraph):
         kwargs = enrich_kwargs(dpe, "dpe", **kwargs)
         return super().to_dot(**kwargs)
 
-    def accepts(self, w) -> True:
+    def accepts(self, w: str) -> True:
+        """
+        Tests whether this :py:class:`Nfa` instance accepts a word,
+        meaning there exist a state reached from its initial state by
+        consuming successively each character of the input word.
+
+        Args:
+            w (str): The input word.
+
+        Returns:
+            ``True`` if the automaton accepts ``w``
+            ``False`` otherwise.
+        """
         return any(is_final(q, self) for q in delta_word(w, self))
 
     def delta_word(self, w) -> set:
+        """
+        Transition function, allowing to move from an initial state
+        to the state reached by consuming each character of a word ``w``, if any.
+        See also :py:meth:`Nfa.delta`.
+
+        Args:
+            w (str): The word.
+
+        Returns:
+            The reached states
+        """
         qs = set(initials(self))
         qs = self.delta_epsilon(qs)
         for a in w:
@@ -166,20 +356,86 @@ class Nfa(DirectedGraph):
             qs = set.union(*[delta(q, a, self) for q in qs])
         return qs
 
-    def finals(self):
+    def finals(self) -> iter:
+        """
+        Retrieves the final states of this :py:class:`Nfa` instance.
+
+        Returns:
+            The final initial states of the NFA.
+        """
         return (q for q in vertices(self) if is_final(q, self))
 
-def epsilon(nfa :Nfa) -> chr:
+    def is_epsilon_transition(self, e: EdgeDescriptor) -> bool:
+        """
+        Tests whether a transition is labeled by the empty word.
+
+        Args:
+            e (EdgeDescriptor): The edge descriptor of the transition.
+            nfa (Nfa): A non-deterministic automaton.
+
+        Returns:
+            ``True`` if the transition is labeled by the empty word,
+            ``False`` otherwise.
+        """
+        return self.label(e) == self.epsilon
+
+def epsilon(nfa: Nfa) -> str:
+    """
+    Retrieves the symbol representing the empty word.
+
+    Args:
+        nfa (Nfa): A non-deterministic automaton.
+
+    Returns:
+        The symbol representing the empty word.
+    """
     return nfa.epsilon
 
-def is_epsilon_transition(e :EdgeDescriptor, nfa :Nfa) -> bool:
-    return label(e, nfa) == epsilon(nfa)
+def is_epsilon_transition(e: EdgeDescriptor, nfa: Nfa) -> bool:
+    """
+    Tests whether a transition is labeled by the empty word.
 
-def initials(nfa :Nfa):
+    Args:
+        e (EdgeDescriptor): The edge descriptor of the transition.
+        nfa (Nfa): A non-deterministic automaton.
+
+    Returns:
+        ``True`` if the transition is labeled by the empty word,
+        ``False`` otherwise.
+    """
+    return self.is_epsilon_transition(e)
+
+def initials(nfa: Nfa) -> iter:
+    """
+    Retrieves the initial states of a NFA.
+
+    Args:
+        nfa (Nfa): A non-deterministic automaton.
+
+    Returns:
+        The initial states of the NFA.
+    """
     return (q for q in nfa.initials)
 
-def set_initials(q0s, nfa :Nfa):
+def set_initials(q0s: iter, nfa: Nfa):
+    """
+    Sets the initial states of a NFA.
+
+    Args:
+        q0s (iter): The new set of initial states.
+        nfa (Nfa): A non-deterministic automaton.
+    """
     nfa.set_initials(q0s)
 
-def delta_word(w, nfa) -> set: # Overloads Automaton.delta_word
+def delta_word(w: str, nfa: Nfa) -> set:
+    """
+    Adapts :py:func:`Automaton.delta_word` for NFAs.
+
+    Args:
+        w (str): The word to consume.
+        nfa (Nfa): A non-deterministic automaton.
+
+    Returns:
+        The set of reached states.
+    """
     return nfa.delta_word(w)

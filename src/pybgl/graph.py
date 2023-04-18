@@ -271,13 +271,59 @@ class Graph:
             u (int): The source vertex.
 
         Returns:
-            An iterator over the edges.
+            An iterator over the out-edges of ``u``.
         """
         return (
             EdgeDescriptor(u, v, n)
             for (v, s) in self.adjacencies.get(u, dict()).items()
             for n in s
         )
+
+    def out_degree(self, u: int) -> int:
+        """
+        Gets the out-degree (the number of out-edges) of a vertex ``u``
+        involved in this :py:class:`Graph` instance.
+
+        Args:
+            u (int): The considered vertex.
+
+        Returns:
+            The out-degree of ``u``
+        """
+        return __len_gen__(self.out_edges(u))
+
+    def in_edges(self, u: int) -> iter:
+        """
+        Gets an iterator over the in-edges of a vertex ``v``
+        involved in this :py:class:`Graph` instance.
+
+        Args:
+            v (int): The target vertex.
+
+        Returns:
+            An iterator over the out-edges of ``v``.
+        """
+        # As the mapping is only in the forward direction, the
+        # in_edges primitive is not implemented on purpose.
+        # It requires an additional mapping map each vertex
+        # with its in-edges or to implemented an inefficient
+        # iterator, e.g:
+        #
+        #   (e for e in self.edges() if self.target(e) == u)
+        return NotImplementedError("in_edges must be implemented in the child class")
+
+    def in_degree(self, u: int) -> int:
+        """
+        Gets the in-degree (the number of in-edges) of a vertex ``u``
+        involved in this :py:class:`Graph` instance.
+
+        Args:
+            u (int): The considered vertex.
+
+        Returns:
+            The in-degree of ``u``
+        """
+        return __len_gen__(self.in_edges(u))
 
     def edges(self) -> iter:
         """
@@ -480,7 +526,7 @@ class UndirectedGraph(Graph):
             u (int): The source vertex.
 
         Returns:
-            An iterator over the edges.
+            An iterator over the out-edges of ``u``.
         """
         # source(e, g) and target(e, g) impose to returns (u, v)-like
         # EdgeDescriptors.
@@ -514,7 +560,7 @@ class UndirectedGraph(Graph):
             u (int): The target vertex.
 
         Returns:
-            An iterator over the edges.
+            An iterator over the in-edges of ``u``.
         """
         return self.out_edges(u)
 
@@ -699,7 +745,7 @@ def in_degree(u: int, g: Graph) -> int:
     Returns:
         The in-degree of ``u``
     """
-    return __len_gen__(in_edges(u, g))
+    return g.in_degree(u)
 
 def out_edges(u: int, g: Graph) -> iter:
     """
@@ -711,7 +757,7 @@ def out_edges(u: int, g: Graph) -> iter:
         g (Graph): The considered graph.
 
     Returns:
-        An iterator over the edges.
+        An iterator over the out-edges of ``u``.
     """
     return g.out_edges(u)
 
@@ -727,7 +773,7 @@ def out_degree(u: int, g: Graph) -> int:
     Returns:
         The out-degree of ``u``
     """
-    return __len_gen__(out_edges(u, g))
+    return __len_gen__(self.out_edges(u))
 
 def edge(u: int, v: int, g: Graph) -> tuple:
     """

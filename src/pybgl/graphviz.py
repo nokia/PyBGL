@@ -15,27 +15,55 @@ from .graphviz_impl import *
 # Graphviz read
 #------------------------------------------------------------------
 
-class GraphVizOptsParser(HTMLParser):
+class GraphvizOptsParser(HTMLParser):
+    """
+    Implementation details for the :py:class:`ReadGraphvizVisitor` class.
+    used to parse the options related to a vertex or an edge.
+    """
     def __init__(self):
+        """
+        Constructor
+        """
         super().__init__()
         self.d = dict()
+
     def handle_starttag(self, tag, attrs):
         for (k, v) in attrs:
             self.d[k] = v
+
     def feed(self, graphviz_opts):
         if graphviz_opts:
             graphviz_opts= "<fake_tag " + graphviz_opts[1:-1] + ">"
             super().feed(graphviz_opts)
+
     def items(self):
         return self.d.items()
 
 class GraphvizVisitor():
-    def on_vertex(self, line :str, u :int, opts :str):  pass
-    def on_edge(self, line :str, u :int, v :int, opts :str): pass
-    def on_else(self, line :str): pass
+    """
+    Base of the :py:class:`GraphvizVisitor` class.
+    """
+    def on_vertex(self, line: str, u: int, opts: str):
+        pass
+    def on_edge(self, line: str, u: int, v: int, opts: str):
+        pass
+    def on_else(self, line: str):
+        pass
 
 class ReadGraphvizVisitor(GraphvizVisitor):
-    def __init__(self, g :Graph):
+    """
+    The :py:class:`ReadGraphvizVisitor` is used to implement
+    the :py:func:`read_graphviz` function. It is used to
+    initialize a :py:class:`Graph` instance from a
+    Graphviz file.
+    """
+    def __init__(self, g: Graph):
+        """
+        Constructor.
+
+        Args:
+            g: The graph to populate.
+        """
         super().__init__()
         self.m_g = g
         self.m_aliases = dict()
@@ -46,32 +74,35 @@ class ReadGraphvizVisitor(GraphvizVisitor):
     def on_install_edge_property(self, e, g, key, value):
         pass
 
-    def on_vertex(self, line :str, u_alias :int, opts :str) -> int:
+    def on_vertex(self, line: str, u_alias: int, opts: str) -> int:
         u = add_vertex(self.m_g)
         self.m_aliases[u_alias] = u
-        parser = GraphVizOptsParser()
+        parser = GraphvizOptsParser()
         parser.feed(opts)
         for (key, value) in parser.items():
             self.on_install_vertex_property(u, self.m_g, key, value)
         return u
 
-    def on_edge(self, line :str, u_alias :int, v_alias :int, opts :str) -> EdgeDescriptor:
+    def on_edge(self, line: str, u_alias: int, v_alias: int, opts: str) -> EdgeDescriptor:
         u = self.m_aliases[u_alias]
         v = self.m_aliases[v_alias]
         (e, added) = add_edge(u, v, self.m_g)
         assert added
-        parser = GraphVizOptsParser()
+        parser = GraphvizOptsParser()
         parser.feed(opts)
         for (key, value) in parser.items():
             self.on_install_edge_property(e, self.m_g, key, value)
         return e
 
-PATTERN_SPACE          = "\\s*"
-PATTERN_VERTEX_ID      = "([0-9]+)"
+PATTERN_SPACE = "\\s*"
+PATTERN_VERTEX_ID = "([0-9]+)"
 PATTERN_EDGE_CONNECTOR = "->" #TODO manage -- for undirected graphs
-PATTERN_OPTS           = "(\\[(.*)\\])?"
-PATTERN_LINE_VERTEX    = PATTERN_SPACE.join([PATTERN_VERTEX_ID, PATTERN_OPTS, ";"])
-PATTERN_LINE_EDGE      = PATTERN_SPACE.join([PATTERN_VERTEX_ID, PATTERN_EDGE_CONNECTOR, PATTERN_VERTEX_ID, PATTERN_OPTS, ";"])
+PATTERN_OPTS = "(\\[(.*)\\])?"
+PATTERN_LINE_VERTEX = PATTERN_SPACE.join([PATTERN_VERTEX_ID, PATTERN_OPTS, ";"])
+PATTERN_LINE_EDGE = PATTERN_SPACE.join([
+    PATTERN_VERTEX_ID, PATTERN_EDGE_CONNECTOR,
+    PATTERN_VERTEX_ID, PATTERN_OPTS, ";"
+])
 
 RE_GRAPHVIZ_SVG = re.compile(".*(<svg.*>.*</svg>).*")
 RE_LINE_VERTEX = re.compile(PATTERN_LINE_VERTEX)
@@ -84,13 +115,17 @@ def read_graphviz(iterable, g :Graph, vis :ReadGraphvizVisitor = None):
     This function expect at most one vertex per line and one edge per line.
 
     Assumptions:
-    - vertices are identified using integer
-    - vertices are described in the dot file before the edges
-    - vertex/edge attributes are not too weird strings
+
+    - The vertices are identified using integer
+    - The vertices are described in the dot file before the edges
+    - The vertex/edge attributes are not too weird strings
+
+    See the :py:func:`read_graphviz_dp` function to load Graphviz styles.
 
     Args:
-        iterable: An iterable (e.g. my_file.readlines() or my_str.splitlines())
-        g: Pass an empty DirectedGraph.
+        iterable: The input Graphviz lines (e.g. my_file.readlines() or my_str.splitlines())
+        g (Graph): Pass an empty :py:class:`DirectedGraph` or :py:class:`UndirectedGraph`
+            instance.
     """
     if not vis:
         vis = ReadGraphvizVisitor(g)
@@ -111,7 +146,13 @@ def read_graphviz(iterable, g :Graph, vis :ReadGraphvizVisitor = None):
 #------------------------------------------------------------------
 
 class ReadGraphvizDpVisitor(ReadGraphvizVisitor):
-    def __init__(self, g, dpv :dict, dpe :dict):
+    """
+    The :py:class:`ReadGraphvizDpVisitor` is used to implement
+    the :py:func:`read_graphviz_dp` function. It is used to
+    initialize a :py:class:`Graph` instance from a
+    Graphviz file.
+    """
+    def __init__(self, g, dpv: dict, dpe: dict):
         super().__init__(g)
         self.m_dpv = dpv
         self.m_dpe = dpe
@@ -124,7 +165,7 @@ class ReadGraphvizDpVisitor(ReadGraphvizVisitor):
         pmap = self.m_dpe[key] if self.m_dpe else None
         if pmap: pmap[e] = value
 
-def read_graphviz_dp(iterable, g :Graph, dpv :dict = None, dpe :dict = None):
+def read_graphviz_dp(iterable: iter, g: Graph, dpv: dict = None, dpe: dict = None):
     """
     Read an iterable where each element is a line of a graphviz string to
     extract a graph and its node/edge attributes.
@@ -151,7 +192,7 @@ def error(*cls):
     """
     print(*cls, file=sys.stderr)
 
-def run_graphviz(s_dot, layout_engine = "dot", format = "svg") -> bytes:
+def run_graphviz(s_dot: str, layout_engine: str = "dot", format: str = "svg") -> bytes:
     """
     Converts a dot string (graphviz format) into a graphic file.
 
@@ -179,8 +220,21 @@ def run_graphviz(s_dot, layout_engine = "dot", format = "svg") -> bytes:
         error("Input dot string was:\n%s\n" % s_dot)
         raise RuntimeError("run_graphviz: invalid string")
 
-def dot_to_svg(s_dot :str, layout_engine = "dot", format = "svg") -> str:
-    bytes_img = run_graphviz(s_dot, layout_engine, format)
+def dot_to_svg(s_dot: str, engine: str = "dot", format: str = "svg") -> str:
+    """
+    Converts a Graphviz string to SVG.
+
+    Args:
+        s_dot (str): A Graphviz string.
+        engine (str): A graphviz engine (e.g.,
+            ``"dot"``, ``"fdp"``, ``"neato"``, ...).
+        format (str): The output graphviz terminal, e.g. ``"svg"``, ``"png"``.
+            See `man dot <https://linux.die.net/man/1/dot>`__ for more details.
+
+    Returns:
+        The corresponding SVG string.
+    """
+    bytes_img = run_graphviz(s_dot, engine, format)
     if isinstance(bytes_img, bytes): # This should no more occur
         return bytes_img.decode("utf-8")
     elif isinstance(bytes_img, str):
@@ -188,21 +242,27 @@ def dot_to_svg(s_dot :str, layout_engine = "dot", format = "svg") -> str:
         return bytes_img[i:]
     return None
 
-def write_graphviz(s_dot :str, filename, engine = "dot", format = "svg") -> bool:
+def write_graphviz(s_dot: str, filename: str, engine: str = "dot", format: str = "svg") -> bool:
     """
-    Writes a dot string (graphviz format) into a graphic file.
+    Writes a dot string (Graphviz format) into a graphic file.
 
     Args:
-        s_dot: A string in the graphviz format.
-        filename: The path of the output file.
-        format: The output graphviz terminal.
-            See "man dot" for more details.
-        engine: A graphviz engine (e.g. "dot", "fp", "neato", ...).
+        s_dot (str): A string in the graphviz format.
+        filename (str): The path of the output file.
+        engine (str): A graphviz engine (e.g.,
+            ``"dot"``, ``"fdp"``, ``"neato"``, ...).
+        format (str): The output graphviz terminal, e.g. ``"svg"``, ``"png"``.
+            See `man dot <https://linux.die.net/man/1/dot>`__ for more details.
 
     Returns:
         True iff successful.
     """
-    def write_graphviz_impl(s_dot :str, filename, format = "svg", engine = "dot") -> bool:
+    def write_graphviz_impl(
+        s_dot: str,
+        filename: str,
+        format: str = "svg",
+        engine: str = "dot"
+    ) -> bool:
         ret = False
         bytes_img = run_graphviz(s_dot, engine, format)
         if bytes_img:
@@ -216,26 +276,28 @@ def write_graphviz(s_dot :str, filename, engine = "dot", format = "svg") -> bool
     else:
         return write_graphviz_impl(s_dot, filename, format, engine)
 
-def dotstr_to_html(s_dot :str, engine = "dot") -> str:
+def dotstr_to_html(s_dot: str, engine = "dot") -> str:
     """
-    Converts a dot string to a html string.
+    Converts a Graphviz string to a HTML string.
 
     Args:
-        s_dot: A dot string.
-        engine: A graphviz engine (e.g. "dot", "fdp", "neato", ...).
+        s_dot (str): A dot string.
+        engine (str): A graphviz engine (e.g.,
+            ``"dot"``, ``"fdp"``, ``"neato"``, ...).
 
     Returns:
         The corresponding HTML string.
     """
     return str(run_graphviz(s_dot, engine, format="svg"))
 
-def graph_to_html(g, engine = "dot", **kwargs) -> str:
+def graph_to_html(g, engine: str = "dot", **kwargs) -> str:
     """
-    Converts a Graph to a HTML string.
+    Converts a graph to a HTML string.
 
     Args:
-        g: The input Graph.
-        engine: A graphviz engine (e.g. "dot", "fdp", "neato", ...).
+        g (Graph): The input graph.
+        engine (str): A graphviz engine (e.g. "dot", "fdp", "neato", ...).
+        **kwargs (dict): See the :py:meth:`Graph.to_dot` method.
 
     Returns:
         The corresponding HTML string.

@@ -1,29 +1,25 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Class allowing to aggregate a list of compatible visitors
-# into a single visitor.
-#
 # This file is part of the pybgl project.
 # https://github.com/nokia/pybgl
 
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2020, Nokia"
-__license__    = "BSD-3"
+"""
+This module provides utilities related to colors, handy to convert HTML color
+(HSV, HSL...) to the corresponding `Graphviz color <https://graphviz.org/>`__.
+This module is complementary to `colorsys <https://docs.python.org/2/library/colorsys.html>`__.
+"""
 
-# Note: this module is complementary to colorsys.
-# https://docs.python.org/2/library/colorsys.html
-
-def hsv_to_hsl(h :float, s :float, v :float) -> tuple:
+def hsv_to_hsl(h: float, s: float, v: float) -> tuple:
     """
-    HSV to HSL color conversion.
-    https://en.wikipedia.org/wiki/HSL_and_HSV#Interconversion
+    Computes an
+    `HSV to HSL color conversion <https://en.wikipedia.org/wiki/HSL_and_HSV#Interconversion>`__.
+
     Args:
-        h: Float in [0.0, 1.0] corresponding to hue.
-        s: Float in [0.0, 1.0] corresponding to saturation.
-        v: Float in [0.0, 1.0] corresponding to value.
+        h (float): the hue, in [0.0, 1.0].
+        s (float): the saturation, in [0.0, 1.0].
+        v (float): the value, [0.0, 1.0].
+
     Returns:
         The corresponding HSL normalized tuple.
     """
@@ -31,14 +27,16 @@ def hsv_to_hsl(h :float, s :float, v :float) -> tuple:
     s = 0 if l == 0 or l == 1 else (v - l) / min(l, 1 - l)
     return (h, s, l)
 
-def hsl_to_hsv(h :float, s :float, l :float) -> tuple:
+def hsl_to_hsv(h: float, s: float, l: float) -> tuple:
     """
-    HSL to HSV color conversion.
-    https://en.wikipedia.org/wiki/HSL_and_HSV#Interconversion
+    Computes an
+    `HSL to HSV color conversion <https://en.wikipedia.org/wiki/HSL_and_HSV#Interconversion>`__.
+
     Args:
-        h: `float` in [0.0, 1.0] corresponding to hue.
-        s: `float` in [0.0, 1.0] corresponding to saturation.
-        l: `float` in [0.0, 1.0] corresponding to light.
+        h (float): the hue, in [0.0, 1.0].
+        s (float): the saturation, in [0.0, 1.0].
+        l (float): the light, [0.0, 1.0].
+
     Returns:
         The corresponding HSv normalized tuple.
     """
@@ -46,25 +44,31 @@ def hsl_to_hsv(h :float, s :float, l :float) -> tuple:
     s = 0 if v == 0 else 2 * (1 - l/v)
     return (h, s, v)
 
-def normalize_color_tuple(h :int, s:int, x:int) -> tuple:
+def normalize_color_tuple(h: int, s: int, x: int) -> tuple:
     """
-    Normalize an HSV or HSL tuple.
+    Normalizes an HSV or HSL tuple.
+
     Args:
-        h: `int` in {0, ..., 360} corresponding to hue.
-        s: `int` in {0, ..., 100} corresponding to saturation.
-        x: `int` in {0, ..., 100} corresponding to light or value.
-    Returns:l
+        h (int): The hue, in {0, ..., 360}.
+        s (int): The saturation, in {0, ..., 100}.
+        x (int): The value or the light, {0, ..., 100}.
+
+    Returns:
         The corresponding normalized tuple.
     """
     return (h / 360, s / 100, x / 100)
 
-def html_to_graphviz(color :str) -> str:
+#TODO rename to html_color_to_graphviz
+def html_to_graphviz(color: str) -> str:
     """
     HTML to Graphviz color conversion.
+
     Args:
-        color: An HTML color e.g. "#40e0d0", "turquoise", "hsl(173, 71%, 56%)".
+        color (str): An HTML color. _Examples:_ ``"#40e0d0"``, ``"turquoise"``,
+            ``"hsl(173, 71%, 56%)"``.
+
     Returns;
-        The corresponding graphviz color. It's directly `color` if it does not
+        The corresponding graphviz color. This is exactly ``color`` if it does not
         start with hsl.
     """
     if color.startswith("hsl"):

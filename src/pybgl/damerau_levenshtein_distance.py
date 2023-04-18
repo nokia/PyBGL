@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2021, Nokia"
-__license__    = "BSD-3"
+#
+# This file is part of the pybgl project.
+# https://github.com/nokia/pybgl
 
 def damerau_levenshtein_distance_naive(x :str, y :str) -> int:
     """
-    Inefficient implementation of the `Damerau Levenshtein distance <https://en.wikipedia.org/wiki/Damerau–Levenshtein_distance>`__ (no memoization).
+    Inefficient implementation of the
+    `Damerau Levenshtein distance <https://en.wikipedia.org/wiki/Damerau–Levenshtein_distance>`__
+    (no memoization).
+    Prefer the :py:func:`damerau_levenshtein_distance` function.
 
     Args:
         x (str): The left operand.
@@ -58,7 +58,9 @@ class DamerauLevenshteinDistance:
 
     def compute(self, i :int = 0, j :int = 0) -> int:
         """
-        Computes the `Damerau Levenshtein distance <https://en.wikipedia.org/wiki/Damerau–Levenshtein_distance>`__, with memoization.
+        Computes the
+        `Damerau Levenshtein distance <https://en.wikipedia.org/wiki/Damerau–Levenshtein_distance>`__,
+        with memoization.
 
         Args:
             i (int): The current index in ``self.x``.
@@ -92,7 +94,9 @@ class DamerauLevenshteinDistance:
 
 def damerau_levenshtein_distance(x :str, y :str) -> int:
     """
-    Computes the `Damerau Levenshtein distance <https://en.wikipedia.org/wiki/Damerau–Levenshtein_distance>`__, with memoization.
+    Computes the
+    `Damerau Levenshtein distance <https://en.wikipedia.org/wiki/Damerau–Levenshtein_distance>`__,
+    with memoization.
 
     Args:
         x (str): The left operand.

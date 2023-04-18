@@ -4,16 +4,11 @@
 # This file is part of the pybgl project.
 # https://github.com/nokia/pybgl
 
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2020, Nokia"
-__license__    = "BSD-3"
-
-from pybgl.automaton import \
-    BOTTOM, Automaton, EdgeDescriptor, \
-    add_edge, add_vertex, delta, \
+from pybgl.automaton import (
+    BOTTOM, Automaton, EdgeDescriptor,
+    add_edge, add_vertex, delta,
     initial, is_initial, is_final, label, set_initial, set_final, source, target
+)
 
 class ProductMixin:
     def __init__(self, g12 :Automaton, operator):

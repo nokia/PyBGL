@@ -1,17 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2020, Nokia"
-__license__    = "BSD-3"
+#
+# This file is part of the pybgl project.
+# https://github.com/nokia/pybgl
 
 import copy, re, string
 from collections import deque
-
-from pybgl.nfa import *
-from pybgl.shunting_yard_postfix import (
+from .nfa import *
+from .shunting_yard_postfix import (
     MAP_OPERATORS_RE, DefaultShuntingYardVisitor,
     shunting_yard_postfix, tokenizer_re
 )
@@ -38,13 +34,13 @@ from pybgl.shunting_yard_postfix import (
 #   \x    escape sequence
 #-------------------------------------------------------------
 
-def literal(a :chr) -> Nfa:
+def literal(a: chr) -> Nfa:
     nfa = Nfa(2)
     add_edge(0, 1, a, nfa)
     set_final(1, nfa)
     return (nfa, 0, 1)
 
-def insert_automaton(g1 :Nfa, g2 :Nfa, map21 :dict = None) -> dict:
+def insert_automaton(g1: Nfa, g2: Nfa, map21: dict = None) -> dict:
     if not map21:
         map21 = dict()
     for q2 in vertices(g2):
@@ -63,14 +59,14 @@ def insert_automaton(g1 :Nfa, g2 :Nfa, map21 :dict = None) -> dict:
         add_edge(q1, r1, a, g1)
     return map21
 
-def concatenation(nfa1 :Nfa, q01 :int, f1 :int, nfa2 :Nfa, q02 :int, f2 :int) -> tuple:
+def concatenation(nfa1: Nfa, q01: int, f1: int, nfa2: Nfa, q02: int, f2: int) -> tuple:
     map21 = insert_automaton(nfa1, nfa2)
     add_edge(f1, map21[q02], epsilon(nfa1), nfa1)
     set_initials({q01}, nfa1)
     set_final(f1, nfa1, False)
     return (nfa1, q01, map21[f2])
 
-def alternation(nfa1 :Nfa, q01 :int, f1 :int, nfa2 :Nfa, q02 :int, f2 :int) -> tuple:
+def alternation(nfa1: Nfa, q01: int, f1: int, nfa2: Nfa, q02: int, f2: int) -> tuple:
     map21 = insert_automaton(nfa1, nfa2)
     q0 = add_vertex(nfa1)
     add_edge(q0, q01, epsilon(nfa1), nfa1)
@@ -84,12 +80,12 @@ def alternation(nfa1 :Nfa, q01 :int, f1 :int, nfa2 :Nfa, q02 :int, f2 :int) -> t
     set_final(f, nfa1, True)
     return (nfa1, q0, f)
 
-def zero_or_one(nfa :Nfa, q0 :int, f :int) -> tuple:
+def zero_or_one(nfa: Nfa, q0: int, f: int) -> tuple:
     eps = epsilon(nfa)
     add_edge(q0, f, eps, nfa)
     return (nfa, q0, f)
 
-def zero_or_more(nfa :Nfa, q0 :int, f :int) -> tuple:
+def zero_or_more(nfa: Nfa, q0: int, f: int) -> tuple:
     eps = epsilon(nfa)
     new_q0 = add_vertex(nfa)
     new_f = add_vertex(nfa)
@@ -102,7 +98,7 @@ def zero_or_more(nfa :Nfa, q0 :int, f :int) -> tuple:
     set_final(new_f, nfa, True)
     return (nfa, new_q0, new_f)
 
-def one_or_more(nfa :Nfa, q0 :int, f :int) -> tuple:
+def one_or_more(nfa: Nfa, q0: int, f: int) -> tuple:
     eps = epsilon(nfa)
     new_q0 = add_vertex(nfa)
     new_f = add_vertex(nfa)
@@ -114,7 +110,7 @@ def one_or_more(nfa :Nfa, q0 :int, f :int) -> tuple:
     set_final(new_f, nfa, True)
     return (nfa, new_q0, new_f)
 
-def repetition(nfa :Nfa, q0 :int, f :int, m :int) -> tuple:
+def repetition(nfa: Nfa, q0: int, f: int, m: int) -> tuple:
     assert m >= 0
     if m == 0:
         nfa = Nfa(1)
@@ -130,7 +126,7 @@ def repetition(nfa :Nfa, q0 :int, f :int, m :int) -> tuple:
             (nfa, q0, f) = concatenation(nfa, q0, f, ori, q0_ori, f_ori)
     return (nfa, q0, f)
 
-def repetition_range(nfa :Nfa, q0 :int, f :int, m :int, n :int) -> tuple:
+def repetition_range(nfa: Nfa, q0: int, f: int, m: int, n: int) -> tuple:
     assert n is None or m <= n, "The lower bound {m} must be less than the upper bound {n}"
     if   (m, n) == (0, 1):
         return zero_or_one(nfa, q0, f)
@@ -160,7 +156,7 @@ def repetition_range(nfa :Nfa, q0 :int, f :int, m :int, n :int) -> tuple:
                 add_edge(pred_f, f, eps, nfa)
         return (nfa, q0, f)
 
-def bracket(chars :iter) -> tuple:
+def bracket(chars: iter) -> tuple:
     nfa = Nfa(2)
     set_final(1, nfa)
     for a in chars:
@@ -171,7 +167,7 @@ def bracket(chars :iter) -> tuple:
 # Internal parsers
 #-------------------------------------------------------------
 
-def parse_repetition(s :str) -> tuple:
+def parse_repetition(s: str) -> tuple:
     r = re.compile(r"{\s*(\d+)\s*}")
     match = r.match(s)
     if match:
@@ -186,7 +182,7 @@ def parse_repetition(s :str) -> tuple:
 
 DEFAULT_ALPHABET = string.printable
 
-def parse_bracket(s :str, whole_alphabet :iter = None) -> set:
+def parse_bracket(s: str, whole_alphabet: iter = None) -> set:
     if not whole_alphabet:
         whole_alphabet = DEFAULT_ALPHABET
     if not (s[0] == "[" and s[-1] == "]"):
@@ -221,26 +217,26 @@ def parse_bracket(s :str, whole_alphabet :iter = None) -> set:
     return accepted if not reverse else set(whole_alphabet) - accepted
 
 MAP_ESCAPED_BRACKET = {
-        r"\d" : "[0-9]",
-        r"\D" : "[^0-9]",
-        r"\s" : "[ \t]",
-        r"\S" : "[^ \t]",
+        r"\d":  "[0-9]",
+        r"\D":  "[^0-9]",
+        r"\s":  "[ \t]",
+        r"\S":  "[^ \t]",
         # \w and \W should depend on the locale. Here, we assume ASCII.
-        r"\w" : "[0-9A-Za-z]",
-        r"\W" : "[^0-9A-Za-z]",
+        r"\w":  "[0-9A-Za-z]",
+        r"\W":  "[^0-9A-Za-z]",
 }
 
 MAP_ESCAPED_SPECIAL = {
-    r"\a" : "\a",
-    r"\b" : "\b",
-    r"\f" : "\f",
-    r"\n" : "\n",
-    r"\r" : "\r",
-    r"\t" : "\t",
-    r"\v" : "\v",
+    r"\a":  "\a",
+    r"\b":  "\b",
+    r"\f":  "\f",
+    r"\n":  "\n",
+    r"\r":  "\r",
+    r"\t":  "\t",
+    r"\v":  "\v",
 }
 
-def parse_escaped(s :str, whole_alphabet :iter = None) -> set:
+def parse_escaped(s: str, whole_alphabet: iter = None) -> set:
     if len(s) == 2:
         if s in {
             r"\+", r"\*", r"\?", r"\.", r"\|",
@@ -266,7 +262,7 @@ def parse_escaped(s :str, whole_alphabet :iter = None) -> set:
 # Thompson algorithm
 #-------------------------------------------------------------
 
-def thompson_compile_nfa(expression :str, whole_alphabet = None) -> Nfa:
+def thompson_compile_nfa(expression: str, whole_alphabet = None) -> Nfa:
     if not expression:
         g = Nfa(1)
         set_final(0, g)

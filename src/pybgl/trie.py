@@ -4,15 +4,9 @@
 # This file is part of the pybgl project.
 # https://github.com/nokia/pybgl
 
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2020, Nokia"
-__license__    = "BSD-3"
-
-from pybgl.automaton import *
-from pybgl.parallel_breadth_first_search import WHITE, ParallelBreadthFirstSearchVisitor, parallel_breadth_first_search
-from pybgl.property_map import make_constant_property_map
+from .automaton import *
+from .parallel_breadth_first_search import WHITE, ParallelBreadthFirstSearchVisitor, parallel_breadth_first_search
+from .property_map import make_constant_property_map
 
 class Trie(Automaton):
     def __init__(self, *args):
@@ -33,12 +27,12 @@ class TrieDeterministicFusion(ParallelBreadthFirstSearchVisitor):
     def __init__(self):
         self.map_q2_q1 = dict()
 
-    def start_vertex(self, q01 :int, g1 :Trie, q02 :int, g2 :Trie):
+    def start_vertex(self, q01: int, g1: Trie, q02: int, g2: Trie):
         self.map_q2_q1[q02] = q01
         if is_final(q02, g2):
             set_final(q01, g1)
 
-    def examine_edge(self, e1 :EdgeDescriptor, g1 :Trie, e2 :EdgeDescriptor, g2 :Trie, a :chr):
+    def examine_edge(self, e1: EdgeDescriptor, g1: Trie, e2: EdgeDescriptor, g2: Trie, a: chr):
         r2 = target(e2, g2) if e2 else BOTTOM
         if e1 is None or target(e1, g1) is BOTTOM:
             q1 = None
@@ -55,7 +49,7 @@ class TrieDeterministicFusion(ParallelBreadthFirstSearchVisitor):
         if r2 is not BOTTOM and is_final(r2, g2):
             set_final(r1, g1)
 
-def trie_deterministic_fusion(g1 :Trie, g2 :Trie):
+def trie_deterministic_fusion(g1: Trie, g2: Trie):
     parallel_breadth_first_search(
         g1, g2,
         vis = TrieDeterministicFusion(),

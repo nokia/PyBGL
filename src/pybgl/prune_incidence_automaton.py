@@ -1,21 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+#
+# This file is part of the pybgl project.
+# https://github.com/nokia/pybgl
 
-__author__     = "Marc-Olivier Buob, Maxime Raynal"
-__maintainer__ = "Marc-Olivier Buob, Maxime Raynal"
-__email__      = "{marc-olivier.buob,maxime.raynal}@nokia.com"
-__copyright__  = "Copyright (C) 2020, Nokia"
-__license__    = "BSD-3"
-
-from collections               import defaultdict
-
-from pybgl.graph               import Graph
-from pybgl.incidence_automaton import (
+from collections import defaultdict
+from .graph import Graph
+from .incidence_automaton import (
     IncidenceAutomaton, finals, initial, remove_vertex, vertices
 )
-from pybgl.depth_first_search  import depth_first_search_graph
-from pybgl.property_map        import make_assoc_property_map
-from pybgl.reverse             import reverse_graph
+from .depth_first_search  import depth_first_search_graph
+from .property_map import make_assoc_property_map
+from .reverse import reverse_graph
 
 def find_reachable_vertices(g: Graph, sources: set) -> set:
     """
