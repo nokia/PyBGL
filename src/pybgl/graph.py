@@ -773,7 +773,7 @@ def out_degree(u: int, g: Graph) -> int:
     Returns:
         The out-degree of ``u``
     """
-    return __len_gen__(self.out_edges(u))
+    return __len_gen__(g.out_edges(u))
 
 def edge(u: int, v: int, g: Graph) -> tuple:
     """

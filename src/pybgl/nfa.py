@@ -403,7 +403,7 @@ def is_epsilon_transition(e: EdgeDescriptor, nfa: Nfa) -> bool:
         ``True`` if the transition is labeled by the empty word,
         ``False`` otherwise.
     """
-    return self.is_epsilon_transition(e)
+    return nfa.is_epsilon_transition(e)
 
 def initials(nfa: Nfa) -> iter:
     """

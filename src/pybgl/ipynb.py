@@ -24,7 +24,7 @@ def in_ipynb() -> bool:
     except ImportError:
         return False
 
-def background_template_html(background_color:str = None) -> str:
+def background_template_html(background_color: str = None) -> str:
     """
     Crafts an HTML template to nest HTML code in a div setting the background to
     a given color.
@@ -91,5 +91,5 @@ def display_body(body_html, filename_html, background_color: str = None) -> str:
     display_svg(
         "<html><head><meta charset='UTF-8'></head><body>%s</body></html>" % body_html,
         filename_html,
-        **kwargs
+        background_color=background_color
     )
