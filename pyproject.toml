@@ -17,8 +17,10 @@ testpaths = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.8"
-ipython = ">=8.10.0"
+python = ">= 3.8, < 4.0"
+ipython = ">= 8.10.0"
+poetry-plugin-export = "*"
+dulwich = "*"
 
 [tool.poetry.group.test]
 optional = true
