@@ -1,12 +1,6 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2020, Nokia"
-__license__    = "BSD-3"
-
 from pybgl.shunting_yard_postfix import (
     MAP_OPERATORS_ALG, MAP_OPERATORS_RE,
     Ast, RpnDequeAlg, RpnDequeAst,
@@ -39,9 +33,9 @@ def test_tokenizer_alg_unary():
 
 def test_tokenizer_alg_strip():
     assert list(tokenizer_alg(" 12 + 3 ")) == [12, "+", 3]
-    assert list(tokenizer_alg("12 + 3"))   == [12, "+", 3]
-    assert list(tokenizer_alg(" 12+3 "))   == [12, "+", 3]
-    assert list(tokenizer_alg("12+3"))     == [12, "+", 3]
+    assert list(tokenizer_alg("12 + 3")) == [12, "+", 3]
+    assert list(tokenizer_alg(" 12+3 ")) == [12, "+", 3]
+    assert list(tokenizer_alg("12+3")) == [12, "+", 3]
 
 def test_re_escape():
     assert re_escape("(") == "\\("
@@ -51,8 +45,8 @@ def test_re_escape():
 def test_tokenizer_re_char_repetitions():
     # Explicit concatenation
     assert list(tokenizer_re("x{1,3}.y", cat=None)) == ["x", "{1,3}", ".", "y"]
-    assert list(tokenizer_re("x{3}.y",   cat=None)) == ["x", "{3}",   ".", "y"]
-    assert list(tokenizer_re("x{3,}.y",  cat=None)) == ["x", "{3,}",  ".", "y"]
+    assert list(tokenizer_re("x{3}.y", cat=None)) == ["x", "{3}",   ".", "y"]
+    assert list(tokenizer_re("x{3,}.y", cat=None)) == ["x", "{3,}",  ".", "y"]
     # Implicit concatenation
     assert list(tokenizer_re("x{1,3}y")) == ["x", "{1,3}", ".", "y"]
     assert list(tokenizer_re("x{3}y"  )) == ["x", "{3}",   ".", "y"]
@@ -70,14 +64,14 @@ def test_tokenizer_re_escape_sequence():
 
 def test_tokenizer_re_classes():
     # Explicit concatenation
-    assert list(tokenizer_re("a.[0-9].b",   cat=None)) == ["a", ".", "[0-9]",  ".", "b"]
-    assert list(tokenizer_re("a.[^0-9].b",  cat=None)) == ["a", ".", "[^0-9]", ".", "b"]
-    assert list(tokenizer_re("a.[(].b",     cat=None)) == ["a", ".", "[(]",    ".", "b"]
+    assert list(tokenizer_re("a.[0-9].b", cat=None)) == ["a", ".", "[0-9]",  ".", "b"]
+    assert list(tokenizer_re("a.[^0-9].b", cat=None)) == ["a", ".", "[^0-9]", ".", "b"]
+    assert list(tokenizer_re("a.[(].b", cat=None)) == ["a", ".", "[(]",    ".", "b"]
     assert list(tokenizer_re("[a-z].[0-9]", cat=None)) == ["[a-z]", ".", "[0-9]"]
     # Implicit concatenation
-    assert list(tokenizer_re("a[0-9]b" )) == ["a", ".", "[0-9]",  ".", "b"]
+    assert list(tokenizer_re("a[0-9]b")) == ["a", ".", "[0-9]",  ".", "b"]
     assert list(tokenizer_re("a[^0-9]b")) == ["a", ".", "[^0-9]", ".", "b"]
-    assert list(tokenizer_re("a[(]b"   )) == ["a", ".", "[(]",    ".", "b"]
+    assert list(tokenizer_re("a[(]b")) == ["a", ".", "[(]",    ".", "b"]
     assert list(tokenizer_re("[a-z][0-9]")) == ["[a-z]", ".", "[0-9]"]
 
 def test_tokenizer_re_parenthesis():
@@ -96,13 +90,13 @@ def test_tokenizer_re_explicit():
 def test_tokenizer_re_implicit():
     map_input_expected = {
 
-        "123?(4|5)*67" : "1.2.3?.(4|5)*.6.7",
-        "(1?2)*?3+4"   : "(1?.2)*?.3+.4",
-        "a\\dx"        : "a.\\d.x",
-        "a\\d+x"       : "a.\\d+.x",
-        "a[0-9]x"      : "a.[0-9].x",
-        "a[0-9]+x"     : "a.[0-9]+.x",
-        "a{1,2}+x"     : "a{1,2}+.x",
+        "123?(4|5)*67": "1.2.3?.(4|5)*.6.7",
+        "(1?2)*?3+4": "(1?.2)*?.3+.4",
+        "a\\dx": "a.\\d.x",
+        "a\\d+x": "a.\\d+.x",
+        "a[0-9]x": "a.[0-9].x",
+        "a[0-9]+x": "a.[0-9]+.x",
+        "a{1,2}+x": "a{1,2}+.x",
     }
     for (regexp, expected) in map_input_expected.items():
         obtained = "".join(tokenizer_re(regexp))

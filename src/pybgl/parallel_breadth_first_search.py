@@ -22,19 +22,19 @@ class ParallelBreadthFirstSearchVisitor:
     def finish_vertex(self, q1: int, g1: Automaton, q2: int, g2: Automaton):
         pass
 
-    def examine_symbol(self, q1: int, g1: Automaton, q2: int, g2: Automaton, a: chr):
+    def examine_symbol(self, q1: int, g1: Automaton, q2: int, g2: Automaton, a: str):
         pass
 
-    def examine_edge(self, e1: EdgeDescriptor, g1: Automaton, e2: EdgeDescriptor, g2: Automaton, a: chr):
+    def examine_edge(self, e1: EdgeDescriptor, g1: Automaton, e2: EdgeDescriptor, g2: Automaton, a: str):
         pass
 
-    def tree_edge(self, e1: EdgeDescriptor, g1: Automaton, e2: EdgeDescriptor, g2: Automaton, a: chr):
+    def tree_edge(self, e1: EdgeDescriptor, g1: Automaton, e2: EdgeDescriptor, g2: Automaton, a: str):
         pass
 
-    def gray_target(self, e1: EdgeDescriptor, g1: Automaton, e2: EdgeDescriptor, g2: Automaton, a: chr):
+    def gray_target(self, e1: EdgeDescriptor, g1: Automaton, e2: EdgeDescriptor, g2: Automaton, a: str):
         pass
 
-    def black_target(self, e1: EdgeDescriptor, g1: Automaton, e2: EdgeDescriptor, g2: Automaton, a: chr):
+    def black_target(self, e1: EdgeDescriptor, g1: Automaton, e2: EdgeDescriptor, g2: Automaton, a: str):
         pass
 
 def parallel_breadth_first_search(
@@ -55,7 +55,7 @@ def parallel_breadth_first_search(
 
     stack = deque()
 
-    if source_pairs == None:
+    if source_pairs is None:
         q01 = initial(g1)
         q02 = initial(g2)
         stack.appendleft((q01, q02))

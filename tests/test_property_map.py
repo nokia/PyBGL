@@ -1,15 +1,11 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
-#
-# Authors:
-#   Marc-Olivier Buob <marc-olivier.buob@nokia-bell-labs.com>
-#   Maxime Raynal     <maxime.raynal@nokia.com>
 
-from collections        import defaultdict
-from pybgl.property_map import get, \
-    make_assoc_property_map, \
-    make_constant_property_map, \
-    make_func_property_map
+from collections import defaultdict
+from pybgl.property_map import (
+    get, make_assoc_property_map,
+    make_constant_property_map, make_func_property_map
+)
 
 EXPECTED_RESULT = {
     'a': 'n', 'b': 'o', 'c': 'p', 'd': 'q', 'e': 'r', 'f': 's', 'g': 't', 'h': 'u',
@@ -18,10 +14,10 @@ EXPECTED_RESULT = {
     'y': 'l', 'z': 'm'
 }
 
-def rot13(c :chr) -> chr:
+def rot13(c: chr) -> chr:
     return chr((ord(c) - ord('a') + 13) % 26 + ord('a'))
 
-def int2chr(i :int) -> chr:
+def int2chr(i: int) -> chr:
     return ord('a') + i
 
 def alphabet():
@@ -31,13 +27,13 @@ def check_rot13(pmap_rot13):
     for a in alphabet():
         assert pmap_rot13[a] == get(pmap_rot13, a)
         assert pmap_rot13[a] == rot13(a), "pmap_rot13[%r] = %r != rot13(%r) = %r" % (a, pmap_rot13[a], a, rot13(a))
-    assert {a : pmap_rot13[a] for a in alphabet()} == EXPECTED_RESULT
+    assert {a: pmap_rot13[a] for a in alphabet()} == EXPECTED_RESULT
 
 def test_make_func_property_map():
     pmap_rot13 = make_func_property_map(rot13)
     check_rot13(pmap_rot13)
 
-def _test_make_assoc_property_map(with_dict :bool):
+def _test_make_assoc_property_map(with_dict: bool):
     # Build the underlying dictionary
     d = dict() if with_dict else defaultdict(str) # Here we use str instead of chr, because chr() does not exists!
 
@@ -63,4 +59,3 @@ def test_constant_property_map():
         assert pmap[i] == value
         pmap[i] = value + 1
         assert pmap[i] == value
-

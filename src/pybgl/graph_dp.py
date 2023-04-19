@@ -60,9 +60,9 @@ class GraphDp:
         self.dpv = dpv if dpv else dict() # Vertex attributes
         self.dpe = dpe if dpe else dict() # Edge attributes
         gs = GraphvizStyle()
-        self.dg  = dg  if dg else copy(gs.graph)
-        self.dv  = dv  if dv else copy(gs.node)
-        self.de  = de  if de else copy(gs.edge)
+        self.dg = dg if dg else copy(gs.graph)
+        self.dv = dv if dv else copy(gs.node)
+        self.de = de if de else copy(gs.edge)
         self.extra_style = extra_style if extra_style else copy(gs.extra_style)
 
     def get_dpv(self) -> dict:

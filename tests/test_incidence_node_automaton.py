@@ -1,16 +1,10 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2018, Nokia"
-__license__    = "BSD-3"
-
-from collections                        import defaultdict
-from pybgl.graphviz                     import graph_to_html
-from pybgl.property_map                 import make_assoc_property_map, make_func_property_map
-from pybgl.incidence_node_automaton     import *
+from collections import defaultdict
+from pybgl.graphviz import graph_to_html
+from pybgl.property_map import make_assoc_property_map, make_func_property_map
+from pybgl.incidence_node_automaton import *
 
 (u, v, w) = (0, 1, 2)
 
@@ -92,7 +86,7 @@ def test_incidence_node_automaton_pmap_vlabel():
     map_vlabel = defaultdict(lambda: None)
     map_vlabel[v] = "a"
     map_vlabel[w] = "b"
-    g = IncidenceNodeAutomaton(3, pmap_vsymbol = make_assoc_property_map(map_vlabel))
+    g = IncidenceNodeAutomaton(3, pmap_vsymbol=make_assoc_property_map(map_vlabel))
     assert num_vertices(g) == 3
     print(g.adjacencies)
     assert symbol(u, g) is None, f"Got {symbol(u, g)}"
@@ -194,13 +188,13 @@ def test_make_incidence_node_automaton():
     g = make_incidence_node_automaton(
         [(0, 1), (0, 2), (1, 2)],
         q0n = 0,
-        pmap_vlabel = make_assoc_property_map(
+        pmap_vlabel=make_assoc_property_map(
             defaultdict(
                 lambda: None,
                 {1: "a", 2: "b"}
             )
         ),
-        pmap_vfinal = make_func_property_map(lambda u: u in {0, 2})
+        pmap_vfinal=make_func_property_map(lambda u: u in {0, 2})
     )
     assert num_vertices(g) == 3
     assert num_edges(g) == 3

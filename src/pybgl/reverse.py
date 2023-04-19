@@ -25,7 +25,7 @@ def reverse_graph(g: IncidenceGraph):
     swap(g, "source", "target")
     swap(g, "in_edges", "out_edges")
 
-def reverse_dict(d :dict) -> dict:
+def reverse_dict(d: dict) -> dict:
     """
     Reverses a dictionary (swap its key and its values).
     Note that (key, value) pair may disappear if the values
@@ -37,4 +37,4 @@ def reverse_dict(d :dict) -> dict:
     Returns:
         The reversed dictionary.
     """
-    return {v : k for (k, v) in d.items()}
+    return {v: k for (k, v) in d.items()}

@@ -1,17 +1,11 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2020, Nokia"
-__license__    = "BSD-3"
-
-from pybgl.graph        import *
-from pybgl.graph_dp     import GraphDp
-from pybgl.graphviz     import graphviz_escape_char, graphviz_escape_html, graph_to_html, read_graphviz
-from pybgl.html         import html
-from pybgl.ipynb        import in_ipynb, ipynb_display_graph
+from pybgl.graph import *
+from pybgl.graph_dp import GraphDp
+from pybgl.graphviz import graphviz_escape_char, graphviz_escape_html, graph_to_html, read_graphviz
+from pybgl.html import html
+from pybgl.ipynb import in_ipynb, ipynb_display_graph
 
 WEIRD_CHARS = "&<>\n\t\r[]{}" + "".join([chr(i) for i in range(32)])
 
@@ -84,18 +78,18 @@ def test_graph_to_html_with_pmaps():
         g = make_graph(G)
 
         # Graph configuration display
-        dv = {"color" : "purple"}
-        de = {"color" : "red"}
+        dv = {"color": "purple"}
+        de = {"color": "red"}
         dpv = {
-            "fontcolor" : make_func_property_map(
+            "fontcolor": make_func_property_map(
                 lambda e: "cyan" if e % 2 else "orange"
             )
         }
         dpe = {
-            "fontcolor" : make_func_property_map(
+            "fontcolor": make_func_property_map(
                 lambda e: "blue" if source(e, g) % 2 else "red"
             ),
-            "label" : make_func_property_map(
+            "label": make_func_property_map(
                 lambda e: f"({source(e, g)}, {target(e, g)})"
             )
         }
@@ -136,8 +130,8 @@ def test_graph_to_html_with_html_sequences():
     pmap_elabel = make_assoc_property_map(defaultdict(str))
     gdp = GraphDp(
         g,
-        dpv = {"label" : pmap_vlabel},
-        dpe = {"label" : pmap_elabel}
+        dpv = {"label": pmap_vlabel},
+        dpe = {"label": pmap_elabel}
     )
 
     for label in [
@@ -171,12 +165,12 @@ def test_read_graphviz_simple():
     assert num_edges(g) == 1
 
 def test_read_graphviz_custom():
-    from collections        import defaultdict
+    from collections import defaultdict
     from pybgl.property_map import ReadWritePropertyMap, make_assoc_property_map
-    from pybgl.graphviz     import ReadGraphvizVisitor
+    from pybgl.graphviz import ReadGraphvizVisitor
 
     class MyReadGraphvizVisitor(ReadGraphvizVisitor):
-        def __init__(self, g :Graph, pmap_vlabel :ReadWritePropertyMap, pmap_elabel :ReadWritePropertyMap):
+        def __init__(self, g: Graph, pmap_vlabel: ReadWritePropertyMap, pmap_elabel: ReadWritePropertyMap):
             super().__init__(g)
             self.pmap_vlabel = pmap_vlabel
             self.pmap_elabel = pmap_elabel
@@ -207,4 +201,4 @@ def test_read_graphviz_custom():
     if in_ipynb(): ipynb_display_graph(g)
     assert map_vlabel == {0: "red", 1: "green", 2: "blue"}, map_vlabel
     e_01 = next(iter(edges(g)))
-    assert map_elabel == {e_01 : "my_label"}, map_vlabel
+    assert map_elabel == {e_01: "my_label"}, map_vlabel

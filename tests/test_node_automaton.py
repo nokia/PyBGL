@@ -1,14 +1,8 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2018, Nokia"
-__license__    = "BSD-3"
-
-from pybgl.graphviz        import graph_to_html
-from pybgl.node_automaton  import *
+from pybgl.graphviz import graph_to_html
+from pybgl.node_automaton import *
 
 (u, v, w) = (0, 1, 2)
 
@@ -71,7 +65,7 @@ def test_node_automaton_symbol():
     assert symbol(w, g1) == "b"
 
 def test_node_automaton_pmap_vlabel():
-    map_vlabel = defaultdict(lambda: None, {v : "a", w : "b"})
+    map_vlabel = defaultdict(lambda: None, {v: "a", w: "b"})
     g = NodeAutomaton(3, pmap_vsymbol=make_assoc_property_map(map_vlabel))
     assert num_vertices(g) == 3
     print(g.adjacencies)

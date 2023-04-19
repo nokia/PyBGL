@@ -1,14 +1,8 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2020, Nokia"
-__license__    = "BSD-3"
-
-from pybgl.graph        import *
-from pybgl.graphviz     import graph_to_html
+from pybgl.graph import *
+from pybgl.graphviz import graph_to_html
 
 def test_graph_vertex():
     for G in [DirectedGraph, UndirectedGraph]:
@@ -117,4 +111,3 @@ def test_graph_graphviz():
         (e4, _) = add_edge(0, 2, g)
         (e5, _) = add_edge(1, 2, g)
         svg = graph_to_html(g)
-

@@ -1,12 +1,6 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2021, Nokia"
-__license__    = "BSD-3"
-
 from pybgl.levenshtein_distance import *
 
 WORDS = [
@@ -35,14 +29,14 @@ def test_levenshtein_distance():
 
 def test_levenshtein_distance_explicit():
     map_xy_expected = {
-        ("books", "book")  : 1,
-        ("books", "books") : 0,
-        ("books", "cake")  : 4,
-        ("books", "boo")   : 2,
-        ("books", "boon")  : 2,
-        ("books", "cook")  : 2,
-        ("books", "cake")  : 4,
-        ("books", "cape")  : 5,
+        ("books", "book"): 1,
+        ("books", "books"): 0,
+        ("books", "cake"): 4,
+        ("books", "boo"): 2,
+        ("books", "boon"): 2,
+        ("books", "cook"): 2,
+        ("books", "cake"): 4,
+        ("books", "cape"): 5,
     }
     for ((x, y), expected) in map_xy_expected.items():
         obtained = levenshtein_distance(x, y)

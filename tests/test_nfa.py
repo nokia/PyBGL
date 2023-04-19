@@ -1,34 +1,28 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2020, Nokia"
-__license__    = "BSD-3"
-
-from pybgl.nfa      import *
+from pybgl.nfa import *
 from pybgl.graphviz import graph_to_html
 
-def make_nfa1(eps = EPSILON):
+def make_nfa1(eps=EPSILON):
     g = Nfa(4)
     (e01a, _) = add_edge(0, 1, "a", g)
     assert label(e01a, g) == "a"
-    assert is_epsilon_transition(e01a, g) == False
+    assert is_epsilon_transition(e01a, g) is False
     (e02a, _) = add_edge(0, 2, "a", g)
     (e02b, _) = add_edge(0, 2, "b", g)
     (e02a, _) = add_edge(0, 2, "a", g)
     (e21b, _) = add_edge(2, 1, "a", g)
     (e03e, _) = add_edge(0, 3, eps, g)
     assert label(e03e, g) == epsilon(g)
-    assert is_epsilon_transition(e03e, g) == True
+    assert is_epsilon_transition(e03e, g) is True
     (e33c, _) = add_edge(3, 3, "c", g)
     set_final(1, g)
     set_final(3, g)
     assert set(vertices(g)) == {0, 1, 2, 3}
     return g
 
-def make_nfa2(eps = EPSILON):
+def make_nfa2(eps=EPSILON):
     g = Nfa(3)
     add_edge(0, 1, "a", g)
     add_edge(0, 1, "a", g)
@@ -66,13 +60,13 @@ def test_sigma():
 
 def test_accepts():
     g = make_nfa1()
-    assert accepts("a", g) == True
-    assert accepts("aa", g) == True
-    assert accepts("b", g) == False
-    assert accepts("ba", g) == True
-    assert accepts("c", g) == True
-    assert accepts("cc", g) == True
-    assert accepts("", g) == True
+    assert accepts("a", g) is True
+    assert accepts("aa", g) is True
+    assert accepts("b", g) is False
+    assert accepts("ba", g) is True
+    assert accepts("c", g) is True
+    assert accepts("cc", g) is True
+    assert accepts("", g) is True
 
 def test_finals():
     g = make_nfa1()
@@ -121,13 +115,13 @@ def test_set_initials():
     g = make_nfa1()
     assert set(initials(g)) == {0}
     set_initial(2, g, True)
-    assert accepts("a", g) == True
-    assert accepts("aa", g) == True
-    assert accepts("ccc", g) == True
+    assert accepts("a", g) is True
+    assert accepts("aa", g) is True
+    assert accepts("ccc", g) is True
     set_initial(0, g, False)
-    assert accepts("a", g) == True
-    assert accepts("aa", g) == False
-    assert accepts("ccc", g) == False
+    assert accepts("a", g) is True
+    assert accepts("aa", g) is False
+    assert accepts("ccc", g) is False
 
 def test_nfa_graphviz():
     nfa = make_nfa1()

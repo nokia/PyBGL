@@ -1,16 +1,10 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2020, Nokia"
-__license__    = "BSD-3"
-
-from pybgl.automaton                import Automaton, make_automaton
-from pybgl.ipynb                    import in_ipynb
-from pybgl.property_map             import make_func_property_map
-from pybgl.deterministic_inclusion  import deterministic_inclusion
+from pybgl.automaton import Automaton, make_automaton
+from pybgl.ipynb import in_ipynb
+from pybgl.property_map import make_func_property_map
+from pybgl.deterministic_inclusion import deterministic_inclusion
 
 TEMPLATE_HTML = "<div style='background-color:white;'>%s</div>"
 
@@ -50,11 +44,11 @@ def make_fda2():
     )
 
 def check_deterministic_inclusion(
-    g1 :Automaton,
-    g2 :Automaton,
-    expected :int,
-    show_g1 :bool = True,
-    show_g2 :bool = True
+    g1: Automaton,
+    g2: Automaton,
+    expected: int,
+    show_g1: bool = True,
+    show_g2: bool = True
 ):
     obtained = deterministic_inclusion(g1, g2)
 

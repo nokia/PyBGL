@@ -1,14 +1,8 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2020, Nokia"
-__license__    = "BSD-3"
-
-from pybgl.cut          import cut
-from pybgl.graph        import DirectedGraph, add_edge
+from pybgl.cut import cut
+from pybgl.graph import DirectedGraph, add_edge
 
 def test_cut():
     g = DirectedGraph(3)
@@ -53,7 +47,6 @@ def test_cut_tree():
     (e46, _) = add_edge(4, 8, g)
     (e19, _) = add_edge(1, 9, g)
 
-
     obtained = cut(0, g, lambda e, g: e in {e01, e02})
     assert obtained == {1, 2}
 
@@ -65,6 +58,3 @@ def test_cut_tree():
 
     obtained = cut(0, g, lambda e, g: e in {e23, e24})
     assert obtained == {3, 4, 9}
-
-
-

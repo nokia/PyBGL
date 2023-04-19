@@ -1,12 +1,6 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2021, Nokia"
-__license__    = "BSD-3"
-
 from pybgl.damerau_levenshtein_distance import *
 
 WORDS = [
@@ -33,11 +27,11 @@ def test_damerau_levenshtein_distance():
                 d2 = damerau_levenshtein_distance(wi, wj)
                 assert d1 == d2
 
-def test_damerau_levenshtein_distance():
+def test_damerau_levenshtein_distance_2():
     map_xy_expected = {
-        ("ab", "ba")    : 1,
-        ("ba", "abc")   : 2,
-        ('fee', 'deed') : 2,
+        ("ab", "ba"): 1,
+        ("ba", "abc"): 2,
+        ('fee', 'deed'): 2,
     }
     for ((x, y), expected) in map_xy_expected.items():
         obtained = damerau_levenshtein_distance(x, y)

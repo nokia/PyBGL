@@ -11,12 +11,12 @@ from pybgl.automaton import (
 )
 
 class ProductMixin:
-    def __init__(self, g12 :Automaton, operator):
+    def __init__(self, g12: Automaton, operator):
         self.map_product_vertices = dict()
         self.g12 = g12
         self.operator = operator
 
-    def add_product_vertex(self, q1 :int, g1 :Automaton, q2 :int, g2 :Automaton) -> int:
+    def add_product_vertex(self, q1: int, g1: Automaton, q2: int, g2: Automaton) -> int:
         q12 = add_vertex(self.g12)
         if self.operator(is_initial(q1, g1), is_initial(q2, g2)):
             set_initial(q12, self.g12)
@@ -25,7 +25,7 @@ class ProductMixin:
         self.map_product_vertices[(q1, q2)] = q12
         return q12
 
-    def add_product_edge(self, e1 :EdgeDescriptor, g1 :Automaton, e2 :EdgeDescriptor, g2 :Automaton):
+    def add_product_edge(self, e1: EdgeDescriptor, g1: Automaton, e2: EdgeDescriptor, g2: Automaton):
         if e1:
             q1 = source(e1, g1)
             r1 = target(e1, g1)
@@ -44,10 +44,10 @@ class ProductMixin:
         r12 = self.get_or_create_product_vertex(r1, g1, r2, g2)
         return add_edge(q12, r12, a, self.g12)
 
-    def get_product_vertex(self, q1 :int, q2 :int) -> int:
+    def get_product_vertex(self, q1: int, q2: int) -> int:
         return self.map_product_vertices.get((q1, q2))
 
-    def get_or_create_product_vertex(self, q1 :int, g1 :Automaton, q2 :int, g2 :Automaton) -> int:
+    def get_or_create_product_vertex(self, q1: int, g1: Automaton, q2: int, g2: Automaton) -> int:
         if q1 is BOTTOM and q2 is BOTTOM:
             raise RuntimeError("Tried to create (BOTTOM, BOTTOM) state.")
         q12 = self.get_product_vertex(q1, q2)

@@ -1,12 +1,6 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2021, Nokia"
-__license__    = "BSD-3"
-
 from pybgl.lcs_distance import *
 
 WORDS = [
@@ -35,14 +29,14 @@ def test_lcs_distance():
 
 def test_lcs_distance_explicit():
     map_xy_expected = {
-        ("books", "book")  : 1,
-        ("books", "books") : 0,
-        ("books", "cake")  : 7,
-        ("books", "boo")   : 2,
-        ("books", "boon")  : 3,
-        ("books", "cook")  : 3,
-        ("books", "cake")  : 7,
-        ("books", "cape")  : 9,
+        ("books", "book"): 1,
+        ("books", "books"): 0,
+        ("books", "cake"): 7,
+        ("books", "boo"): 2,
+        ("books", "boon"): 3,
+        ("books", "cook"): 3,
+        ("books", "cake"): 7,
+        ("books", "cape"): 9,
     }
     for ((x, y), expected) in map_xy_expected.items():
         obtained = lcs_distance(x, y)

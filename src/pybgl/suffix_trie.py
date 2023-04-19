@@ -8,7 +8,7 @@ from itertools import chain
 from .property_map import make_func_property_map
 from .trie import BOTTOM, Trie, add_vertex, add_edge, delta, initial, num_vertices
 
-def slices(n, max_len :int = None):
+def slices(n, max_len: int = None):
     return chain(
         ((0, 0), ), # Empty word
         (
@@ -18,11 +18,11 @@ def slices(n, max_len :int = None):
         )
     )
 
-def factors(s, max_len :int = None):
+def factors(s, max_len: int = None):
     n = len(s)
     return (s[i:j] for (i, j) in slices(n, max_len))
 
-def make_suffix_trie(w :str = "", max_len :int = None, g :Trie = None) -> Trie:
+def make_suffix_trie(w: str = "", max_len: int = None, g: Trie = None) -> Trie:
     if g is None:
         g = Trie()
     if num_vertices(g) == 0:

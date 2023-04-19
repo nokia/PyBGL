@@ -4,7 +4,7 @@
 # This file is part of the pybgl project.
 # https://github.com/nokia/pybgl
 
-def damerau_levenshtein_distance_naive(x :str, y :str) -> int:
+def damerau_levenshtein_distance_naive(x: str, y: str) -> int:
     """
     Inefficient implementation of the
     `Damerau Levenshtein distance <https://en.wikipedia.org/wiki/Damerau–Levenshtein_distance>`__
@@ -32,8 +32,10 @@ def damerau_levenshtein_distance_naive(x :str, y :str) -> int:
                 damerau_levenshtein_distance_naive(x_1, y_1),
             ] + (
                 [damerau_levenshtein_distance_naive(x[2:], y[2:])] if (
-                    len(x) >= 2  and len(y) >= 2 and
-                    x[0] == y[1] and x[1] == y[0]
+                    len(x) >= 2
+                    and len(y) >= 2
+                    and x[0] == y[1]
+                    and x[1] == y[0]
                 ) else []
             )
         )
@@ -44,7 +46,7 @@ class DamerauLevenshteinDistance:
     The :py:class:`DamerauLevenshteinDistance` class is used to implement the memoization
     used by the :py:func:`damerau_levenshtein_distance_naive` function.
     """
-    def __init__(self, x :str, y :str):
+    def __init__(self, x: str, y: str):
         """
         Constructor.
 
@@ -56,7 +58,7 @@ class DamerauLevenshteinDistance:
         self.x = x
         self.y = y
 
-    def compute(self, i :int = 0, j :int = 0) -> int:
+    def compute(self, i: int = 0, j: int = 0) -> int:
         """
         Computes the
         `Damerau Levenshtein distance <https://en.wikipedia.org/wiki/Damerau–Levenshtein_distance>`__,
@@ -84,15 +86,16 @@ class DamerauLevenshteinDistance:
                         self.compute(i + 1, j + 1)
                     ] + (
                         [self.compute(i + 2, j + 2)] if (
-                            i + 1 < len(self.x) and j + 1 < len(self.y) and
-                            self.x[i] == self.y[j + 1] and self.x[i + 1] == self.y[j]
+                            i + 1 < len(self.x) and j + 1 < len(self.y)
+                            and self.x[i] == self.y[j + 1]
+                            and self.x[i + 1] == self.y[j]
                         ) else []
                     )
                 )
             )
         return ret
 
-def damerau_levenshtein_distance(x :str, y :str) -> int:
+def damerau_levenshtein_distance(x: str, y: str) -> int:
     """
     Computes the
     `Damerau Levenshtein distance <https://en.wikipedia.org/wiki/Damerau–Levenshtein_distance>`__,

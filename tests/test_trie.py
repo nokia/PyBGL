@@ -1,17 +1,11 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2020, Nokia"
-__license__    = "BSD-3"
-
-from pybgl.html                import html
-from pybgl.ipynb               import in_ipynb
-from pybgl.graphviz            import graph_to_html
-from pybgl.trie                import Trie, finals, num_vertices
-from pybgl.digital_sequence    import DigitalSequence
+from pybgl.html import html
+from pybgl.ipynb import in_ipynb
+from pybgl.graphviz import graph_to_html
+from pybgl.trie import Trie, finals, num_vertices
+from pybgl.digital_sequence import DigitalSequence
 
 def make_t1():
     t1 = Trie()
@@ -22,7 +16,8 @@ def make_t1():
 
 def test_trie_string():
     t1 = make_t1()
-    if in_ipynb(): html(graph_to_html(t1))
+    if in_ipynb():
+        html(graph_to_html(t1))
     assert num_vertices(t1) == 17
 
 def make_t2():
@@ -33,14 +28,16 @@ def make_t2():
 
 def test_trie_digital_sequence():
     t2 = make_t2()
-    if in_ipynb(): html(graph_to_html(t2))
+    if in_ipynb():
+        html(graph_to_html(t2))
     assert num_vertices(t2) == 12
 
 def test_trie_trie():
     t1 = make_t1()
     t2 = make_t2()
     t1.insert(t2)
-    if in_ipynb(): html(graph_to_html(t1))
+    if in_ipynb():
+        html(graph_to_html(t1))
     assert num_vertices(t1) == 26
     assert num_vertices(t2) == 12
 

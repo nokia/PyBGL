@@ -1,20 +1,18 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
-#
-# Authors:
-#   Marc-Olivier Buob <marc-olivier.buob@nokia-bell-labs.com>
 
-from pybgl.ipynb             import in_ipynb
-from pybgl.graph             import DirectedGraph, add_edge, source, target, vertices
-from pybgl.graph_dp          import GraphDp
-from pybgl.graphviz          import graph_to_html
-from pybgl.html              import html
+from pybgl.ipynb import in_ipynb
+from pybgl.graph import DirectedGraph, add_edge, source, target, vertices
+from pybgl.graph_dp import GraphDp
+from pybgl.graphviz import graph_to_html
+from pybgl.html import html
 from pybgl.strong_components import strong_components
-from pybgl.property_map      import make_assoc_property_map, make_func_property_map
+from pybgl.property_map import make_assoc_property_map, make_func_property_map
 
 def edge_color(e, g, pmap_component, pmap_color, default_color = "black"):
     """
     Returns the color assigned to an edge.
+
     Args:
         e: An EdgeDescriptor.
         g: A DirectedGraph.
@@ -40,19 +38,22 @@ def strong_components_to_html(g, pmap_color, pmap_component) -> str:
     return graph_to_html(
         g,
         dpv={
-            "color" : make_func_property_map(lambda u: pmap_color[pmap_component[u]])
+            "color": make_func_property_map(
+                lambda u: pmap_color[pmap_component[u]]
+            )
         },
         dpe={
-            "color" : make_func_property_map(lambda e: edge_color(e, g, pmap_component, pmap_color)),
-            "style" : make_func_property_map(lambda e: (
-                "solid" if edge_color(e, g, pmap_component, pmap_color, None) else "dashed"
-            )),
+            "color": make_func_property_map(
+                lambda e: edge_color(e, g, pmap_component, pmap_color)
+            ),
+            "style": make_func_property_map(
+                lambda e: (
+                    "solid" if edge_color(e, g, pmap_component, pmap_color, None)
+                    else "dashed"
+                )
+            ),
         }
     )
-
-#-------------------------------------------------------------
-# Main program
-#-------------------------------------------------------------
 
 def test_strong_components():
     # Create the graph
@@ -67,27 +68,26 @@ def test_strong_components():
     add_edge(6, 4, g)
 
     # Find strong connected components
-    map_component = {u : None for u in vertices(g)}
+    map_component = {u: None for u in vertices(g)}
     pmap_component = make_assoc_property_map(map_component)
     strong_components(g, pmap_component)
 
     # Rendering
     pmap_color = make_assoc_property_map({
-        0 : "red",
-        1 : "blue",
-        2 : "green",
-        3 : "purple"
+        0: "red",
+        1: "blue",
+        2: "green",
+        3: "purple"
     })
     assert map_component == {
-        0 : 2,
-        1 : 1,
-        2 : 1,
-        3 : 1,
-        4 : 0,
-        5 : 0,
-        6 : 0,
+        0: 2,
+        1: 1,
+        2: 1,
+        3: 1,
+        4: 0,
+        5: 0,
+        6: 0,
     }
 
     if in_ipynb():
         html(strong_components_to_html(g, pmap_color, pmap_component).replace("\\n", ""))
-

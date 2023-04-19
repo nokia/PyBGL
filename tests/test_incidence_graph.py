@@ -1,8 +1,5 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
-#
-# Authors:
-#   Marc-Olivier Buob <marc-olivier.buob@nokia-bell-labs.com>
 
 from pybgl.incidence_graph import *
 

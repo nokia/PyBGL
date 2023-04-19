@@ -1,21 +1,14 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2018, Nokia"
-__license__    = "BSD-3"
-
-
 from pybgl.graph import *
 (u, v, w) = (0, 1, 2)
 
 def make_g1() -> DirectedGraph:
     g1 = DirectedGraph()
-    add_vertex(g1) # u
-    add_vertex(g1) # v
-    add_vertex(g1) # w
+    add_vertex(g1)  # u
+    add_vertex(g1)  # v
+    add_vertex(g1)  # w
     return g1
 
 def make_g2() -> DirectedGraph:

@@ -1,18 +1,15 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
-#
-# Authors:
-#   Marc-Olivier Buob <marc-olivier.buob@nokia-bell-labs.com>
 
-from collections                import defaultdict
-from pybgl.graph                import *
-from pybgl.graphviz             import graph_to_html
-from pybgl.html                 import html
-from pybgl.ipynb                import in_ipynb
-from pybgl.property_map         import make_assoc_property_map, make_func_property_map
-from pybgl.graph_copy           import graph_copy
+from collections import defaultdict
+from pybgl.graph import *
+from pybgl.graphviz import graph_to_html
+from pybgl.html import html
+from pybgl.ipynb import in_ipynb
+from pybgl.property_map import make_assoc_property_map, make_func_property_map
+from pybgl.graph_copy import graph_copy
 
-def _test_graph_copy_small(threshold :int = 50):
+def _test_graph_copy_small(threshold: int = 50):
     g = DirectedGraph(5)
     (e01, _) = add_edge(0, 1, g)
     (e02, _) = add_edge(0, 2, g)
@@ -25,14 +22,14 @@ def _test_graph_copy_small(threshold :int = 50):
     map_eweight = defaultdict(
         lambda: None,
         {
-            e01 : 83,
-            e02 : 3,
-            e04 : 78,
-            e12 : 92,
-            e23 : 7,
-            e24 : 18,
-            e40 : 51,
-            e44 : 84,
+            e01: 83,
+            e02: 3,
+            e04: 78,
+            e12: 92,
+            e23: 7,
+            e24: 18,
+            e40: 51,
+            e44: 84,
         }
     )
     pmap_eweight = make_assoc_property_map(map_eweight)
@@ -54,28 +51,28 @@ def _test_graph_copy_small(threshold :int = 50):
 
     graph_copy(
         0, g, g_dup,
-        pmap_erelevant    = pmap_erelevant,
-        pmap_vertices     = pmap_vertices,
-        pmap_edges        = pmap_edges,
-        callback_dup_edge = callback_dup_edge
+        pmap_erelevant=pmap_erelevant,
+        pmap_vertices=pmap_vertices,
+        pmap_edges=pmap_edges,
+        callback_dup_edge=callback_dup_edge
     )
 
     if in_ipynb():
         ori_html = graph_to_html(
             g,
-            dpv = {
-                "label" : make_func_property_map(lambda u: "%s<br/>(becomes %s)" % (u, pmap_vertices[u]))
+            dpv={
+                "label": make_func_property_map(lambda u: "%s<br/>(becomes %s)" % (u, pmap_vertices[u]))
             },
-            dpe = {
-                "color" : make_func_property_map(lambda e : "darkgreen" if pmap_erelevant[e] else "lightgrey"),
-                "style" : make_func_property_map(lambda e : "solid"     if pmap_erelevant[e] else "dashed"),
-                "label" : pmap_eweight,
+            dpe={
+                "color": make_func_property_map(lambda e: "darkgreen" if pmap_erelevant[e] else "lightgrey"),
+                "style": make_func_property_map(lambda e: "solid"     if pmap_erelevant[e] else "dashed"),
+                "label": pmap_eweight,
             }
         )
         dup_html = graph_to_html(
             g_dup,
-            dpe = {
-                "label" : pmap_eweight_dup,
+            dpe={
+                "label": pmap_eweight_dup,
             }
         )
         html(
@@ -95,18 +92,20 @@ def _test_graph_copy_small(threshold :int = 50):
     if threshold == 50:
         expected_num_edges = 5
         assert map_vertices == {
-            0 : 0,
-            1 : 1,
-            2 : 2,
-            4 : 3
+            0: 0,
+            1: 1,
+            2: 2,
+            4: 3
         }
         for e, e_dup in map_edges.items():
             u = source(e, g)
             v = target(e, g)
             u_dup = source(e_dup, g_dup)
             v_dup = target(e_dup, g_dup)
-            assert u_dup == pmap_vertices[u], "u_dup = %s ; pmap_vertices[%s] = %s" % (u_dup, u, pmap_vertices[u])
-            assert v_dup == pmap_vertices[v], "v_dup = %s ; pmap_vertices[%s] = %s" % (v_dup, v, pmap_vertices[v])
+            assert u_dup == pmap_vertices[u], \
+                "u_dup = %s ; pmap_vertices[%s] = %s" % (u_dup, u, pmap_vertices[u])
+            assert v_dup == pmap_vertices[v], \
+                "v_dup = %s ; pmap_vertices[%s] = %s" % (v_dup, v, pmap_vertices[v])
             assert pmap_eweight[e] == pmap_eweight_dup[e_dup]
     elif threshold < min(w for w in map_eweight.values()):
         expected_num_edges = num_edges(g)

@@ -1,15 +1,10 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2018, Nokia"
-__license__    = "BSD-3"
-
-from pybgl.graph import \
-    UndirectedGraph, add_vertex, add_edge, edge, edges, num_edges, num_vertices, \
-    in_degree, in_edges, out_degree, out_edges, remove_vertex, remove_edge, target
+from pybgl.graph import (
+    UndirectedGraph, add_vertex, add_edge, edge, edges, num_edges, num_vertices,
+    in_degree, in_edges, out_degree, out_edges, remove_vertex, remove_edge
+)
 
 (u, v, w) = (0, 1, 2)
 

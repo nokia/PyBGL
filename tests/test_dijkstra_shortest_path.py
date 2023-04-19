@@ -1,17 +1,20 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
-#
-# Authors:
-#   Marc-Olivier Buob <marc-olivier.buob@nokia-bell-labs.com>
 
 from pybgl.dijkstra_shortest_paths import *
 from pybgl.graph import *
 from pybgl.ipynb import in_ipynb, ipynb_display_graph
-from pybgl.property_map import ReadPropertyMap, ReadWritePropertyMap, make_func_property_map
+from pybgl.property_map import (
+    ReadPropertyMap, ReadWritePropertyMap, make_func_property_map
+)
 
 # For debug purposes
 
-def display_graph(g :Graph, pmap_eweight :ReadPropertyMap = None, map_vpreds :dict = None):
+def display_graph(
+    g: Graph,
+    pmap_eweight: ReadPropertyMap = None,
+    map_vpreds: dict = None
+):
     if in_ipynb():
         dpe = dict()
         if pmap_eweight:
@@ -41,10 +44,10 @@ LINKS = [
 ]
 
 def make_graph(
-    links :list,
-    pmap_eweight :ReadWritePropertyMap,
-    directed :bool = True,
-    build_reverse_edge :bool = True
+    links: list,
+    pmap_eweight: ReadWritePropertyMap,
+    directed: bool = True,
+    build_reverse_edge: bool = True
 ):
     def add_node(un, g, d):
         u = d.get(un)
@@ -88,7 +91,7 @@ def test_isolated_vertices():
         assert map_vpreds == dict()
 
         # Every target are at infinite distance excepted the source node.
-        assert map_vdist  == {u : infty if u != s else 0 for u in vertices(g)}
+        assert map_vdist  == {u: infty if u != s else 0 for u in vertices(g)}
 
 def test_simple_graph():
     # Prepare graph, just a 0 -> 1 arc
@@ -109,17 +112,17 @@ def test_simple_graph():
         make_assoc_property_map(map_eweight),
         make_assoc_property_map(map_vpreds),
         make_assoc_property_map(map_vdist),
-        vis = DijkstraDebugVisitor()
+        vis=DijkstraDebugVisitor()
     )
 
     # Check
     assert map_vpreds == {
-        v : {e},
+        v: {e},
     }
 
     assert map_vdist == {
-        u : 0,
-        v : w
+        u: 0,
+        v: w
     }
 
 def test_parallel_edges():
@@ -147,12 +150,12 @@ def test_parallel_edges():
 
     # Check
     assert map_vpreds == {
-        v : {e1, e2},
+        v: {e1, e2},
     }
 
     assert map_vdist == {
-        u : 0,
-        v : w
+        u: 0,
+        v: w
     }
 
 class DijkstraDebugVisitor(DijkstraVisitor):
@@ -177,7 +180,7 @@ class DijkstraDebugVisitor(DijkstraVisitor):
     def finish_vertex(self, u: int, g: DirectedGraph):
         print(f"finish_vertex({u})")
 
-def test_directed_graph(links :list = None):
+def test_directed_graph(links: list = None):
     if links is None:
         links = LINKS
     map_eweight = defaultdict()
@@ -194,29 +197,29 @@ def test_directed_graph(links :list = None):
         vis = DijkstraDebugVisitor()
     )
 
-    edge_dict = {(source(e, g), target(e, g)) : e for e in edges(g)}
+    edge_dict = {(source(e, g), target(e, g)): e for e in edges(g)}
 
     assert map_vpreds == {
-        1 : {edge_dict[0, 1]},
-        2 : {edge_dict[1, 2]},
-        3 : {edge_dict[1, 3]},
-        4 : {edge_dict[0, 4]},
-        5 : {edge_dict[0, 5]},
-        6 : {edge_dict[5, 6]},
-        7 : {edge_dict[6, 7]},
-        8 : {edge_dict[6, 8]},
+        1: {edge_dict[0, 1]},
+        2: {edge_dict[1, 2]},
+        3: {edge_dict[1, 3]},
+        4: {edge_dict[0, 4]},
+        5: {edge_dict[0, 5]},
+        6: {edge_dict[5, 6]},
+        7: {edge_dict[6, 7]},
+        8: {edge_dict[6, 8]},
     }
     assert map_vdist == {
-        0 : 0,
-        1 : 1,
-        2 : 2,
-        3 : 4,
-        4 : 1,
-        5 : 1,
-        6 : 9,
-        7 : 10,
-        8 : 10,
-        9 : INFINITY
+        0: 0,
+        1: 1,
+        2: 2,
+        3: 4,
+        4: 1,
+        5: 1,
+        6: 9,
+        7: 10,
+        8: 10,
+        9: INFINITY
     }
 
 def test_decrease_key():
@@ -227,9 +230,9 @@ def test_decrease_key():
     map_eweight = defaultdict(
         lambda: None,
         {
-            e01 : 9,
-            e02 : 1,
-            e21 : 1,
+            e01: 9,
+            e02: 1,
+            e21: 1,
         }
     )
     pmap_eweight = make_assoc_property_map(map_eweight)
@@ -247,17 +250,17 @@ def test_decrease_key():
     assert map_vpreds[1] == {e21}
     assert map_vpreds[2] == {e02}
     assert map_vdist == {
-        0  : 0,
-        1  : 2,
-        2  : 1,
+        0: 0,
+        1: 2,
+        2: 1,
     }
 
-def test_directed_symmetric_graph(links :list = None):
+def test_directed_symmetric_graph(links: list = None):
     if links is None:
         links = LINKS
     map_eweight = defaultdict()
     pmap_eweight = make_assoc_property_map(map_eweight)
-    g = make_graph(LINKS, pmap_eweight, directed = True, build_reverse_edge = True)
+    g = make_graph(LINKS, pmap_eweight, directed=True, build_reverse_edge=True)
 
     map_vpreds = defaultdict(set)
     map_vdist = defaultdict()
@@ -269,39 +272,39 @@ def test_directed_symmetric_graph(links :list = None):
     )
     display_graph(g, pmap_eweight, map_vpreds)
 
-    E = {(source(e, g), target(e, g)) : e for e in edges(g)}
+    E = {(source(e, g), target(e, g)): e for e in edges(g)}
 
     assert map_vpreds == {
-        1 : {E[0, 1]},
-        2 : {E[1, 2]},
-        3 : {E[0, 3]},
-        4 : {E[0, 4]},
-        5 : {E[0, 5]},
-        6 : {E[8, 6]},
-        7 : {E[6, 7]},
-        8 : {E[2, 8]},
-        9 : {E[2, 9]}
+        1: {E[0, 1]},
+        2: {E[1, 2]},
+        3: {E[0, 3]},
+        4: {E[0, 4]},
+        5: {E[0, 5]},
+        6: {E[8, 6]},
+        7: {E[6, 7]},
+        8: {E[2, 8]},
+        9: {E[2, 9]}
     }
     assert map_vdist == {
-        0 : 0,
-        1 : 1,
-        2 : 2,
-        3 : 1,
-        4 : 1,
-        5 : 1,
-        6 : 4,
-        7 : 5,
-        8 : 3,
-        9 : 3
+        0: 0,
+        1: 1,
+        2: 2,
+        3: 1,
+        4: 1,
+        5: 1,
+        6: 4,
+        7: 5,
+        8: 3,
+        9: 3
     }
 
-def test_dijkstra_shortest_path(links :list = None):
+def test_dijkstra_shortest_path(links: list = None):
     if links is None:
         links = LINKS
     # Prepare graph
     map_eweight = defaultdict(int)
     pmap_eweight = make_assoc_property_map(map_eweight)
-    g = make_graph(links, pmap_eweight, build_reverse_edge = False)
+    g = make_graph(links, pmap_eweight, build_reverse_edge=False)
 
     # Dijkstra, stopped when vertex 9 is reached
     map_vpreds = defaultdict(set)
@@ -318,8 +321,8 @@ def test_dijkstra_shortest_path(links :list = None):
         ipynb_display_graph(
             g,
             dpe = {
-                "color" : make_func_property_map(lambda e: "green" if e in path else "red"),
-                "label" : pmap_eweight
+                "color": make_func_property_map(lambda e: "green" if e in path else "red"),
+                "label": pmap_eweight
             }
         )
     assert [
@@ -339,7 +342,7 @@ def test_dijkstra_shortest_paths_bandwidth():
         (1, 3, 30),
         (3, 0, 10),
     ]
-    g = make_graph(links, pmap_eweight, build_reverse_edge = False)
+    g = make_graph(links, pmap_eweight, build_reverse_edge=False)
 
     map_vpreds = defaultdict(set)
     map_vdist = defaultdict(int)
@@ -350,16 +353,16 @@ def test_dijkstra_shortest_paths_bandwidth():
         make_assoc_property_map(map_eweight),
         make_assoc_property_map(map_vpreds),
         make_assoc_property_map(map_vdist),
-        compare = lambda a, b: a >= b,
-        combine = min,
-        zero    = INFINITY,
-        infty   = 0
+        compare=lambda a, b: a >= b,
+        combine=min,
+        zero=INFINITY,
+        infty=0
     )
     display_graph(g, pmap_eweight)
     print(map_vdist)
     assert map_vdist == {
-        0 : INFINITY,
-        1 : 100,
-        2 : 80,
-        3 : 30
+        0: INFINITY,
+        1: 100,
+        2: 80,
+        3: 30
     }

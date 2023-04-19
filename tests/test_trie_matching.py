@@ -1,17 +1,11 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2020, Nokia"
-__license__    = "BSD-3"
-
-from pybgl.graphviz         import graph_to_html
-from pybgl.html             import html
-from pybgl.ipynb            import in_ipynb
-from pybgl.trie             import Trie
-from pybgl.trie_matching    import trie_matching
+from pybgl.graphviz import graph_to_html
+from pybgl.html import html
+from pybgl.ipynb import in_ipynb
+from pybgl.trie import Trie
+from pybgl.trie_matching import trie_matching
 
 def test_matching_tries():
     both = {"an", "banana"}
@@ -32,7 +26,7 @@ def test_matching_tries():
         html(graph_to_html(t1))
         html(graph_to_html(t2))
 
-    l = trie_matching(t1, t2)
-    assert l[1] == len(only1)
-    assert l[2] == len(only2)
-    assert l[3] == len(both)
+    ret = trie_matching(t1, t2)
+    assert ret[1] == len(only1)
+    assert ret[2] == len(only2)
+    assert ret[3] == len(both)

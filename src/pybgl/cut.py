@@ -23,19 +23,19 @@ def cut(s: int, g: Graph, in_cut: callable) -> set:
         The set of vertices that are in the vertex cut.
     """
     class LeavesVisitor(DefaultDepthFirstSearchVisitor):
-        def __init__(self, leaves :set):
+        def __init__(self, leaves: set):
             self.leaves = leaves
-        def examine_edge(self, e :EdgeDescriptor, g :Graph):
+        def examine_edge(self, e: EdgeDescriptor, g: Graph):
             u = source(e, g)
             self.leaves.discard(u)
-        def discover_vertex(self, u :int, g :Graph):
+        def discover_vertex(self, u: int, g: Graph):
             self.leaves.add(u)
 
     class IfPush:
-        def __init__(self, in_cut, cutting_edges :set):
+        def __init__(self, in_cut, cutting_edges: set):
             self.in_cut = in_cut
             self.cutting_edges = cutting_edges
-        def __call__(self, e :EdgeDescriptor, g :Graph) -> bool:
+        def __call__(self, e: EdgeDescriptor, g: Graph) -> bool:
             is_cutting_edge = self.in_cut(e, g)
             if is_cutting_edge:
                 self.cutting_edges.add(e)

@@ -1,15 +1,9 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2020, Nokia"
-__license__    = "BSD-3"
-
-from pybgl.automaton           import make_automaton, num_vertices, num_edges
-from pybgl.ipynb               import in_ipynb
-from pybgl.property_map        import make_func_property_map
+from pybgl.automaton import make_automaton, num_vertices, num_edges
+from pybgl.ipynb import in_ipynb
+from pybgl.property_map import make_func_property_map
 from pybgl.deterministic_union import deterministic_union
 
 def make_dafsa1():
@@ -30,7 +24,7 @@ def make_dafsa2():
         make_func_property_map(lambda q: q in {4})
     )
 
-def test_deterministic_union(show_g1 :bool = True, show_g2 :bool = True, show_g12 :bool = True):
+def test_deterministic_union(show_g1: bool = True, show_g2: bool = True, show_g12: bool = True):
     g1 = make_dafsa1()
     g2 = make_dafsa2()
     g12 = deterministic_union(g1, g2)
@@ -38,10 +32,13 @@ def test_deterministic_union(show_g1 :bool = True, show_g2 :bool = True, show_g1
     if in_ipynb():
         from pybgl.graphviz import graph_to_html
         from pybgl.html     import html
-        l = list()
-        if show_g1:  l += ["<b>A</b>",  graph_to_html(g1)]
-        if show_g2:  l += ["<b>A'</b>", graph_to_html(g2)]
-        if show_g12: l += ["<b>A &#x222a; A'</b><br/>", graph_to_html(g12)]
-        html("<br/>".join(l))
+        lines = list()
+        if show_g1:
+            lines += ["<b>A</b>",  graph_to_html(g1)]
+        if show_g2:
+            lines += ["<b>A'</b>", graph_to_html(g2)]
+        if show_g12:
+            lines += ["<b>A &#x222a; A'</b><br/>", graph_to_html(g12)]
+        html("<br/>".join(lines))
     assert num_vertices(g12) == 12
     assert num_edges(g12) == 11

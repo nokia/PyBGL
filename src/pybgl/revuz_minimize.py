@@ -4,12 +4,6 @@
 # This file is part of the pybgl project.
 # https://github.com/nokia/pybgl
 
-__author__     = "Marc-Olivier Buob, Achille Salaün, Anne Bouillard"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2018, Nokia"
-__license__    = "BSD-3"
-
 from collections import defaultdict
 from .incidence_automaton import IncidenceAutomaton, label
 from .property_map import (
@@ -111,8 +105,8 @@ def revuz_height(
 
 def revuz_minimize(
     g,
-    pmap_vlabel : ReadPropertyMap = None,
-    pmap_elabel : ReadPropertyMap = None,
+    pmap_vlabel: ReadPropertyMap = None,
+    pmap_elabel: ReadPropertyMap = None,
     leaves: set = None,
     vis: DefaultRevuzMinimizeVisitor = None
 ) -> int:
@@ -159,7 +153,7 @@ def revuz_minimize(
     else:
         from pybgl.incidence_node_automaton import add_edge
 
-    def _make_signature(q :int) -> tuple:
+    def _make_signature(q: int) -> tuple:
         return (
             is_final(q, g),
             pmap_vlabel[q] if pmap_vlabel else None,
@@ -171,7 +165,7 @@ def revuz_minimize(
             })
         )
 
-    def _move_edge(e_old :EdgeDescriptor, q :int, r :int):
+    def _move_edge(e_old: EdgeDescriptor, q: int, r: int):
         a = pmap_elabel[e_old] if pmap_elabel else None
         remove_edge(e_old, g)
         e_merge = None

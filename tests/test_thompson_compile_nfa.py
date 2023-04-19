@@ -1,14 +1,8 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2020, Nokia"
-__license__    = "BSD-3"
-
-from pybgl.ipynb    import in_ipynb, ipynb_display_graph
-from pybgl.nfa      import (
+from pybgl.ipynb import in_ipynb, ipynb_display_graph
+from pybgl.nfa import (
     Nfa, accepts, add_edge, initials, finals, delta, set_final
 )
 from pybgl.thompson_compile_nfa import (
@@ -51,41 +45,41 @@ def test_concatenation():
     (nfa1, q01, f1) = nfa_to_triple(make_nfa1())
     (nfa2, q02, f2) = nfa_to_triple(make_nfa2())
     (nfa, q0, f) = concatenation(nfa1, q01, f1, nfa2, q02, f2)
-    assert accepts("xaab", nfa) == True
-    assert accepts("x", nfa) == False
-    assert accepts("aab", nfa) == False
+    assert accepts("xaab", nfa) is True
+    assert accepts("x", nfa) is False
+    assert accepts("aab", nfa) is False
 
 def test_alternation():
     (nfa1, q01, f1) = nfa_to_triple(make_nfa1())
     (nfa2, q02, f2) = nfa_to_triple(make_nfa2())
     (nfa, q0, f) = alternation(nfa1, q01, f1, nfa2, q02, f2)
-    assert accepts("xaab", nfa) == False
-    assert accepts("x", nfa) == True
-    assert accepts("aab", nfa) == True
+    assert accepts("xaab", nfa) is False
+    assert accepts("x", nfa) is True
+    assert accepts("aab", nfa) is True
 
 def test_zero_or_one():
     (nfa, q0, f) = nfa_to_triple(make_nfa1())
     (nfa, q0, f) = zero_or_one(nfa, q0, f)
-    assert accepts("", nfa) == True
-    assert accepts("x", nfa) == True
-    assert accepts("xx", nfa) == False
-    assert accepts("a", nfa) == False
+    assert accepts("", nfa) is True
+    assert accepts("x", nfa) is True
+    assert accepts("xx", nfa) is False
+    assert accepts("a", nfa) is False
 
 def test_zero_or_more():
     (nfa, q0, f) = nfa_to_triple(make_nfa1())
     (nfa, q0, f) = zero_or_more(nfa, q0, f)
-    assert accepts("", nfa) == True
-    assert accepts("x", nfa) == True
-    assert accepts("xx", nfa) == True
-    assert accepts("a", nfa) == False
+    assert accepts("", nfa) is True
+    assert accepts("x", nfa) is True
+    assert accepts("xx", nfa) is True
+    assert accepts("a", nfa) is False
 
 def test_one_or_more():
     (nfa, q0, f) = nfa_to_triple(make_nfa1())
     (nfa, q0, f) = one_or_more(nfa, q0, f)
-    assert accepts("", nfa) == False
-    assert accepts("x", nfa) == True
-    assert accepts("xx", nfa) == True
-    assert accepts("a", nfa) == False
+    assert accepts("", nfa) is False
+    assert accepts("x", nfa) is True
+    assert accepts("xx", nfa) is True
+    assert accepts("a", nfa) is False
 
 def test_parse_repetition():
     for (m, n) in [(0, 1), (0, None), (1, None), (3, 3), (2, 4), (2, None)]:
@@ -118,21 +112,21 @@ def test_repetition_range():
 
 def test_parse_bracket():
     map_input_expected = {
-        "[a-z]" : [
+        "[a-z]": [
             'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
             'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'
         ],
-        "[a-zA-Z]" : [
+        "[a-zA-Z]": [
             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
             'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
             'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
             'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'
         ],
-        "[a-e0-9P-T]" : [
+        "[a-e0-9P-T]": [
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'P', 'Q', 'R',
             'S', 'T', 'a', 'b', 'c', 'd', 'e'
         ],
-        "[^a-zA-Z]" : [
+        "[^a-zA-Z]": [
             '\t', '\n', '\x0b', '\x0c', '\r', ' ', '!', '"', '#', '$', '%',
             '&', "'", '(', ')', '*', '+', ',', '-', '.', '/', '0', '1', '2',
             '3', '4', '5', '6', '7', '8', '9', ':', ';', '<', '=', '>', '?',
@@ -182,14 +176,14 @@ def test_parse_escaped():
 
 def test_escaped_operator():
     (nfa, q0, f) = thompson_compile_nfa("a\\?b")
-    assert accepts("a?b", nfa) == True
-    assert accepts("ab", nfa) == False
-    assert accepts("b", nfa) == False
+    assert accepts("a?b", nfa) is True
+    assert accepts("ab", nfa) is False
+    assert accepts("b", nfa) is False
 
     (nfa, q0, f) = thompson_compile_nfa("a?b")
-    assert accepts("a?b", nfa) == False
-    assert accepts("ab", nfa) == True
-    assert accepts("b", nfa) == True
+    assert accepts("a?b", nfa) is False
+    assert accepts("ab", nfa) is True
+    assert accepts("b", nfa) is True
 
     for regexp in r"\|", r"\.", r"\*", r"\+", r"\(", r"\)", r"\{", r"\}", r"\[", r"\]":
         (nfa, q0, f) = thompson_compile_nfa(regexp)
@@ -203,7 +197,7 @@ def test_escaped_classes():
     whole_alphabet = DEFAULT_ALPHABET
     escaped_classes = [r"\d", r"\w", r"\s", r"\D", r"\W", r"\S"]
     map_escape_allowed = {
-        r : set(parse_escaped(r, whole_alphabet))
+        r: set(parse_escaped(r, whole_alphabet))
         for r in escaped_classes
     }
     for regexp in [r"\d", r"\w", r"\s", r"\D", r"\W", r"\S"]:

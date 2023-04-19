@@ -5,10 +5,10 @@
 # https://github.com/nokia/pybgl
 
 class TokenizeVisitor:
-    def on_unmatched(self, unmatched :str, start :int, end :int, s :str): pass
-    def on_matched(self, matched :str, start :int, end :int, s :str): pass
+    def on_unmatched(self, unmatched: str, start: int, end: int, s: str): pass
+    def on_matched(self, matched: str, start: int, end: int, s: str): pass
 
-def tokenize(tokenizer, s :str, vis :TokenizeVisitor = None):
+def tokenize(tokenizer, s: str, vis: TokenizeVisitor = None):
     """
     Regexp-based string tokenizer. Useful to parse string
     when processing involve multiple regular expressions.

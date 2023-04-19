@@ -4,7 +4,7 @@
 # This file is part of the pybgl project.
 # https://github.com/nokia/pybgl
 
-def html(s :str):
+def html(s: str):
     """
     Evaluates HTML code in a Jupyter Notebook.
 
@@ -51,9 +51,9 @@ def beside(
             </div>
         </div>
         """ % {
-            "title"     : title,
-            "title1"    : title1,
-            "title2"    : title2,
-            "contents1" : contents1,
-            "contents2" : contents2
+            "title": title,
+            "title1": title1,
+            "title2": title2,
+            "contents1": contents1,
+            "contents2": contents2
         }

@@ -30,18 +30,21 @@ def make_dafsa2():
         make_func_property_map(lambda q: q in {4})
     )
 
-def test_deterministic_intersection(show_g1 :bool = True, show_g2 :bool = True, show_g12 :bool = True):
+def test_deterministic_intersection(show_g1: bool = True, show_g2: bool = True, show_g12: bool = True):
     g1 = make_dafsa1()
     g2 = make_dafsa2()
     g12 = deterministic_intersection(g1, g2)
 
     if in_ipynb():
         from pybgl.graphviz import graph_to_html
-        from pybgl.html     import html
-        l = list()
-        if show_g1:  l += ["<b>A</b>",  graph_to_html(g1)]
-        if show_g2:  l += ["<b>A'</b>", graph_to_html(g2)]
-        if show_g12: l += ["<b>A &#x2229; A'</b><br/>", graph_to_html(g12)]
-        html("<br/>".join(l))
+        from pybgl.html import html
+        lines = list()
+        if show_g1:
+            lines += ["<b>A</b>", graph_to_html(g1)]
+        if show_g2:
+            lines += ["<b>A'</b>", graph_to_html(g2)]
+        if show_g12:
+            lines += ["<b>A &#x2229; A'</b><br/>", graph_to_html(g12)]
+        html("<br/>".join(lines))
     assert num_vertices(g12) == 5
     assert num_edges(g12) == 4

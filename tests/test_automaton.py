@@ -1,14 +1,8 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2018, Nokia"
-__license__    = "BSD-3"
-
-from pybgl.automaton    import *
-from pybgl.graphviz     import graph_to_html
+from pybgl.automaton import *
+from pybgl.graphviz import graph_to_html
 from pybgl.property_map import make_func_property_map
 
 G1 = make_automaton(
@@ -75,24 +69,24 @@ def test_automaton_set_final():
     assert not is_final(q, g)
 
 def test_automaton_is_deterministic():
-    assert is_deterministic(G1) == True
+    assert is_deterministic(G1) is True
 
 def test_automaton_is_finite():
-    assert is_finite(G1) == True
+    assert is_finite(G1) is True
 
 def test_automaton_is_complete():
-    assert is_complete(G1) == True
-    assert is_complete(G2) == False
-    assert is_complete(G3) == False
-    assert is_complete(G4) == True
-    assert is_complete(G5) == True
+    assert is_complete(G1) is True
+    assert is_complete(G2) is False
+    assert is_complete(G3) is False
+    assert is_complete(G4) is True
+    assert is_complete(G5) is True
 
 def test_automaton_accepts():
-    assert accepts("", G1) == False
-    assert accepts("aaab", G1) == True
-    assert accepts("aaaba", G1) == False
-    assert accepts("aaabaa", G1) == True
-    assert accepts("aaabaabb", G1) == True
+    assert accepts("", G1) is False
+    assert accepts("aaab", G1) is True
+    assert accepts("aaaba", G1) is False
+    assert accepts("aaabaa", G1) is True
+    assert accepts("aaabaabb", G1) is True
 
 def test_automaton_sigma():
     assert sigma(0, G1) == {"a", "b"}

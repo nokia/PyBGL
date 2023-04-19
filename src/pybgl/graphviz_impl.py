@@ -135,16 +135,16 @@ GRAPHVIZ_HTML_TOKENIZER = re.compile(
 # graphviz does not support HTML entity (e.g. "&amp;") and that is why we
 # rely on the HTML code (e.g. "&#38;").
 GRAPHVIZ_MAP_CHAR_ESCAPED = {
-    '&'  : "&#38;",  # &amp;
-    "<"  : "&#60;",  # &lt;
-    ">"  : "&#62;",  # &gt;
-    "\n" : "\\n",
-    "\t" : "\\t",
-    "\r" : "\\r",
-    "["  : "&#91;",  # "&lbrack;"
-    "]"  : "&#93;",  # "&rbrack;"
-    "{"  : "&#123;", # "&lbrace;"
-    "}"  : "&#125;", # "&rbrace;"
+    '&': "&#38;",  # &amp;
+    "<": "&#60;",  # &lt;
+    ">": "&#62;",  # &gt;
+    "\n": "\\n",
+    "\t": "\\t",
+    "\r": "\\r",
+    "[": "&#91;",  # "&lbrack;"
+    "]": "&#93;",  # "&rbrack;"
+    "{": "&#123;", # "&lbrace;"
+    "}": "&#125;", # "&rbrace;"
 }
 
 def graphviz_escape_char(a: str) -> str:
