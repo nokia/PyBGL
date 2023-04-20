@@ -36,14 +36,16 @@ def test_revuz_height():
             (1, 2), (1, 3),
             (2, 4), (3, 4)
         ],
-        make_assoc_property_map(defaultdict(
-            lambda: None,
-            {
-                1: "a",
-                2: "b",
-                3: "a",
-                4: "c"
-            })
+        make_assoc_property_map(
+            defaultdict(
+                lambda: None,
+                {
+                    1: "a",
+                    2: "b",
+                    3: "a",
+                    4: "c"
+                }
+            )
         )
     )
 
@@ -102,14 +104,24 @@ def test_revuz_minimize_final():
     _test_revuz_minimize(
         g=make_incidence_node_automaton(
             [(0, 1), (0, 2), (2, 3)],
-            make_assoc_property_map({1: "a", 2: "b", 3: "a"})
+            make_assoc_property_map(
+                defaultdict(
+                    lambda: None,
+                    {1: "a", 2: "b", 3: "a"}
+                )
+            )
         ),
         e_expected={(0, 1), (0, 2), (2, 1)}
     )
     _test_revuz_minimize(
         g=make_incidence_node_automaton(
             [(0, 1), (0, 2), (2, 3)],
-            make_assoc_property_map({1: "a", 2: "b", 3: "a"}),
+            make_assoc_property_map(
+                defaultdict(
+                    lambda: None,
+                    {1: "a", 2: "b", 3: "a"}
+                )
+            ),
             pmap_vfinal=make_func_property_map(lambda q: q == 1)
         ),
         e_expected={(0, 1), (0, 2), (2, 3)}

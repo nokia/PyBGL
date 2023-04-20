@@ -3,6 +3,7 @@
 
 import sys
 
+from collections import defaultdict
 from pybgl.graph import DirectedGraph, add_edge, edges
 from pybgl.graph_dp import GraphDp
 from pybgl.graph_extract import graph_extract
@@ -21,16 +22,21 @@ def _test_graph_extract_small(threshold: int = 50):
     (e24, _) = add_edge(2, 4, g)
     (e40, _) = add_edge(4, 0, g)
     (e44, _) = add_edge(4, 4, g)
-    pmap_eweight = make_assoc_property_map({
-        e01: 83,
-        e02: 3,
-        e04: 78,
-        e12: 92,
-        e23: 7,
-        e24: 18,
-        e40: 51,
-        e44: 84,
-    })
+    pmap_eweight = make_assoc_property_map(
+        defaultdict(
+            int,
+            {
+                e01: 83,
+                e02: 3,
+                e04: 78,
+                e12: 92,
+                e23: 7,
+                e24: 18,
+                e40: 51,
+                e44: 84,
+            }
+        )
+    )
 
     extracted_edges = set()
     pmap_erelevant = make_func_property_map(lambda e: pmap_eweight[e] >= threshold)

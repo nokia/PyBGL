@@ -33,7 +33,7 @@ class BKTree(Automaton):
         """
         super().__init__()
         self.distance = distance
-        self.map_velement = dict()
+        self.map_velement = defaultdict()
         self.root = None
 
     def add_vertex(self, w: str) -> int:

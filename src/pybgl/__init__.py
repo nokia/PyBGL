@@ -77,7 +77,6 @@ from .levenshtein_distance import levenshtein_distance
 from .moore_determination import moore_determination
 from .nfa import Nfa
 from .node_automaton import NodeAutomaton
-#<<
 from .parallel_breadth_first_search import (
     ParallelBreadthFirstSearchVisitor, parallel_breadth_first_search
 )
@@ -87,7 +86,6 @@ from .property_map import (
     make_func_property_map, make_assoc_property_map,
     identity_property_map, make_constant_property_map
 )
-#>>
 from .prune_incidence_automaton import prune_incidence_automaton
 from .regexp import compile_nfa, compile_dfa
 from .reverse import reverse_graph, reverse_dict

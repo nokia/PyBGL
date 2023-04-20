@@ -4,9 +4,10 @@
 # This file is part of the pybgl project.
 # https://github.com/nokia/pybgl
 
+from collections import defaultdict
 from .automaton import *
 from .parallel_breadth_first_search import WHITE, ParallelBreadthFirstSearchVisitor, parallel_breadth_first_search
-from .property_map import make_constant_property_map
+from .property_map import make_assoc_property_map
 
 class Trie(Automaton):
     def __init__(self, *args):
@@ -54,5 +55,5 @@ def trie_deterministic_fusion(g1: Trie, g2: Trie):
         g1, g2,
         vis = TrieDeterministicFusion(),
         if_push = lambda e1, g1, e2, g2: e2 is not None,
-        pmap_vcolor = make_constant_property_map(WHITE)
+        pmap_vcolor = make_assoc_property_map(defaultdict(int))
     )

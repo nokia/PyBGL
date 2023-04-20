@@ -33,9 +33,9 @@ def test_make_func_property_map():
     pmap_rot13 = make_func_property_map(rot13)
     check_rot13(pmap_rot13)
 
-def _test_make_assoc_property_map(with_dict: bool):
+def test_make_assoc_property_map():
     # Build the underlying dictionary
-    d = dict() if with_dict else defaultdict(str) # Here we use str instead of chr, because chr() does not exists!
+    d = defaultdict(str) # Here we use str instead of chr, because chr() does not exists!
 
     # Initialize the property map (and its underlying dict)
     pmap_rot13 = make_assoc_property_map(d)
@@ -48,14 +48,8 @@ def _test_make_assoc_property_map(with_dict: bool):
     # This is the behavior we expect (std::map<K, V> in C++ ~ defaultdict(V) in python).
     x = pmap_rot13['!']
 
-def test_make_assoc_property_map():
-    for b in [False, True]:
-        _test_make_assoc_property_map(b)
-
 def test_constant_property_map():
     value = 17
     pmap = make_constant_property_map(value)
     for i in range(10):
-        assert pmap[i] == value
-        pmap[i] = value + 1
         assert pmap[i] == value

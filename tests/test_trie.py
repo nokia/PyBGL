@@ -49,4 +49,3 @@ def test_included_insertions():
     assert {q for q in finals(t3)} == {2, 3}
     t3.insert("")
     assert {q for q in finals(t3)} == {0, 2, 3}
-

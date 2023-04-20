@@ -1,6 +1,7 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
+from collections import defaultdict
 from pybgl.ipynb import in_ipynb
 from pybgl.graph import DirectedGraph, add_edge, source, target, vertices
 from pybgl.graph_dp import GraphDp
@@ -68,17 +69,22 @@ def test_strong_components():
     add_edge(6, 4, g)
 
     # Find strong connected components
-    map_component = {u: None for u in vertices(g)}
+    map_component = defaultdict(lambda: None)
     pmap_component = make_assoc_property_map(map_component)
     strong_components(g, pmap_component)
 
     # Rendering
-    pmap_color = make_assoc_property_map({
-        0: "red",
-        1: "blue",
-        2: "green",
-        3: "purple"
-    })
+    pmap_color = make_assoc_property_map(
+        defaultdict(
+            lambda: None,
+            {
+                0: "red",
+                1: "blue",
+                2: "green",
+                3: "purple"
+            }
+        )
+    )
     assert map_component == {
         0: 2,
         1: 1,

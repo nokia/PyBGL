@@ -182,23 +182,16 @@ def test_automaton_remove_vertex():
     )
     assert num_vertices(g) == 3
     assert num_edges(g) == 9
-    print(g.adjacencies)
 
-    print("remove_vertex(0)")
     remove_vertex(0, g)
-    print(g.adjacencies)
     assert num_vertices(g) == 2
     assert num_edges(g) == 5
 
-    print("remove_vertex(2)")
     remove_vertex(2, g)
-    print(g.adjacencies)
     assert num_vertices(g) == 1
     assert num_edges(g) == 1
 
-    print("remove_vertex(1)")
     remove_vertex(1, g)
-    print(g.adjacencies)
     assert num_vertices(g) == 0
     assert num_edges(g) == 0
 
