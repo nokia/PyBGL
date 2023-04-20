@@ -35,23 +35,23 @@ There are several possible ways to install the package:
 python3 -m venv env      # Create your virtual environment
 source env/bin/activate  # Activate the "env" virtual environment
 which python             # Check you use the venv python interpret (i.e., not /usr/bin/python3)
-pip install pybgl 
+pip install pybgl --force-reinstall
 deactivate               # Leave the  "env" virtual environment
 ```
 
 * _System-wide:_ modern ``pip3`` version prevents to install packages system-wide. You must either use a virtual environment, or either pass the `--break-system-packages` options:
 
 ```
-sudo pip3 install pybgl --break-system-packages
+sudo pip3 install pybgl --break-system-packages --force-reinstall
 ```
 
-## From git 
+## From git
 
 * Clone the repository and install the package:
 
 ```bash
 git clone https://github.com/nokia/PyBGL.git
-cd pybgl 
+cd pybgl
 ```
 
 * Install the missing dependencies and build the wheel of the project:
