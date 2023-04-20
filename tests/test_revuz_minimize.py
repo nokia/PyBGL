@@ -10,6 +10,20 @@ from pybgl.revuz_minimize import *
 
 # Internals
 
+# class DebugRevuzMinimizeVisitor(DefaultRevuzMinimizeVisitor):
+#     def merging_states(self, q1: int, q2: int, g: IncidenceNodeAutomaton):
+#         print("merging_states(%s, %s)" % (q1, q2))
+#
+#     def move_transition(self, e_old: EdgeDescriptor, e_new: EdgeDescriptor, g: IncidenceNodeAutomaton):
+#         print("move_transition(%s, %s)" % (e_old, e_new))
+#
+#     def remove_vertex(self, u: int, g: IncidenceNodeAutomaton):
+#         print("remove_vertex(%s)" % (u))
+#
+#     def states_merged(self, q1: int, q2: int, g: IncidenceNodeAutomaton):
+#         print("states_merged(%s, %s)" % (q1, q2))
+
+
 def check_graph(g: IncidenceAutomaton, e_expected: set):
     e_obtained = {(source(e, g), target(e, g)) for e in edges(g)}
     assert e_obtained == e_expected, \

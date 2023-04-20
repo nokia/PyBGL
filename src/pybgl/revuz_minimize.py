@@ -17,15 +17,20 @@ from .incidence_node_automaton import (
 )
 
 class DefaultRevuzMinimizeVisitor:
-    def start(self, g: IncidenceNodeAutomaton):
-        pass
-
     def merging_states(
         self,
         q1: int,
         q2: int,
         g: IncidenceNodeAutomaton
     ):
+        """
+        Method invoked when two states are about to be merged.
+
+        Args:
+            q1 (int): The first merged state (about to become the merged state).
+            q2 (int): The second merged state (about to be removed).
+            g (IncidenceNodeAutomaton): The processed automaton.
+        """
         pass
 
     def move_transition(
@@ -34,34 +39,37 @@ class DefaultRevuzMinimizeVisitor:
         e_new: EdgeDescriptor,
         g: IncidenceNodeAutomaton
     ):
+        """
+        Method invoked when a transition has just been moved.
+
+        Args:
+            e_old (EdgeDescriptor): The transition before being moved.
+            e_new (EdgeDescriptor): The transition after being moved.
+            g (IncidenceNodeAutomaton): The processed automaton.
+        """
         pass
-#    def merge_transitions(self, e_old: EdgeDescriptor, e_merge: EdgeDescriptor, g: IncidenceNodeAutomaton):
-#       pass
 
     def remove_vertex(self, u: int, g: IncidenceNodeAutomaton):
+        """
+        Method invoked when a state is about to be removed.
+
+        Args:
+            u (int): The state being removed.
+            g (IncidenceNodeAutomaton): The processed automaton.
+        """
         pass
 
     def states_merged(self, q1: int, q2: int, g: IncidenceNodeAutomaton):
+        """
+        Method invoked when two states have just been merged as well as
+        their transitions.
+
+        Args:
+            q1 (int): The first merged state (about to become the merged state).
+            q2 (int): The second merged state (about to be removed).
+            g (IncidenceNodeAutomaton): The processed automaton.
+        """
         pass
-
-class DebugRevuzMinimizeVisitor(DefaultRevuzMinimizeVisitor):
-    def start(self, g: IncidenceNodeAutomaton):
-        print("start()")
-
-    def merging_states(self, q1: int, q2: int, g: IncidenceNodeAutomaton):
-        print("merging_states(%s, %s)" % (q1, q2))
-
-#    def merge_transitions(self, e_old: EdgeDescriptor, e_merge: EdgeDescriptor, g: IncidenceNodeAutomaton):
-#        print("merge_transitions(%s, %s)" % (e_old, e_merge))
-
-    def move_transition(self, e_old: EdgeDescriptor, e_new: EdgeDescriptor, g: IncidenceNodeAutomaton):
-        print("move_transition(%s, %s)" % (e_old, e_new))
-
-    def remove_vertex(self, u: int, g: IncidenceNodeAutomaton):
-        print("remove_vertex(%s)" % (u))
-
-    def states_merged(self, q1: int, q2: int, g: IncidenceNodeAutomaton):
-        print("states_merged(%s, %s)" % (q1, q2))
 
 def revuz_height(
     g,
@@ -194,7 +202,6 @@ def revuz_minimize(
     # Initialization
     h = 0
     to_process = leaves if leaves else {q for q in vertices(g) if out_degree(q, g) == 0}
-    vis.start(g)
 
     # Iteration
     while to_process:
