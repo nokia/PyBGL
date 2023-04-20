@@ -19,8 +19,8 @@ testpaths = [
 [tool.poetry.dependencies]
 python = ">= 3.8, < 4.0"
 ipython = ">= 8.10.0"
-poetry-plugin-export = "*"
-dulwich = "*"
+#poetry-plugin-export = "*"
+#dulwich = "*"
 
 [tool.poetry.group.test]
 optional = true
@@ -49,5 +49,5 @@ sphinx-rtd-theme = "*"
 sphinx_mdinclude = "*"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core", "dulwich", "poetry-plugin-export"]
 build-backend = "poetry.core.masonry.api"
