@@ -4,15 +4,9 @@
 # This file is part of the pybgl project.
 # https://github.com/nokia/pybgl
 
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2018, Nokia"
-__license__    = "BSD-3"
-
-from collections    import deque
-from .graph         import Graph, EdgeDescriptor, out_edges, target
-from .property_map  import ReadWritePropertyMap
+from collections import deque
+from .graph import Graph, EdgeDescriptor, out_edges, target
+from .property_map import ReadWritePropertyMap
 
 WHITE = 0 # If you use AssociativePropertyMap you are encouraged to wrap a defaultdict(int)
 GRAY  = 1

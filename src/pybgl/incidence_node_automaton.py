@@ -4,13 +4,6 @@
 # This file is part of the pybgl project.
 # https://github.com/nokia/pybgl
 
-__author__     = "Marc-Olivier Buob"
-__maintainer__ = "Marc-Olivier Buob"
-__email__      = "marc-olivier.buob@nokia-bell-labs.com"
-__copyright__  = "Copyright (C) 2018, Nokia"
-__license__    = "BSD-3"
-
-
 from collections import defaultdict
 from .graph import __len_gen__
 from .property_map import ReadPropertyMap
