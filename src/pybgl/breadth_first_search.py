@@ -38,7 +38,7 @@ class DefaultBreadthFirstSearchVisitor:
 
     def examine_edge(self, e: EdgeDescriptor, g: Graph):
         """
-        Method invoked invoked on every out-edge of each verte
+        Method invoked invoked on every out-edge of each vertex
         immediately after the vertex is removed from the queue.
 
         Args:
@@ -146,7 +146,7 @@ def breadth_first_search_graph(
             with its current color (:py:data:`WHITE`, :py:data:`GRAY`
             or :py:data:`BLACK`)
         vis (DefaultBreadthFirstSearchVisitor): An optional visitor.
-        if_push (callable): A `callback(e, g) -> bool` where ``e`` is the
+        if_push (callable): A `callback(e, g) -> bool` where ``e`` is
             an arc of ``g`` that returns ``True`` if and only if the arc
             ``e`` is relevant.
             This is a legacy parameter. You should rather consider
