@@ -212,7 +212,7 @@ def parallel_breadth_first_search(
         g1 (Automaton): The first automaton.
         g2 (Automaton): The second automaton.
         source_pairs (iter): An iterable over the pairs of source sattes.
-            _Example:_ ``[(g1.initial(), g2.initial())]``.
+            `Example:` ``[(g1.initial(), g2.initial())]``.
         pmap_vcolor (ReadWritePropertyMap): A property map that maps each vertex
             with its current color (:py:data:`WHITE`, :py:data:`GRAY`
             or :py:data:`BLACK`)

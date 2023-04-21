@@ -110,7 +110,10 @@ def depth_first_search(
     if_push: callable = None
 ):
     """
-    Non-recursive implementation of Depth First Search algorithm, from a single source.
+    Non-recursive implementation of the
+    `Depth First Search <https://en.wikipedia.org/wiki/Depth-first_search>`__
+    algorithm, from a single source.
+
     Based on `depth_first_search.hpp <https://www.boost.org/doc/libs/1_67_0/libs/graph/doc/depth_first_search.html>`__,
     by Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
 
@@ -188,7 +191,10 @@ def depth_first_search_graph(
     if_push: bool = None
 ):
     """
-    Non-recursive implementation of Depth First Search algorithm, from multiple sources.
+    Non-recursive implementation of the
+    `Depth First Search <https://en.wikipedia.org/wiki/Depth-first_search>`__
+    algorithm, from multiple sources.
+
     Based on `depth_first_search.hpp <https://www.boost.org/doc/libs/1_67_0/libs/graph/doc/depth_first_search.html>`__,
     by Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
 

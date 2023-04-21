@@ -89,21 +89,16 @@ from .property_map import (
 from .prune_incidence_automaton import prune_incidence_automaton
 from .regexp import compile_nfa, compile_dfa
 from .reverse import reverse_graph, reverse_dict
-#<<
 from .revuz_minimize import DefaultRevuzMinimizeVisitor, revuz_minimize
 from .shunting_yard_postfix import (
     Ast, DefaultShuntingYardVisitor,
-    RpnDequeOperation, RpnDequeAlg, RpnDequeAst,
     shunting_yard_ast, shunting_yard_postfix, shunting_yard_compute,
     tokenizer_alg, tokenizer_re
 )
-#>>
 from .singleton import Singleton
-#<<
 from .strong_components import strong_components
 from .thompson_compile_nfa import thompson_compile_nfa
 from .tokenize import tokenize
 from .topological_sort import TopologicalSortVisitor, topological_sort
 from .trie_matching import TrieMatchingVisitor, trie_matching
 from .trie import Trie, TrieDeterministicFusion, trie_deterministic_fusion
-#>>

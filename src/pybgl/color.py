@@ -64,10 +64,10 @@ def html_to_graphviz(color: str) -> str:
     HTML to Graphviz color conversion.
 
     Args:
-        color (str): An HTML color. _Examples:_ ``"#40e0d0"``, ``"turquoise"``,
+        color (str): An HTML color. `Examples:` ``"#40e0d0"``, ``"turquoise"``,
             ``"hsl(173, 71%, 56%)"``.
 
-    Returns;
+    Returns:
         The corresponding graphviz color. This is exactly ``color`` if it does not
         start with hsl.
     """

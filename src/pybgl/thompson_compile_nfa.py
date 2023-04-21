@@ -34,13 +34,41 @@ from .shunting_yard_postfix import (
 #   \x    escape sequence
 #-------------------------------------------------------------
 
-def literal(a: chr) -> Nfa:
+def literal(a: str) -> Nfa:
+    """
+    Builds a NFA that recognizes a single symbol.
+
+    Args:
+        a (str): The considered symbol.
+
+    Returns:
+        A ``(nfa, q0, f)`` tuple, where:
+        ``nfa`` is a NFA made of single initial state and a single final state
+        that recognizes the language {a};
+        ``q0`` is its initial state;
+        ``f`` is its initial state;
+    """
     nfa = Nfa(2)
     add_edge(0, 1, a, nfa)
     set_final(1, nfa)
     return (nfa, 0, 1)
 
 def insert_automaton(g1: Nfa, g2: Nfa, map21: dict = None) -> dict:
+    """
+    Inserts an NFA in another NFA.
+    In the end, in the first automaton (modified in place),
+    there are two disconnected automata.
+    The states of the second NFA are reindexed to not collide
+    with those already used in the first NFA.
+
+    Args:
+        g1 (Nfa): The first NFA, modified in place.
+        g2 (Nfa): The second NFA, not modified.
+
+    Returns:
+        A dictionary precising how the state of ``g2`` have
+        been reindexed once inserted in ``g1``.
+    """
     if not map21:
         map21 = dict()
     for q2 in vertices(g2):
@@ -59,14 +87,69 @@ def insert_automaton(g1: Nfa, g2: Nfa, map21: dict = None) -> dict:
         add_edge(q1, r1, a, g1)
     return map21
 
-def concatenation(nfa1: Nfa, q01: int, f1: int, nfa2: Nfa, q02: int, f2: int) -> tuple:
+def concatenation(
+    nfa1: Nfa,
+    q01: int,
+    f1: int,
+    nfa2: Nfa,
+    q02: int,
+    f2: int
+) -> tuple:
+    """
+    Builds a NFA obtained by concatenating two NFAs.
+
+    Args:
+        g1 (Nfa): The first NFA made of single initial state and a
+            single final state.
+        q01 (int): The initial state of ``g1``.
+        f1 (int): The initial state of ``g1``.
+        g2 (Nfa): The second NFA made of single initial state and a
+            single final state.
+        q02 (int): The initial state of ``g2``.
+        f2 (int): The initial state of ``g2``.
+
+    Returns:
+        A ``(nfa, q0, f)`` tuple, where:
+        ``nfa`` is a NFA made of single initial state and a single final state
+        that recognizes the language ``{s1 + s2 for s1 in L(g1) for s2 in L(g2)}``
+        where ``L`` returns the language of an automaton;
+        ``q0`` is its initial state;
+        ``f`` is its initial state.
+    """
     map21 = insert_automaton(nfa1, nfa2)
     add_edge(f1, map21[q02], epsilon(nfa1), nfa1)
     set_initials({q01}, nfa1)
     set_final(f1, nfa1, False)
     return (nfa1, q01, map21[f2])
 
-def alternation(nfa1: Nfa, q01: int, f1: int, nfa2: Nfa, q02: int, f2: int) -> tuple:
+def alternation(
+    nfa1: Nfa,
+    q01: int,
+    f1: int,
+    nfa2: Nfa,
+    q02: int,
+    f2: int
+) -> tuple:
+    """
+    Builds a NFA that implements the ``|`` regular expression operator.
+
+    Args:
+        g1 (Nfa): The first NFA made of single initial state and a
+            single final state.
+        q01 (int): The initial state of ``g1``.
+        f1 (int): The initial state of ``g1``.
+        g2 (Nfa): The second NFA made of single initial state and a
+            single final state.
+        q02 (int): The initial state of ``g2``.
+        f2 (int): The initial state of ``g2``.
+
+    Returns:
+        A ``(nfa, q0, f)`` tuple, where:
+        ``nfa`` is a NFA made of single initial state and a single final state
+        that recognizes the language ``L(g1) | L(g2)``;
+        ``q0`` is its initial state;
+        ``f`` is its initial state.
+    """
     map21 = insert_automaton(nfa1, nfa2)
     q0 = add_vertex(nfa1)
     add_edge(q0, q01, epsilon(nfa1), nfa1)
@@ -81,11 +164,45 @@ def alternation(nfa1: Nfa, q01: int, f1: int, nfa2: Nfa, q02: int, f2: int) -> t
     return (nfa1, q0, f)
 
 def zero_or_one(nfa: Nfa, q0: int, f: int) -> tuple:
+    """
+    Builds a NFA that implements the ``?`` regular expression operator
+    (0 or 1 repetition).
+
+    Args:
+        nfa (Nfa): A NFA made of single initial state and a
+            single final state.
+        q0 (int): The initial state of ``nfa``.
+        f1 (int): The initial state of ``nfa``.
+
+    Returns:
+        A ``(nfa, q0, f)`` tuple, where:
+        ``nfa`` is a NFA made of single initial state and a single final state
+        that recognizes the language ``L(g1) | set()``
+        where ``L`` returns the language of an automaton;
+        ``q0`` is its initial state;
+        ``f`` is its initial state.
+    """
     eps = epsilon(nfa)
     add_edge(q0, f, eps, nfa)
     return (nfa, q0, f)
 
 def zero_or_more(nfa: Nfa, q0: int, f: int) -> tuple:
+    """
+    Builds a NFA that implements the ``*`` regular expression operator
+    (0 or more repetitions).
+
+    Args:
+        nfa (Nfa): A NFA made of single initial state and a
+            single final state.
+        q0 (int): The initial state of ``nfa``.
+        f1 (int): The initial state of ``nfa``.
+
+    Returns:
+        A ``(nfa, q0, f)`` tuple, where:
+        ``nfa`` is a NFA made of single initial state and a single final state;
+        ``q0`` is its initial state;
+        ``f`` is its initial state.
+    """
     eps = epsilon(nfa)
     new_q0 = add_vertex(nfa)
     new_f = add_vertex(nfa)
@@ -99,6 +216,22 @@ def zero_or_more(nfa: Nfa, q0: int, f: int) -> tuple:
     return (nfa, new_q0, new_f)
 
 def one_or_more(nfa: Nfa, q0: int, f: int) -> tuple:
+    """
+    Builds a NFA that implements the ``+`` regular expression operator
+    (0 or more repetitions).
+
+    Args:
+        nfa (Nfa): A NFA made of single initial state and a
+            single final state.
+        q0 (int): The initial state of ``nfa``.
+        f1 (int): The initial state of ``nfa``.
+
+    Returns:
+        A ``(nfa, q0, f)`` tuple, where:
+        ``nfa`` is a NFA made of single initial state and a single final state;
+        ``q0`` is its initial state;
+        ``f`` is its initial state.
+    """
     eps = epsilon(nfa)
     new_q0 = add_vertex(nfa)
     new_f = add_vertex(nfa)
@@ -111,6 +244,24 @@ def one_or_more(nfa: Nfa, q0: int, f: int) -> tuple:
     return (nfa, new_q0, new_f)
 
 def repetition(nfa: Nfa, q0: int, f: int, m: int) -> tuple:
+    """
+    Builds the NFA that implements the ``{m}`` regular expression operator
+    (exacly ``m`` repetitions).
+
+    Args:
+        nfa (Nfa): A NFA made of single initial state and a
+            single final state.
+        q0 (int): The initial state of ``nfa``.
+        f1 (int): The initial state of ``nfa``.
+
+    Returns:
+        A ``(nfa, q0, f)`` tuple, where:
+        ``nfa`` is a NFA made of single initial state and a single final state
+        that recognizes the language ``{s1 * m for s1 in L(nfa)}``
+        where L returns the language of an automaton;
+        ``q0`` is its initial state;
+        ``f`` is its initial state.
+    """
     assert m >= 0
     if m == 0:
         nfa = Nfa(1)
@@ -127,6 +278,22 @@ def repetition(nfa: Nfa, q0: int, f: int, m: int) -> tuple:
     return (nfa, q0, f)
 
 def repetition_range(nfa: Nfa, q0: int, f: int, m: int, n: int) -> tuple:
+    """
+    Builds a NFA that implements the ``{m, n}`` regular expression operator
+    (between ``m`` and ``n`` repetitions).
+
+    Args:
+        nfa (Nfa): A NFA made of single initial state and a
+            single final state.
+        q0 (int): The initial state of ``nfa``.
+        f1 (int): The initial state of ``nfa``.
+
+    Returns:
+        A ``(nfa, q0, f)`` tuple, where:
+        ``nfa`` is a NFA made of single initial state and a single final state;
+        ``q0`` is its initial state;
+        ``f`` is its initial state.
+    """
     assert n is None or m <= n, "The lower bound {m} must be less than the upper bound {n}"
     if   (m, n) == (0, 1):
         return zero_or_one(nfa, q0, f)
@@ -157,6 +324,19 @@ def repetition_range(nfa: Nfa, q0: int, f: int, m: int, n: int) -> tuple:
         return (nfa, q0, f)
 
 def bracket(chars: iter) -> tuple:
+    """
+    Builds a NFA that recognizes a set of words made of exactly one
+    symbol of the alphabet.
+
+    Args:
+        chars (iter): The recognized symbols.
+
+    Returns:
+        A ``(nfa, q0, f)`` tuple, where:
+        ``nfa`` is a NFA made of single initial state and a single final state;
+        ``q0`` is its initial state;
+        ``f`` is its initial state.
+    """
     nfa = Nfa(2)
     set_final(1, nfa)
     for a in chars:
@@ -168,6 +348,23 @@ def bracket(chars: iter) -> tuple:
 #-------------------------------------------------------------
 
 def parse_repetition(s: str) -> tuple:
+    """
+    Parses the ``{m}`` and the ``"{m, n}"`` operator involved in a
+    regular, where ``m`` and ``n`` are two integers
+    such that ``0 <= m <= n``.
+    Regarding the ``"{m, n}"`` operator, ``m`` and/or ``n`` may be omitted
+    (and respectively defaults to ``0`` and ``None``).
+
+    Args:
+        s (str): The parsed regular expression.
+
+    Raises:
+        :py:class:`RuntimeError` if the string is not well-formed.
+        :py:class:`ValueError` if ``m`` or ``n`` are invalid.
+
+    Returns:
+        The corresponding ``(m, n)`` tuple.
+    """
     r = re.compile(r"{\s*(\d+)\s*}")
     match = r.match(s)
     if match:
@@ -175,14 +372,40 @@ def parse_repetition(s: str) -> tuple:
     else:
         r = re.compile(r"{\s*(\d*)\s*,\s*(\d*)\s*}")
         match = r.match(s)
-        assert match, f"Invalid token {s}: Not well-formed"
+        if not match:
+            raise RuntimeError(f"Invalid token {s}: Not well-formed")
         m = int(match.group(1)) if match.group(1) else 0
+        if not m >= 0:
+            raise ValueError(f"Invalid m = {m}")
         n = int(match.group(2)) if match.group(2) else None
+        if n is not None and not n >= m:
+            raise ValueError(f"Invalid n = {n} (m = {m})")
     return (m, n)
 
 DEFAULT_ALPHABET = string.printable
 
 def parse_bracket(s: str, whole_alphabet: iter = None) -> set:
+    """
+    Parse a ``[...]``-like regular expression (set of symbols).
+
+    This function supports:
+
+    - reversed set of characters (if the first character inside
+      the bracket is ``^``), (e.g., ``[^ab]`` means neither ``a`` or
+      ``b``);
+    - range of characters, (e.g., ``[A-Za-z]`` corresponds to any
+      latin letter);
+    - escaped characters (see :py:data:`MAP_ESCAPED_BRACKET`` and
+      :py:data:`MAP_ESCAPED_SPECIAL``)
+
+    Args:
+        s (str): The parsed regular expression.
+        whole_alphabet (iter): The whole alphabet (required to
+            implement the ``[^...]`` operator.
+
+    Returns:
+        The corresponding matched characters.
+    """
     if not whole_alphabet:
         whole_alphabet = DEFAULT_ALPHABET
     if not (s[0] == "[" and s[-1] == "]"):
@@ -217,13 +440,13 @@ def parse_bracket(s: str, whole_alphabet: iter = None) -> set:
     return accepted if not reverse else set(whole_alphabet) - accepted
 
 MAP_ESCAPED_BRACKET = {
-        r"\d":  "[0-9]",
-        r"\D":  "[^0-9]",
-        r"\s":  "[ \t]",
-        r"\S":  "[^ \t]",
-        # \w and \W should depend on the locale. Here, we assume ASCII.
-        r"\w":  "[0-9A-Za-z]",
-        r"\W":  "[^0-9A-Za-z]",
+    r"\d":  "[0-9]",
+    r"\D":  "[^0-9]",
+    r"\s":  "[ \t]",
+    r"\S":  "[^ \t]",
+    # \w and \W should depend on the locale. Here, we assume ASCII.
+    r"\w":  "[0-9A-Za-z]",
+    r"\W":  "[^0-9A-Za-z]",
 }
 
 MAP_ESCAPED_SPECIAL = {
@@ -237,6 +460,17 @@ MAP_ESCAPED_SPECIAL = {
 }
 
 def parse_escaped(s: str, whole_alphabet: iter = None) -> set:
+    """
+    Parses a regular-expression escaped sequence.
+
+    Args:
+        s (str): The parsed regular expression.
+        whole_alphabet (iter): The whole alphabet (required to
+            implement the ``[^...]`` operator.
+
+    Returns:
+        The corresponding characters.
+    """
     if len(s) == 2:
         if s in {
             r"\+", r"\*", r"\?", r"\.", r"\|",
@@ -262,7 +496,20 @@ def parse_escaped(s: str, whole_alphabet: iter = None) -> set:
 # Thompson algorithm
 #-------------------------------------------------------------
 
-def thompson_compile_nfa(expression: str, whole_alphabet = None) -> Nfa:
+def thompson_compile_nfa(expression: str, whole_alphabet: iter = None) -> Nfa:
+    """
+    Compiles a NFA from a regular expression using the
+    `Thompson transformation <https://en.wikipedia.org/wiki/Thompson%27s_construction>`__.
+
+    Args:
+        expression (str): A regular expression.
+        whole_alphabet (iter): The whole alphabet, only needed to
+            process the ``[^..]`` operator occurrences.
+
+    Returns:
+        The correspoding NFA, made of single initial state and a single
+        final state.
+    """
     if not expression:
         g = Nfa(1)
         set_final(0, g)
@@ -273,9 +520,16 @@ def thompson_compile_nfa(expression: str, whole_alphabet = None) -> Nfa:
 
     class ThompsonShuntingYardVisitor(DefaultShuntingYardVisitor):
         def __init__(self):
+            """
+            Constructor.
+            """
             self.cur_id = 0
             self.nfas = deque()
+
         def on_push_output(self, a):
+            """
+            Overloads the :py:class:`DefaultShuntingYardVisitor` class.
+            """
             if a in {".", "|"}:
                 (nfa2, q02, f2) = self.nfas.pop()
                 (nfa1, q01, f1) = self.nfas.pop()

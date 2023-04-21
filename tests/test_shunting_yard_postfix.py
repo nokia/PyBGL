@@ -11,6 +11,14 @@ from pybgl.shunting_yard_postfix import (
 from pybgl.graph import num_vertices, num_edges
 from pybgl.ipynb import in_ipynb, ipynb_display_graph
 
+# class DebugShuntingYardVisitor(DefaultShuntingYardVisitor):
+#     def on_pop_operator(self, o: str):
+#         print(f"pop op {o}")
+#     def on_push_operator(self, o: str):
+#         print(f"push op {o}")
+#     def on_push_output(self, a: str):
+#         print(f"push out {a}")
+
 def test_tokenizer_alg():
     assert list(tokenizer_alg("12+34-456*78/90")) == [
         12, "+", 34, "-", 456, "*", 78, "/", 90

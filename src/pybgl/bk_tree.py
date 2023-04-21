@@ -29,7 +29,7 @@ class BKTree(Automaton):
 
         Args:
             distance (callable): An arbitrary string distance.
-                _Example:_ :py:func:`levenshtein_distance`.
+                `Example:` :py:func:`levenshtein_distance`.
         """
         super().__init__()
         self.distance = distance

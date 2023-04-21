@@ -134,14 +134,17 @@ def breadth_first_search_graph(
     if_push: callable = None
 ):
     """
-    Non-recursive implementation of Depth First Search algorithm, from multiple sources.
+    Non-recursive implementation of the
+    `Breadth First Search <https://en.wikipedia.org/wiki/Breadth-first_search>`__
+    algorithm, from multiple sources.
+
     Based on `Boost breadth_first_search <https://www.boost.org/doc/libs/1_62_0/libs/graph/doc/breadth_first_search.html>`__,
     by Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek.
 
     Args:
         g (Graph): The graph being explored.
         sources (iter): An iterable over the source vertices.
-            _Example:_ ``g.vertices()``.
+            `Example:` ``g.vertices()``.
         pmap_vcolor (ReadWritePropertyMap): A property map that maps each vertex
             with its current color (:py:data:`WHITE`, :py:data:`GRAY`
             or :py:data:`BLACK`)
@@ -198,7 +201,10 @@ def breadth_first_search(
     if_push: callable = None
 ):
     """
-    Non-recursive implementation of Depth First Search algorithm, from a single source.
+    Non-recursive implementation of the
+    `Breadth First Search <https://en.wikipedia.org/wiki/Breadth-first_search>`__,
+    algorithm from a single source.
+
     Based on `Boost breadth_first_search <https://www.boost.org/doc/libs/1_62_0/libs/graph/doc/breadth_first_search.html>`__
     by Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek.
 

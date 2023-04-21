@@ -12,18 +12,6 @@ from .graph import DirectedGraph, out_edges, target, vertices
 from .graph_traversal import WHITE
 from .property_map import ReadWritePropertyMap, make_assoc_property_map
 
-# Key ideas: Consider an arbitrary directed graph.
-# - If each strongly connected component is collapsed in a single vertex, the
-#   graph is a lattice. It is thus possible to assign a component ID to each
-#   vertex such as this lattice orders the component ID.
-# - If the graph is traversed using a DFS, once a vertex is finished, we can
-#   assign to it a component.
-# - In Tarjan algorithm,
-#    - the ID assigned to a vertex is the number of strongly connected components
-#      discovered so far.
-#    - the deeper is a component, the higher will be its identifier. The lattice
-#      orders the component IDs according to >=.
-
 class TarjanVisitor(DefaultDepthFirstSearchVisitor):
     def __init__(self,
         pmap_component,
@@ -40,9 +28,18 @@ class TarjanVisitor(DefaultDepthFirstSearchVisitor):
 
     @property
     def total(self) -> int:
+        """
+        Retrieves the total number of strongly connected components.
+
+        Returns:
+            The total number of strongly connected components.
+        """
         return self.m_total
 
     def discover_vertex(self, u: int, g: DirectedGraph):
+        """
+        Overloads the :py:meth:`DefaultDepthFirstSearchVisitor.discover_vertex` method.
+        """
         self.m_pmap_root[u] = u
         self.m_pmap_component[u] = INFINITY
         self.m_pmap_discover_time[u] = self.m_dfs_time
@@ -50,9 +47,23 @@ class TarjanVisitor(DefaultDepthFirstSearchVisitor):
         self.m_stack.appendleft(u)
 
     def discover_min(self, u: int, v: int) -> int:
+        """
+        Determines which vertex has been discovered first.
+
+        Args:
+            u (int): A vertex descriptor.
+            v (int): A vertex descriptor.
+
+        Returns:
+            ``u`` if ``u`` has been discovered before ``v``,
+            ``v`` otherwise.
+        """
         return u if self.m_pmap_discover_time[u] < self.m_pmap_discover_time[v] else v
 
     def finish_vertex(self, u: int, g: DirectedGraph):
+        """
+        Overloads the :py:meth:`DefaultDepthFirstSearchVisitor.finish_vertex` method.
+        """
         for e in out_edges(u, g):
             v = target(e, g)
             if self.m_pmap_component[v] == INFINITY:
@@ -76,8 +87,26 @@ def strong_components(g: DirectedGraph, pmap_component: ReadWritePropertyMap) ->
     Tarjan algorithm, used to discover in ``O(|V|+|E|)`` strongly connected
     component in an arbitrary directed graph.
 
-    Based on http://www.boost.org/doc/libs/1_64_0/boost/graph/strong_components.hpp
+    Based on the `boost implementation <http://www.boost.org/doc/libs/1_64_0/boost/graph/strong_components.hpp>`__
     by Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+
+    Key ideas: Consider an arbitrary directed graph:
+
+    - If each strongly connected component is collapsed in a single vertex, the
+      graph is a lattice. It is thus possible to assign a component ID to each
+      vertex such as this lattice orders the component ID.
+    - If the graph is traversed using a DFS, once a vertex is finished, we can
+      assign to it a component.
+    - The ID assigned to a vertex is the number of strongly connected components
+      discovered so far.
+    - The deeper is a component, the higher will be its identifier. The lattice
+      orders the component IDs according to ``>=``.
+
+    Args:
+        g (DirectedGraph): The input graph.
+        pmap_component (ReadWritePropertyMap): The output property map that maps
+            each vertex with its component ID (the vertices having the same
+            component ID fall in the same strongly connected component).
     """
     map_vcolor = defaultdict(int)
     map_root = defaultdict(int)
