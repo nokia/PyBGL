@@ -58,9 +58,9 @@ test-all: ## run tests on every Python version with tox
 	poetry run tox
 
 coverage: ## check code coverage quickly with the default Python
-	coverage run --source $(PROJECT) -m pytest
-	coverage report -m
-	coverage html
+	poetry run coverage run -m pytest
+	poetry run coverage html
+	poetry run coverage xml
 	$(BROWSER) htmlcov/index.html
 
 docs: ## generate Sphinx HTML documentation, including API docs
