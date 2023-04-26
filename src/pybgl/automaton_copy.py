@@ -44,7 +44,7 @@ class AutomatonCopyVisitor(DepthFirstSearchCopyVisitor):
             self.m_pmap_vertices[v] if v in self.m_dup_vertices else
             self.dup_vertex(v, g)
         )
-        (e_dup, _) = add_edge(u_dup, v_dup, a, self.m_g_dup)
+        (e_dup, _) = self.m_g_dup.add_edge(u_dup, v_dup, a)
         if self.m_pmap_edges:
             self.m_pmap_edges[e] = e_dup
         if self.m_callback_dup_edge:
@@ -112,5 +112,5 @@ def automaton_copy(
     # Copy g to g_copy according to pmap_erelevant using a DFS from s.
     depth_first_search(
         s, g, pmap_vcolor, vis,
-        if_push = lambda e, g: pmap_erelevant[e] and pmap_vrelevant[target(e, g)]
+        if_push = lambda e, g: pmap_erelevant[e] and pmap_vrelevant[g.target(e)]
     )
