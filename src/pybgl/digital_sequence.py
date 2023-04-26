@@ -76,7 +76,7 @@ class DigitalSequence(Trie):
             The corresponding iterator.
         """
         return (
-            set() if is_initial(q, self)
+            set() if self.is_initial(q)
             else {EdgeDescriptor(q - 1, q, self.w[q - 1])}
         )
 
@@ -85,7 +85,7 @@ class DigitalSequence(Trie):
         See the overloaded :py:meth:`Automaton.out_edges` method.
         """
         return (
-            set() if is_final(q, self)
+            set() if self.is_final(q)
             else {EdgeDescriptor(q, q + 1, self.w[q])}
         )
 
@@ -111,7 +111,7 @@ class DigitalSequence(Trie):
         """
         See the overloaded :py:meth:`Automaton.sigma` method.
         """
-        return set() if q is BOTTOM or is_final(q, self) else {self.w[q]}
+        return set() if q is BOTTOM or self.is_final(q) else {self.w[q]}
 
     def edges(self) -> iter:
         """

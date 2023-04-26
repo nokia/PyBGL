@@ -83,7 +83,8 @@ class NodeAutomaton(Automaton):
         assert r is not None
         a = symbol(r, self)
         adj_q = self.adjacencies[q]
-        if a in adj_q.keys(): return (None, False)
+        if a in adj_q.keys():
+            return (None, False)
         self.adjacencies[q][a] = r
         return (EdgeDescriptor(q, r, a), True)
 
@@ -149,9 +150,9 @@ class NodeAutomaton(Automaton):
         Args:
             e (EdgeDescriptor): The edge descriptor of the transition to be removed.
         """
-        q = source(e, self)
-        r = target(e, self)
-        a = symbol(r, self)
+        q = self.source(e)
+        r = self.target(e)
+        a = self.symbol(r)
         adj_q = self.m_adjacencies.get(q)
         if adj_q:
             if a in adj_q:
@@ -168,8 +169,10 @@ class NodeAutomaton(Automaton):
         Returns:
             The corresponding set of symbols.
         """
-        return set(self.adjacencies.get(q, dict()).keys()) if q is not BOTTOM \
-          else set()
+        return (
+            set(self.adjacencies.get(q, dict()).keys()) if q is not BOTTOM
+            else set()
+        )
 
     def alphabet(self) -> set:
         """
@@ -179,7 +182,11 @@ class NodeAutomaton(Automaton):
         Returns:
             The corresponding set of symbols.
         """
-        return {symbol(q, self) for q in vertices(self) if not is_initial(q, self)}
+        return {
+            self.symbol(q)
+            for q in vertices(self)
+            if not self.is_initial(q)
+        }
 
     def edges(self) -> iter:
         """
@@ -190,7 +197,7 @@ class NodeAutomaton(Automaton):
             An iterator over the transitions.
         """
         return (
-            EdgeDescriptor(q, r, a) \
+            EdgeDescriptor(q, r, a)
             for (q, adj_q) in self.adjacencies.items()
             for (a, r) in adj_q.items()
         )
@@ -208,7 +215,7 @@ class NodeAutomaton(Automaton):
         Returns:
             The symbol assigned to the considered transition.
         """
-        return symbol(target(e, self), self)
+        return self.symbol(self.target(e))
 
     def to_dot(self, **kwargs) -> str:
         """

@@ -67,7 +67,7 @@ def deterministic_union(
         g12 = Automaton()
     if not vis:
         vis = DeterministicUnionVisitor(g12)
-    parallel_breadth_first_search(g1, g2, vis = vis)
+    parallel_breadth_first_search(g1, g2, vis=vis)
     return g12
 
 

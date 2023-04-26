@@ -8,9 +8,7 @@ import sys
 from collections import defaultdict
 from .algebra import BinaryRelation, BinaryOperator, Less, ClosedPlus
 from .breadth_first_search import DefaultBreadthFirstSearchVisitor
-from .graph import (
-    Graph, EdgeDescriptor, source, target, out_edges, vertices
-)
+from .graph import Graph, EdgeDescriptor
 from .graph_traversal import WHITE, GRAY, BLACK
 from .heap import Comparable, Heap
 from .property_map import (
@@ -119,7 +117,7 @@ def dijkstra_shortest_paths_initialization(
 
     # WHITE: not yet processed, GRAY: under process, BLACK: processed.
     pmap_vcolor[s] = WHITE
-    for u in vertices(g):
+    for u in g.vertices():
         pmap_vdist[u] = zero if u == s else infty
         vis.initialize_vertex(u, g)
 
@@ -135,7 +133,7 @@ def dijkstra_shortest_paths_iteration(
     pmap_vpreds: ReadWritePropertyMap,
     pmap_vdist: ReadWritePropertyMap,
     pmap_vcolor: ReadWritePropertyMap,
-    compare: BinaryRelation = Less(), # TODO Ignored, see Heap class.
+    compare: BinaryRelation = Less(),  # TODO Ignored, see Heap class.
     combine: BinaryOperator  = ClosedPlus(),
     vis: DijkstraVisitor = DijkstraVisitor()
 ):
@@ -151,23 +149,23 @@ def dijkstra_shortest_paths_iteration(
     vis.examine_vertex(u, g)
 
     # Update weight and predecessors of each successor of u
-    for e in out_edges(u, g):
+    for e in g.out_edges(u):
         vis.examine_edge(e, g)
-        v = target(e, g)
+        v = g.target(e)
         w_sv = pmap_vdist[v]
         w_uv = pmap_eweight[e]
         w = combine(w_su, w_uv)
-        if compare(w, w_sv): # Traversing u is worth!
+        if compare(w, w_sv):  # Traversing u is worth!
             pmap_vdist[v] = w
             pmap_vpreds[v] = {e}
             if pmap_vcolor[v] == WHITE:
-                heap.push(v) # As v is WHITE, v cannot be in the heap.
+                heap.push(v)  # As v is WHITE, v cannot be in the heap.
                 pmap_vcolor[v] = GRAY
                 vis.discover_vertex(v, g)
             elif pmap_vcolor[v] == GRAY:
                 heap.decrease_key(v)
             vis.edge_relaxed(e, g)
-        elif w == w_sv: # Hence we discover equally-cost shortest paths
+        elif w == w_sv:  # Hence we discover equally-cost shortest paths
             preds_v = pmap_vpreds[v]
             preds_v.add(e)
             pmap_vpreds[v] = preds_v
@@ -187,7 +185,7 @@ def dijkstra_shortest_paths(
     pmap_vpreds: ReadWritePropertyMap,
     pmap_vdist: ReadWritePropertyMap,
     pmap_vcolor: ReadWritePropertyMap = None,
-    compare: BinaryRelation = None, # TODO Ignored, see Heap class.
+    compare: BinaryRelation = None,  # TODO Ignored, see Heap class.
     combine: BinaryOperator = ClosedPlus(),
     zero: int = 0,
     infty: int = INFINITY,
@@ -316,7 +314,7 @@ def make_dag(
         if single_path and es:
             es = {es.pop()}
         kept_edges |= es
-        predecessors = {source(e, g) for e in es if e not in done}
+        predecessors = {g.source(e) for e in es if e not in done}
         done |= to_process
         to_process = predecessors - done
     return kept_edges
@@ -443,7 +441,7 @@ def dijkstra_shortest_path(
             g, s,
             pmap_eweight, pmap_vpreds, pmap_vdist, pmap_vcolor,
             compare, combine, zero, infty,
-            vis = vis
+            vis=vis
         )
     except DijkstraStopException:
         return make_path(g, s, t, pmap_vpreds)

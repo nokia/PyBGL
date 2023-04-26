@@ -4,7 +4,7 @@
 import sys
 
 from collections import defaultdict
-from pybgl.graph import DirectedGraph, add_edge, edges
+from pybgl.graph import DirectedGraph
 from pybgl.graph_dp import GraphDp
 from pybgl.graph_extract import graph_extract
 from pybgl.graphviz import dotstr_to_html
@@ -14,14 +14,14 @@ from pybgl.property_map import make_assoc_property_map, make_func_property_map
 
 def _test_graph_extract_small(threshold: int = 50):
     g = DirectedGraph(5)
-    (e01, _) = add_edge(0, 1, g)
-    (e02, _) = add_edge(0, 2, g)
-    (e04, _) = add_edge(0, 4, g)
-    (e12, _) = add_edge(1, 2, g)
-    (e23, _) = add_edge(2, 3, g)
-    (e24, _) = add_edge(2, 4, g)
-    (e40, _) = add_edge(4, 0, g)
-    (e44, _) = add_edge(4, 4, g)
+    (e01, _) = g.add_edge(0, 1)
+    (e02, _) = g.add_edge(0, 2)
+    (e04, _) = g.add_edge(0, 4)
+    (e12, _) = g.add_edge(1, 2)
+    (e23, _) = g.add_edge(2, 3)
+    (e24, _) = g.add_edge(2, 4)
+    (e40, _) = g.add_edge(4, 0)
+    (e44, _) = g.add_edge(4, 4)
     pmap_eweight = make_assoc_property_map(
         defaultdict(
             int,
@@ -68,7 +68,7 @@ def _test_graph_extract_small(threshold: int = 50):
     expected_edges = None
 
     if threshold == 0:
-        expected_edges = {e for e in edges(g)}
+        expected_edges = set(g.edges())
     elif threshold == 50:
         expected_edges = {e12, e40, e44, e04, e01}
     elif threshold > 100:

@@ -6,10 +6,7 @@
 
 from collections import defaultdict
 
-from .automaton import (
-    Automaton, EdgeDescriptor, add_vertex, add_edge,
-    label, out_edges, source, target
-)
+from .automaton import Automaton, EdgeDescriptor
 from .depth_first_search import depth_first_search
 from .property_map import (
     ReadWritePropertyMap, ReadPropertyMap,
@@ -39,9 +36,9 @@ class AutomatonCopyVisitor(DepthFirstSearchCopyVisitor):
             e (EdgeDescriptor): The examined edge.
             g (Automaton) The processed :py:class:`Automaton` instance.
         """
-        u = source(e, g)
-        v = target(e, g)
-        a = label(e, g)
+        u = g.source(e)
+        v = g.target(e)
+        a = g.label(e)
         u_dup = self.m_pmap_vertices[u]
         v_dup = (
             self.m_pmap_vertices[v] if v in self.m_dup_vertices else
@@ -117,4 +114,3 @@ def automaton_copy(
         s, g, pmap_vcolor, vis,
         if_push = lambda e, g: pmap_erelevant[e] and pmap_vrelevant[target(e, g)]
     )
-

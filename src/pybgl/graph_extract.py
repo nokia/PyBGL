@@ -6,7 +6,7 @@
 
 from collections import defaultdict
 
-from .graph import Graph, EdgeDescriptor, out_edges, target
+from .graph import Graph, EdgeDescriptor
 from .depth_first_search import BLACK, DefaultDepthFirstSearchVisitor, depth_first_search
 from .property_map import (
     ReadWritePropertyMap, ReadPropertyMap,
@@ -53,9 +53,9 @@ class DepthFirstSearchExtractVisitor(DefaultDepthFirstSearchVisitor):
         super().__init__()
         self.m_pmap_vrelevant = pmap_vrelevant
         self.m_pmap_erelevant = pmap_erelevant
-        self.m_pmap_vcolor    = pmap_vcolor
+        self.m_pmap_vcolor = pmap_vcolor
         self.m_callback_vertex_extract = callback_vertex_extract
-        self.m_callback_edge_extract   = callback_edge_extract
+        self.m_callback_edge_extract = callback_edge_extract
 
     def discover_vertex(self, u: int, g: Graph):
         """
@@ -87,7 +87,7 @@ class DepthFirstSearchExtractVisitor(DefaultDepthFirstSearchVisitor):
             e (EdgeDescriptor): The discovered edge.
             g (Graph): The considered graph.
         """
-        if self.m_pmap_erelevant[e] and self.m_pmap_vrelevant[target(e, g)]:
+        if self.m_pmap_erelevant[e] and self.m_pmap_vrelevant[g.target(e)]:
             self.examine_relevant_edge(e, g)
 
 # TODO GraphView
@@ -133,5 +133,5 @@ def graph_extract(
     )
     depth_first_search(
         s, g, pmap_vcolor, vis,
-        if_push = lambda e, g: pmap_erelevant[e] and pmap_vrelevant[target(e, g)]
+        if_push = lambda e, g: pmap_erelevant[e] and pmap_vrelevant[g.target(e)]
     )

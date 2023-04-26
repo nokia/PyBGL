@@ -81,9 +81,9 @@ class IncidenceGraph(DirectedGraph):
         Raises:
             `KeyError` if ``u`` does not exist.
         """
-        for e in [e for e in in_edges(u, self)]:
+        for e in [e for e in self.in_edges(u)]:
             remove_edge(e, self)
-        for e in [e for e in out_edges(u, self)]:
+        for e in [e for e in self.out_edges(u)]:
             remove_edge(e, self)
         del self.adjacencies[u]
         del self.in_adjacencies[u]
@@ -120,4 +120,8 @@ class IncidenceGraph(DirectedGraph):
         Returns:
             An iterator over the in-edges of ``v``.
         """
-        return (EdgeDescriptor(u, v, n) for u, s in self.in_adjacencies.get(v, dict()).items() for n in s)
+        return (
+            EdgeDescriptor(u, v, n)
+            for (u, s) in self.in_adjacencies.get(v, dict()).items()
+            for n in s
+        )

@@ -56,7 +56,10 @@ class Nfa(DirectedGraph):
         Returns:
             The set of reached states.
         """
-        sets = [set(self.adjacencies.get(q, dict()).get(a, dict()).keys()) for q in qs]
+        sets = [
+            set(self.adjacencies.get(q, dict()).get(a, dict()).keys())
+            for q in qs
+        ]
         return set.union(*sets) if sets else set()
 
     def delta_epsilon(self, qs: set) -> set:
@@ -153,8 +156,8 @@ class Nfa(DirectedGraph):
         Args:
             e (EdgeDescriptor): The edge descriptor of the transition to be removed.
         """
-        q = source(e, self)
-        r = target(e, self)
+        q = self.source(e)
+        r = self.target(e)
         (a, n) = e.m_distinguisher
         try:
             del self.m_adjacencies[q][a][r]
@@ -335,7 +338,10 @@ class Nfa(DirectedGraph):
             ``True`` if the automaton accepts ``w``
             ``False`` otherwise.
         """
-        return any(is_final(q, self) for q in delta_word(w, self))
+        return any(
+            self.is_final(q)
+            for q in self.delta_word(w)
+        )
 
     def delta_word(self, w) -> set:
         """
@@ -349,11 +355,12 @@ class Nfa(DirectedGraph):
         Returns:
             The reached states
         """
-        qs = set(initials(self))
+        qs = set(self.initials)
         qs = self.delta_epsilon(qs)
         for a in w:
-            if not qs: break
-            qs = set.union(*[delta(q, a, self) for q in qs])
+            if not qs:
+                break
+            qs = set.union(*[self.delta(q, a) for q in qs])
         return qs
 
     def finals(self) -> iter:
@@ -363,7 +370,7 @@ class Nfa(DirectedGraph):
         Returns:
             The final initial states of the NFA.
         """
-        return (q for q in vertices(self) if is_final(q, self))
+        return (q for q in self.vertices() if self.is_final(q))
 
     def is_epsilon_transition(self, e: EdgeDescriptor) -> bool:
         """

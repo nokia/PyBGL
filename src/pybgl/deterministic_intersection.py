@@ -4,7 +4,7 @@
 # This file is part of the pybgl project.
 # https://github.com/nokia/pybgl
 
-from .automaton import BOTTOM, Automaton, EdgeDescriptor, target
+from .automaton import BOTTOM, Automaton, EdgeDescriptor
 from .parallel_breadth_first_search import (
     ParallelBreadthFirstSearchVisitor, parallel_breadth_first_search
 )
@@ -43,7 +43,7 @@ class DeterministicIntersectionVisitor(ParallelBreadthFirstSearchVisitor, Produc
             g2 (Automaton): The automaton corresponding to right operand of the intersection.
             a (str): The symbol that labels ``e1`` and ``e2``.
         """
-        if target(e1, g1) is not BOTTOM and target(e2, g2) is not BOTTOM:
+        if g1.target(e1) is not BOTTOM and g2.target(e2) is not BOTTOM:
             self.add_product_edge(e1, g1, e2, g2)
 
 def deterministic_intersection(
@@ -69,8 +69,8 @@ def deterministic_intersection(
     parallel_breadth_first_search(
         g1, g2, vis = vis,
         if_push = lambda e1, g1, e2, g2: (
-            e1 is not None and target(e1, g1) and
-            e2 is not None and target(e2, g2)
+            e1 is not None and g1.target(e1) and
+            e2 is not None and g2.target(e2)
         )
     )
     return g12

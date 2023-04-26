@@ -97,6 +97,7 @@ from .shunting_yard_postfix import (
 )
 from .singleton import Singleton
 from .strong_components import strong_components
+from .suffix_trie import slices, factors, make_suffix_trie
 from .thompson_compile_nfa import thompson_compile_nfa
 from .tokenize import tokenize
 from .topological_sort import TopologicalSortVisitor, topological_sort

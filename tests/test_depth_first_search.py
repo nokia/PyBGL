@@ -4,7 +4,6 @@
 from collections import defaultdict
 from pybgl.graph import (
     DirectedGraph, Graph, EdgeDescriptor, UndirectedGraph,
-    add_edge, num_edges, num_vertices, vertices
 )
 from pybgl.depth_first_search import (
     DefaultDepthFirstSearchVisitor, depth_first_search, BLACK
@@ -30,23 +29,23 @@ class MyDepthFirstSearchVisitor(DefaultDepthFirstSearchVisitor):
 
 def make_g1(directed: bool) -> Graph:
     g1 = DirectedGraph(7) if directed else UndirectedGraph(7)
-    add_edge(0, 1, g1)
-    add_edge(1, 2, g1)
-    add_edge(2, 3, g1)
-    add_edge(3, 1, g1)
-    add_edge(3, 4, g1)
-    add_edge(4, 5, g1)
-    add_edge(5, 6, g1)
-    add_edge(6, 4, g1)
+    g1.add_edge(0, 1)
+    g1.add_edge(1, 2)
+    g1.add_edge(2, 3)
+    g1.add_edge(3, 1)
+    g1.add_edge(3, 4)
+    g1.add_edge(4, 5)
+    g1.add_edge(5, 6)
+    g1.add_edge(6, 4)
     return g1
 
 def make_g2(directed: bool) -> Graph:
     g2 = DirectedGraph(4) if directed else UndirectedGraph(4)
-    add_edge(0, 1, g2)
-    add_edge(1, 2, g2)
-    add_edge(1, 3, g2)
-    add_edge(3, 0, g2)
-    add_edge(3, 2, g2)
+    g2.add_edge(0, 1)
+    g2.add_edge(1, 2)
+    g2.add_edge(1, 3)
+    g2.add_edge(3, 0)
+    g2.add_edge(3, 2)
     return g2
 
 def test_all():
@@ -57,8 +56,8 @@ def test_all():
             map_color = defaultdict(int)
             depth_first_search(0, g, make_assoc_property_map(map_color), vis)
 
-            n = num_vertices(g)
-            m = num_edges(g)
+            n = g.num_vertices()
+            m = g.num_edges()
             n_ = vis.num_vertices
             m_ = vis.num_edges
 
@@ -72,5 +71,5 @@ def test_all():
                 assert m_ == 2 * m, "Visited %s/%s edges" % (m_, m)
 
             # Finally, all vertices should all be BLACK
-            for u in vertices(g):
+            for u in g.vertices():
                 assert map_color[u] == BLACK

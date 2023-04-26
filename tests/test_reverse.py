@@ -5,8 +5,11 @@ from pybgl.breadth_first_search import (
     DefaultBreadthFirstSearchVisitor,
     breadth_first_search
 )
-from pybgl.depth_first_search import *
-from pybgl.incidence_graph import *
+from pybgl.depth_first_search import (
+    DefaultDepthFirstSearchVisitor,
+    depth_first_search
+)
+from pybgl.incidence_graph import IncidenceGraph
 from pybgl.reverse import reverse_dict, reverse_graph
 
 def test_revert_dict():
@@ -17,21 +20,21 @@ def test_revert_dict():
 
 def test_reverse_graph():
     g = IncidenceGraph(2)
-    (e01, _) = add_edge(0, 1, g)
-    assert source(e01, g) == 0
-    assert target(e01, g) == 1
-    assert [e for e in in_edges(0, g)] == []
-    assert [e for e in out_edges(0, g)] == [e01]
-    assert [e for e in in_edges(1, g)] == [e01]
-    assert [e for e in out_edges(1, g)] == []
+    (e01, _) = g.add_edge(0, 1)
+    assert g.source(e01) == 0
+    assert g.target(e01) == 1
+    assert [e for e in g.in_edges(0)] == []
+    assert [e for e in g.out_edges(0)] == [e01]
+    assert [e for e in g.in_edges(1)] == [e01]
+    assert [e for e in g.out_edges(1)] == []
 
     reverse_graph(g)
-    assert source(e01, g) == 1
-    assert target(e01, g) == 0
-    assert [e for e in in_edges(1, g)] == []
-    assert [e for e in out_edges(1, g)] == [e01]
-    assert [e for e in in_edges(0, g)] == [e01]
-    assert [e for e in out_edges(0, g)] == []
+    assert g.source(e01) == 1
+    assert g.target(e01) == 0
+    assert [e for e in g.in_edges(1)] == []
+    assert [e for e in g.out_edges(1)] == [e01]
+    assert [e for e in g.in_edges(0)] == [e01]
+    assert [e for e in g.out_edges(0)] == []
 
 class RecordMixin:
     def __init__(self):
@@ -45,7 +48,7 @@ class RecordMixin:
         self.edges.append(e)
 
     def edges_to_pairs(self, g):
-        return [(source(e, g), target(e, g)) for e in self.edges]
+        return [(g.source(e), g.target(e)) for e in self.edges]
 
 class RecordDfsVisitor(RecordMixin, DefaultDepthFirstSearchVisitor):
     def __init__(self):
@@ -57,9 +60,9 @@ class RecordBfsVisitor(RecordMixin, DefaultBreadthFirstSearchVisitor):
 
 def test_reverse_traversal():
     g = IncidenceGraph(4)
-    add_edge(0, 1, g)
-    add_edge(1, 2, g)
-    add_edge(2, 3, g)
+    g.add_edge(0, 1)
+    g.add_edge(1, 2)
+    g.add_edge(2, 3)
 
     for (traversal, Visitor) in [
         (breadth_first_search, RecordBfsVisitor),
@@ -67,7 +70,7 @@ def test_reverse_traversal():
     ]:
         # Forward: g is: 0 -> 1 -> 2 -> 3
         fwd_vis = Visitor()
-        traversal(0, g, vis = fwd_vis)
+        traversal(0, g, vis=fwd_vis)
         assert fwd_vis.vertices == [0, 1, 2, 3]
         assert fwd_vis.edges_to_pairs(g) == [(0, 1), (1, 2), (2, 3)]
 
@@ -75,7 +78,7 @@ def test_reverse_traversal():
         # By reversing the graph
         reverse_graph(g)
         bwd_vis = Visitor()
-        traversal(3, g, vis = bwd_vis)
+        traversal(3, g, vis=bwd_vis)
         assert bwd_vis.vertices == [3, 2, 1, 0]
         assert bwd_vis.edges_to_pairs(g) == [(3, 2), (2, 1), (1, 0)]
 

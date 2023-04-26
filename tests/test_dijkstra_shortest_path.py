@@ -1,11 +1,20 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-from pybgl.dijkstra_shortest_paths import *
-from pybgl.graph import *
+from collections import defaultdict
+from pybgl.dijkstra_shortest_paths import (
+    INFINITY,
+    DijkstraVisitor,
+    dijkstra_shortest_path,
+    dijkstra_shortest_paths
+)
+from pybgl.graph import Graph, DirectedGraph, EdgeDescriptor, UndirectedGraph
 from pybgl.ipynb import in_ipynb, ipynb_display_graph
 from pybgl.property_map import (
-    ReadPropertyMap, ReadWritePropertyMap, make_func_property_map
+    ReadPropertyMap,
+    ReadWritePropertyMap,
+    make_assoc_property_map,
+    make_func_property_map
 )
 
 # For debug purposes
@@ -52,7 +61,7 @@ def make_graph(
     def add_node(un, g, d):
         u = d.get(un)
         if u is None:
-            u = add_vertex(g)
+            u = g.add_vertex()
             d[un] = u
         return u
 
@@ -61,23 +70,22 @@ def make_graph(
     for (un, vn, w) in links:
         u = add_node(un, g, d)
         v = add_node(vn, g, d)
-        (e, added) = add_edge(u, v, g)
+        (e, added) = g.add_edge(u, v)
         assert added
         pmap_eweight[e] = w
 
         if build_reverse_edge:
-            (e, added) = add_edge(v, u, g)
+            (e, added) = g.add_edge(v, u)
             assert added
             pmap_eweight[e] = w
     return g
 
 def test_isolated_vertices():
     # Create 10 isolated vertices
-    infty = sys.maxsize
     g = DirectedGraph(10)
     map_eweight = defaultdict()
 
-    for s in vertices(g):
+    for s in g.vertices():
         map_vpreds = defaultdict(set)
         map_vdist = defaultdict()
         dijkstra_shortest_paths(
@@ -91,14 +99,14 @@ def test_isolated_vertices():
         assert map_vpreds == dict()
 
         # Every target are at infinite distance excepted the source node.
-        assert map_vdist  == {u: infty if u != s else 0 for u in vertices(g)}
+        assert map_vdist  == {u: INFINITY if u != s else 0 for u in g.vertices()}
 
 def test_simple_graph():
     # Prepare graph, just a 0 -> 1 arc
     g = DirectedGraph()
-    u = add_vertex(g)
-    v = add_vertex(g)
-    e, added = add_edge(u, v, g)
+    u = g.add_vertex()
+    v = g.add_vertex()
+    (e, added) = g.add_edge(u, v)
     assert added
     w = 1
     map_eweight = defaultdict()
@@ -128,11 +136,11 @@ def test_simple_graph():
 def test_parallel_edges():
     # Prepare graph, two parallel edges from 0 to 1
     g = DirectedGraph()
-    u = add_vertex(g)
-    v = add_vertex(g)
-    (e1, added) = add_edge(u, v, g)
+    u = g.add_vertex()
+    v = g.add_vertex()
+    (e1, added) = g.add_edge(u, v)
     assert added
-    (e2, added) = add_edge(u, v, g)
+    (e2, added) = g.add_edge(u, v)
     assert added
     w = 1
     map_eweight = defaultdict()
@@ -197,7 +205,7 @@ def test_directed_graph(links: list = None):
         vis = DijkstraDebugVisitor()
     )
 
-    edge_dict = {(source(e, g), target(e, g)): e for e in edges(g)}
+    edge_dict = {(g.source(e), g.target(e)): e for e in g.edges()}
 
     assert map_vpreds == {
         1: {edge_dict[0, 1]},
@@ -224,9 +232,9 @@ def test_directed_graph(links: list = None):
 
 def test_decrease_key():
     g = DirectedGraph(3)
-    (e01, _) = add_edge(0, 1, g)
-    (e02, _) = add_edge(0, 2, g)
-    (e21, _) = add_edge(2, 1, g)
+    (e01, _) = g.add_edge(0, 1)
+    (e02, _) = g.add_edge(0, 2)
+    (e21, _) = g.add_edge(2, 1)
     map_eweight = defaultdict(
         lambda: None,
         {
@@ -272,7 +280,7 @@ def test_directed_symmetric_graph(links: list = None):
     )
     display_graph(g, pmap_eweight, map_vpreds)
 
-    E = {(source(e, g), target(e, g)): e for e in edges(g)}
+    E = {(g.source(e), g.target(e)): e for e in g.edges()}
 
     assert map_vpreds == {
         1: {E[0, 1]},
@@ -326,7 +334,7 @@ def test_dijkstra_shortest_path(links: list = None):
             }
         )
     assert [
-        (source(e, g), target(e, g))
+        (g.source(e), g.target(e))
         for e in path
     ] == [(0, 5), (5, 6), (6, 8)]
 

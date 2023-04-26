@@ -5,7 +5,7 @@
 # https://github.com/nokia/pybgl
 
 from collections import defaultdict, deque
-from .automaton import BOTTOM, Automaton, EdgeDescriptor, delta, initial, sigma
+from .automaton import BOTTOM, Automaton, EdgeDescriptor
 from .graph_traversal import WHITE, GRAY, BLACK
 from .property_map import ReadWritePropertyMap, make_assoc_property_map
 
@@ -200,8 +200,7 @@ def parallel_breadth_first_search(
     source_pairs = None,
     pmap_vcolor: ReadWritePropertyMap = None,
     vis: ParallelBreadthFirstSearchVisitor = None,
-    if_push: callable = None,
-    delta: callable = delta
+    if_push: callable = None
 ):
     """
     Non-recursive implementation of Depth First Search algorithm, from multiple sources.
@@ -224,17 +223,19 @@ def parallel_breadth_first_search(
     def get_edge(q, r, a, g):
         assert q is not None
         # It may be useful to consider (q, BOTTOM, a), see parallel_walk algorithm and tree_edge
-        #assert r is not None
-        return EdgeDescriptor(q, r, a) if q is not None and r == delta(q, a, g) else \
-               EdgeDescriptor(q, BOTTOM, a)
+        # assert r is not None
+        return (
+            EdgeDescriptor(q, r, a) if q is not None and r == g.delta(q, a)
+            else EdgeDescriptor(q, BOTTOM, a)
+        )
 
     stack = deque()
 
     if vis is None:
         vis = ParallelBreadthFirstSearchVisitor()
     if source_pairs is None:
-        q01 = initial(g1)
-        q02 = initial(g2)
+        q01 = g1.initial()
+        q02 = g2.initial()
         stack.appendleft((q01, q02))
         vis.start_vertex(q01, g1, q02, g2)
     else:
@@ -252,8 +253,8 @@ def parallel_breadth_first_search(
     while stack:
         (q1, q2) = stack.pop()
         vis.examine_vertex(q1, g1, q2, g2)
-        for a in sigma(q1, g1) | sigma(q2, g2):
-            (r1, r2) = (delta(q1, a, g1), delta(q2, a, g2))
+        for a in g1.sigma(q1) | g2.sigma(q2):
+            (r1, r2) = (g1.delta(q1, a), g2.delta(q2, a))
             vis.examine_symbol(q1, g1, q2, g2, a)
             e1 = get_edge(q1, r1, a, g1) if q1 is not BOTTOM else None
             e2 = get_edge(q2, r2, a, g2) if q2 is not BOTTOM else None

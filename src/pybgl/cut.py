@@ -5,7 +5,7 @@
 # https://github.com/nokia/pybgl
 
 from collections import defaultdict
-from .graph import Graph, EdgeDescriptor, source, target
+from .graph import Graph, EdgeDescriptor
 from .depth_first_search import WHITE, DefaultDepthFirstSearchVisitor, depth_first_search
 from .property_map import make_assoc_property_map
 
@@ -26,7 +26,7 @@ def cut(s: int, g: Graph, in_cut: callable) -> set:
         def __init__(self, leaves: set):
             self.leaves = leaves
         def examine_edge(self, e: EdgeDescriptor, g: Graph):
-            u = source(e, g)
+            u = g.source(e)
             self.leaves.discard(u)
         def discover_vertex(self, u: int, g: Graph):
             self.leaves.add(u)
@@ -51,7 +51,11 @@ def cut(s: int, g: Graph, in_cut: callable) -> set:
         if_push = IfPush(in_cut, cutting_edges)
     )
     return {
-        target(e, g)
-        for e in cutting_edges} | {u for u in leaves} - {source(e, g)
+        g.target(e)
+        for e in cutting_edges
+    } | {
+        u for u in leaves
+    } - {
+        g.source(e)
         for e in cutting_edges
     }

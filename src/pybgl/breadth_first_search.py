@@ -5,7 +5,7 @@
 # https://github.com/nokia/pybgl
 
 from collections import deque, defaultdict
-from .graph import Graph, EdgeDescriptor, out_edges, target
+from .graph import Graph, EdgeDescriptor
 from .graph_traversal import WHITE, GRAY, BLACK
 from .property_map import ReadWritePropertyMap, make_assoc_property_map
 
@@ -172,10 +172,10 @@ def breadth_first_search_graph(
     while stack:
         u = stack.pop()
         vis.examine_vertex(u, g)
-        for e in out_edges(u, g):
+        for e in g.out_edges(u):
             if not if_push(e, g):
                 continue
-            v = target(e, g)
+            v = g.target(e)
             vis.examine_edge(e, g)
             color_v = pmap_vcolor[v]
             if color_v == WHITE:

@@ -5,11 +5,11 @@
 # https://github.com/nokia/pybgl
 
 from collections import deque
-from .graph import Graph, EdgeDescriptor, out_edges, target
+from .graph import Graph, EdgeDescriptor
 from .property_map import ReadWritePropertyMap
 
 WHITE = 0 # If you use AssociativePropertyMap you are encouraged to wrap a defaultdict(int)
-GRAY  = 1
+GRAY = 1
 BLACK = 2
 
 class DefaultTreeTraversalVisitor:
@@ -72,9 +72,9 @@ def dfs_tree(s: int, g: Graph, vis: DefaultTreeTraversalVisitor = None):
     while stack:
         u = stack.pop()
         vis.discover_vertex(u, g)
-        for e in out_edges(u, g):
+        for e in g.out_edges(u):
             vis.examine_edge(e, g)
-            v = target(e, g)
+            v = g.target(e)
             stack.append(v)
         vis.finish_vertex(u, g)
 
@@ -95,8 +95,8 @@ def bfs_tree(s: int, g: Graph, vis: DefaultTreeTraversalVisitor):
     while stack:
         u = stack.pop()
         vis.discover_vertex(u, g)
-        for e in out_edges(u, g):
+        for e in g.out_edges(u):
             vis.examine_edge(e, g)
-            v = target(e, g)
+            v = g.target(e)
             stack.appendleft(v)
         vis.finish_vertex(u, g)

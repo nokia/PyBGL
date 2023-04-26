@@ -4,7 +4,7 @@
 # This file is part of the PyBGL project.
 # https://github.com/nokia/pybgl
 
-from .automaton import Automaton, is_final
+from .automaton import Automaton
 from .parallel_breadth_first_search import (
     ParallelBreadthFirstSearchVisitor, parallel_breadth_first_search
 )
@@ -37,8 +37,8 @@ class DeterministicInclusionVisitor(ParallelBreadthFirstSearchVisitor):
             q2 (int): A state of ``g2``.
             g2 (Automaton): The automaton corresponding to right operand of the inclusion.
         """
-        f1 = is_final(q1, g1)
-        f2 = is_final(q2, g2)
+        f1 = g1.is_final(q1)
+        f2 = g2.is_final(q2)
         if f1 ^ f2:
             ret = 1 if f2 else -1
             if self.ret == 0:
@@ -94,7 +94,7 @@ def deterministic_inclusion(
     if vis is None:
         vis = DeterministicInclusionVisitor()
     try:
-        parallel_breadth_first_search(g1, g2, vis = vis)
+        parallel_breadth_first_search(g1, g2, vis=vis)
     except ContradictionException:
         return None
     return vis.ret

@@ -5,15 +5,13 @@
 # https://github.com/nokia/pybgl
 
 from collections import defaultdict
-from .incidence_automaton import IncidenceAutomaton, label
+from .incidence_automaton import IncidenceAutomaton
 from .property_map import (
     ReadPropertyMap, ReadWritePropertyMap,
     make_assoc_property_map, make_func_property_map
 )
 from .incidence_node_automaton import (
-    IncidenceNodeAutomaton, EdgeDescriptor,
-    delta, in_edges, is_final, out_degree, out_edges,
-    remove_edge, remove_vertex, source, symbol, target, vertices
+    IncidenceNodeAutomaton, EdgeDescriptor
 )
 
 class DefaultRevuzMinimizeVisitor:
@@ -94,8 +92,8 @@ def revuz_height(
     h = 0
     vertices_to_process = leaves if leaves else {
         q
-        for q in vertices(g)
-        if out_degree(q, g) == 0
+        for q in g.vertices()
+        if g.out_degree(q) == 0
     }
 
     while vertices_to_process:
@@ -104,8 +102,8 @@ def revuz_height(
             # pmap_vheight[v] = max(pmap_vheight[v], h). Note that max is not needed
             # according to the traversal order.
             pmap_vheight[v] = h
-            for e in in_edges(v, g):
-                u = source(e, g)
+            for e in g.in_edges(v):
+                u = g.source(e)
                 next_vertices_to_process.add(u)
         vertices_to_process = next_vertices_to_process
         h += 1
@@ -147,39 +145,33 @@ def revuz_minimize(
 
     # Mappings
     if not pmap_vlabel and isinstance(g, IncidenceNodeAutomaton):
-        pmap_vlabel = make_func_property_map(lambda q: symbol(q, g))
+        pmap_vlabel = make_func_property_map(g.symbol)
     if not pmap_elabel:
         if isinstance(g, IncidenceAutomaton):
-            pmap_elabel = make_func_property_map(lambda e: label(e, g))
+            pmap_elabel = make_func_property_map(g.label)
         elif isinstance(g, IncidenceNodeAutomaton):
-            pmap_elabel = make_func_property_map(lambda e: pmap_vlabel[target(e, g)])
+            pmap_elabel = make_func_property_map(lambda e: pmap_vlabel[g.target(e)])
     assert pmap_vlabel or pmap_elabel
-
-    # Internals
-    if isinstance(g, IncidenceAutomaton):
-        from pybgl.incidence_automaton import add_edge
-    else:
-        from pybgl.incidence_node_automaton import add_edge
 
     def _make_signature(q: int) -> tuple:
         return (
-            is_final(q, g),
+            g.is_final(q),
             pmap_vlabel[q] if pmap_vlabel else None,
             frozenset({
                 (
                     pmap_elabel[e] if pmap_elabel else None,
-                    target(e, g)
-                ) for e in out_edges(q, g)
+                    g.target(e)
+                ) for e in g.out_edges(q)
             })
         )
 
     def _move_edge(e_old: EdgeDescriptor, q: int, r: int):
         a = pmap_elabel[e_old] if pmap_elabel else None
-        remove_edge(e_old, g)
+        g.remove_edge(e_old)
         e_merge = None
 # Due to determinism, merging parents transitions should never be required.
 #
-#        for e in out_edges(q, g):
+#        for e in g.out_edges(q):
 #            a_cur = pmap_elabel[e] if pmap_elabel else None
 #            if a == a_cur: #vlabels always match (see signature)
 #                e_merge = e
@@ -189,19 +181,23 @@ def revuz_minimize(
 #            vis.merge_transitions(e_old, e_merge, g)
 #        else:
 #            if isinstance(g, IncidenceNodeAutomaton):
-#                (e_new, _) = add_edge(q, r, g)
+#                (e_new, _) = g.add_edge(q, r)
 #            else:
-#                (e_new, _) = add_edge(q, r, a, g)
+#                (e_new, _) = g.add_edge(q, r, a)
 #            vis.move_transition(e_old, e_new, g)
         if isinstance(g, IncidenceNodeAutomaton):
-            (e_new, _) = add_edge(q, r, g)
+            (e_new, _) = g.add_edge(q, r)
         else:
-            (e_new, _) = add_edge(q, r, a, g)
+            (e_new, _) = g.add_edge(q, r, a)
         vis.move_transition(e_old, e_new, g)
 
     # Initialization
     h = 0
-    to_process = leaves if leaves else {q for q in vertices(g) if out_degree(q, g) == 0}
+    to_process = leaves if leaves else {
+        q
+        for q in g.vertices()
+        if g.out_degree(q) == 0
+    }
 
     # Iteration
     while to_process:
@@ -223,20 +219,20 @@ def revuz_minimize(
                 vis.merging_states(q1, q2, g)
 
                 # Move each input transition (p -> q2) to (p -> q1)
-                for e2 in {e for e in in_edges(q2, g)}:
-                    p = source(e2, g)
+                for e2 in {e for e in g.in_edges(q2)}:
+                    p = g.source(e2)
                     _move_edge(e2, p, q1)
 
                 # Remove q2, which is now isolated
                 vis.remove_vertex(q2, g)
-                remove_vertex(q2, g)
+                g.remove_vertex(q2)
                 vis.states_merged(q1, q2, g)
 
         to_process = set.union(*[{
-            source(e, g)
+            g.source(e)
             for q in to_process
-            for e in in_edges(q, g)
-            if pmap_vheight[source(e, g)] == h + 1
+            for e in g.in_edges(q)
+            if pmap_vheight[g.source(e)] == h + 1
         }])
         h += 1
     return h - 1

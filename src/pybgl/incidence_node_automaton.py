@@ -21,7 +21,7 @@ class IncidenceNodeAutomaton(NodeAutomaton):
                 each state with its corresponding symbol.
         """
         self.predecessors = defaultdict(set) # predecessors[r] = {q}
-        super().__init__(*args, pmap_vsymbol = pmap_vsymbol) # UGLY
+        super().__init__(*args, pmap_vsymbol=pmap_vsymbol) # UGLY
 
     # TODO: Factorize with IncidenceAutomaton
     def add_edge(self, q: int, r: int) -> tuple:
@@ -56,7 +56,7 @@ class IncidenceNodeAutomaton(NodeAutomaton):
             An iterator over the in-edges of ``r``.
         """
         return (
-            EdgeDescriptor(q, r, symbol(r, self))
+            EdgeDescriptor(q, r, self.symbol(r))
             for q in self.predecessors.get(r, set())
         )
 
@@ -76,16 +76,16 @@ class IncidenceNodeAutomaton(NodeAutomaton):
 
         # In-edges: (p, q) edges
         if q in self.predecessors.keys():
-            a = symbol(q, self)
-            for e in in_edges(q, self):
-                p = source(e, self)
+            a = self.symbol(q)
+            for e in self.in_edges(q):
+                p = self.source(e)
                 del self.adjacencies[p][a]
             del self.predecessors[q]
 
         # Out-edges: (q, r) edges
         if q in self.adjacencies.keys():
-            for e in out_edges(q, self):
-                r = target(e, self)
+            for e in self.out_edges(q):
+                r = self.target(e)
                 if q in self.predecessors[r]:
                     # This test is required to cope with parallel (q, r) edges.
                     self.predecessors[r].remove(q)
@@ -100,8 +100,8 @@ class IncidenceNodeAutomaton(NodeAutomaton):
             e (EdgeDescriptor): The edge descriptor of the edge to be removed.
         """
         super().remove_edge(e)
-        q = source(e, self)
-        r = target(e, self)
+        q = self.source(e)
+        r = self.target(e)
         self.predecessors[r].remove(q)
 
 def make_incidence_node_automaton(
@@ -164,21 +164,21 @@ def make_incidence_node_automaton(
     g.set_initial(q0)
     map_vertices = {q0n:  q0}
     if pmap_vfinal[q0n]:
-        set_final(q0, g)
+        g.set_final(q0)
 
     # Add states
     def _add_state(qn) -> int:
         q = map_vertices.get(qn)
         if q is None:
             a = pmap_vlabel[qn]
-            q = add_vertex(a, g)
+            q = g.add_vertex(a)
             map_vertices[qn] = q
             if pmap_vfinal[qn]:
-                set_final(q, g)
+                g.set_final(q)
         return q
 
     for (qn, rn) in transitions:
         q = _add_state(qn)
         r = _add_state(rn)
-        add_edge(q, r, g)
+        g.add_edge(q, r)
     return g

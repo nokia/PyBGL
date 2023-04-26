@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import json
-from pybgl.graph import *
+from pybgl.graph import DirectedGraph
 from pybgl.graph_dp import GraphDp
 from pybgl.graphviz import read_graphviz
 from pybgl.property_map import make_func_property_map
@@ -10,9 +10,9 @@ from pybgl.ipynb import ipynb_display_graph
 
 def make_g() -> DirectedGraph:
     g = DirectedGraph(3)
-    e01, _ = add_edge(0, 1, g)
-    e12, _ = add_edge(1, 2, g)
-    e02, _ = add_edge(0, 2, g)
+    (e01, _) = g.add_edge(0, 1)
+    (e12, _) = g.add_edge(1, 2)
+    (e02, _) = g.add_edge(0, 2)
     return g
 
 def make_gdp1() -> GraphDp:
@@ -29,8 +29,8 @@ def make_gdp2() -> GraphDp:
             "color": make_func_property_map(lambda q: "red" if q % 2 else "green"),
         },
         dpe={
-            "label": make_func_property_map(lambda e: f"e{source(e, g)}{target(e, g)}"),
-            "color": make_func_property_map(lambda e: "red" if target(e, g) % 2 else "green"),
+            "label": make_func_property_map(lambda e: f"e{g.source(e)}{g.target(e)}"),
+            "color": make_func_property_map(lambda e: "red" if g.target(e) % 2 else "green"),
         }
     )
     return gdp
@@ -62,23 +62,31 @@ def test_graph_dp_filter():
         return u < 2
 
     def edge_filter(e, g, vertex_filter):
-        return vertex_filter(source(e, g)) and vertex_filter(target(e, g))
+        return vertex_filter(g.source(e)) and vertex_filter(g.target(e))
 
     g = make_g()
     gdp = GraphDp(
         g,
         dv={"color": "red"},
         de={"color": "purple"},
-        dpv={"fontcolor": make_func_property_map(lambda e: "blue" if e % 2 else "green")}
+        dpv={
+            "fontcolor": make_func_property_map(
+                lambda e: "blue" if e % 2 else "green"
+            )
+        }
     )
     ipynb_display_graph(
         gdp,
-        vs=(u for u in vertices(g) if vertex_filter(u)),
-        es=(e for e in edges(g)    if edge_filter(e, g, vertex_filter))
+        vs=(u for u in g.vertices() if vertex_filter(u)),
+        es=(e for e in g.edges() if edge_filter(e, g, vertex_filter))
     )
     gdp = GraphDp(
         g,
         dv={"color": "red"},
         de={"color": "purple"},
-        dpv={"fontcolor": make_func_property_map(lambda e: "blue" if e % 2 else "green")}
+        dpv={
+            "fontcolor": make_func_property_map(
+                lambda e: "blue" if e % 2 else "green"
+            )
+        }
     )

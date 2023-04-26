@@ -49,8 +49,8 @@ def literal(a: str) -> Nfa:
         ``f`` is its initial state;
     """
     nfa = Nfa(2)
-    add_edge(0, 1, a, nfa)
-    set_final(1, nfa)
+    nfa.add_edge(0, 1, a)
+    nfa.set_final(1)
     return (nfa, 0, 1)
 
 def insert_automaton(g1: Nfa, g2: Nfa, map21: dict = None) -> dict:
@@ -71,20 +71,20 @@ def insert_automaton(g1: Nfa, g2: Nfa, map21: dict = None) -> dict:
     """
     if not map21:
         map21 = dict()
-    for q2 in vertices(g2):
+    for q2 in g2.vertices():
         if q2 in map21.keys():
             continue
-        q1 = add_vertex(g1)
-        if is_final(q2, g2):
-            set_final(q1, g1)
+        q1 = g1.add_vertex()
+        if g2.is_final(q2):
+            g1.set_final(q1)
         map21[q2] = q1
-    for e2 in edges(g2):
-        q2 = source(e2, g2)
-        r2 = target(e2, g2)
-        a  = label(e2, g2)
+    for e2 in g2.edges():
+        q2 = g2.source(e2)
+        r2 = g2.target(e2)
+        a = g2.label(e2)
         q1 = map21[q2]
         r1 = map21[r2]
-        add_edge(q1, r1, a, g1)
+        g1.add_edge(q1, r1, a)
     return map21
 
 def concatenation(
@@ -117,9 +117,9 @@ def concatenation(
         ``f`` is its initial state.
     """
     map21 = insert_automaton(nfa1, nfa2)
-    add_edge(f1, map21[q02], epsilon(nfa1), nfa1)
-    set_initials({q01}, nfa1)
-    set_final(f1, nfa1, False)
+    nfa1.add_edge(f1, map21[q02], nfa1.epsilon)
+    nfa1.set_initials({q01})
+    nfa1.set_final(f1, False)
     return (nfa1, q01, map21[f2])
 
 def alternation(
@@ -150,17 +150,18 @@ def alternation(
         ``q0`` is its initial state;
         ``f`` is its initial state.
     """
+    eps1 = nfa1.epsilon
     map21 = insert_automaton(nfa1, nfa2)
-    q0 = add_vertex(nfa1)
-    add_edge(q0, q01, epsilon(nfa1), nfa1)
-    add_edge(q0, map21[q02], epsilon(nfa1), nfa1)
-    set_initials({q0}, nfa1)
-    f = add_vertex(nfa1)
-    add_edge(f1, f, epsilon(nfa1), nfa1)
-    add_edge(map21[f2], f, epsilon(nfa1), nfa1)
-    set_final(f1, nfa1, False)
-    set_final(map21[f2], nfa1, False)
-    set_final(f, nfa1, True)
+    q0 = nfa1.add_vertex()
+    nfa1.add_edge(q0, q01, eps1)
+    nfa1.add_edge(q0, map21[q02], eps1)
+    nfa1.set_initials({q0})
+    f = nfa1.add_vertex()
+    nfa1.add_edge(f1, f, eps1)
+    nfa1.add_edge(map21[f2], f, eps1)
+    nfa1.set_final(f1, False)
+    nfa1.set_final(map21[f2], False)
+    nfa1.set_final(f, True)
     return (nfa1, q0, f)
 
 def zero_or_one(nfa: Nfa, q0: int, f: int) -> tuple:
@@ -182,8 +183,8 @@ def zero_or_one(nfa: Nfa, q0: int, f: int) -> tuple:
         ``q0`` is its initial state;
         ``f`` is its initial state.
     """
-    eps = epsilon(nfa)
-    add_edge(q0, f, eps, nfa)
+    eps = nfa.epsilon
+    nfa.add_edge(q0, f, eps)
     return (nfa, q0, f)
 
 def zero_or_more(nfa: Nfa, q0: int, f: int) -> tuple:
@@ -203,16 +204,16 @@ def zero_or_more(nfa: Nfa, q0: int, f: int) -> tuple:
         ``q0`` is its initial state;
         ``f`` is its initial state.
     """
-    eps = epsilon(nfa)
-    new_q0 = add_vertex(nfa)
-    new_f = add_vertex(nfa)
-    add_edge(new_q0, q0, eps, nfa)
-    add_edge(f, new_f, eps, nfa)
-    add_edge(new_q0, new_f, eps, nfa)
-    add_edge(new_f, new_q0, eps, nfa)
-    set_initials({new_q0}, nfa)
-    set_final(f, nfa, False)
-    set_final(new_f, nfa, True)
+    eps = nfa.epsilon
+    new_q0 = nfa.add_vertex()
+    new_f = nfa.add_vertex()
+    nfa.add_edge(new_q0, q0, eps)
+    nfa.add_edge(f, new_f, eps)
+    nfa.add_edge(new_q0, new_f, eps)
+    nfa.add_edge(new_f, new_q0, eps)
+    nfa.set_initials({new_q0})
+    nfa.set_final(f, False)
+    nfa.set_final(new_f, True)
     return (nfa, new_q0, new_f)
 
 def one_or_more(nfa: Nfa, q0: int, f: int) -> tuple:
@@ -232,15 +233,15 @@ def one_or_more(nfa: Nfa, q0: int, f: int) -> tuple:
         ``q0`` is its initial state;
         ``f`` is its initial state.
     """
-    eps = epsilon(nfa)
-    new_q0 = add_vertex(nfa)
-    new_f = add_vertex(nfa)
-    add_edge(new_q0, q0, eps, nfa)
-    add_edge(f, new_f, eps, nfa)
-    add_edge(new_f, new_q0, eps, nfa)
-    set_initials({new_q0}, nfa)
-    set_final(f, nfa, False)
-    set_final(new_f, nfa, True)
+    eps = nfa.epsilon
+    new_q0 = nfa.add_vertex()
+    new_f = nfa.add_vertex()
+    nfa.add_edge(new_q0, q0, eps)
+    nfa.add_edge(f, new_f, eps)
+    nfa.add_edge(new_f, new_q0, eps)
+    nfa.set_initials({new_q0})
+    nfa.set_final(f, False)
+    nfa.set_final(new_f, True)
     return (nfa, new_q0, new_f)
 
 def repetition(nfa: Nfa, q0: int, f: int, m: int) -> tuple:
@@ -265,15 +266,15 @@ def repetition(nfa: Nfa, q0: int, f: int, m: int) -> tuple:
     assert m >= 0
     if m == 0:
         nfa = Nfa(1)
-        set_final(0, nfa)
+        nfa.set_final(0)
         (nfa, q0, f) = (nfa, 0, 0)
     elif m > 1:
-        eps = epsilon(nfa)
+        eps = nfa.epsilon
         ori = copy.deepcopy(nfa)
         q0_ori = q0
         f_ori = f
         for _ in range(m - 1):
-            set_final(f, nfa, False)
+            nfa.set_final(f, False)
             (nfa, q0, f) = concatenation(nfa, q0, f, ori, q0_ori, f_ori)
     return (nfa, q0, f)
 
@@ -317,10 +318,10 @@ def repetition_range(nfa: Nfa, q0: int, f: int, m: int, n: int) -> tuple:
         for i in range(n - m):
             (nfa, q0, f) = concatenation(nfa, q0, f, ori, q0_ori, f_ori)
             final_states.add(f)
-        eps = epsilon(nfa)
+        eps = nfa.epsilon
         for pred_f in final_states:
             if pred_f != f:
-                add_edge(pred_f, f, eps, nfa)
+                nfa.add_edge(pred_f, f, eps)
         return (nfa, q0, f)
 
 def bracket(chars: iter) -> tuple:
@@ -338,9 +339,9 @@ def bracket(chars: iter) -> tuple:
         ``f`` is its initial state.
     """
     nfa = Nfa(2)
-    set_final(1, nfa)
+    nfa.set_final(1)
     for a in chars:
-        add_edge(0, 1, a, nfa)
+        nfa.add_edge(0, 1, a)
     return (nfa, 0, 1)
 
 #-------------------------------------------------------------
@@ -512,11 +513,11 @@ def thompson_compile_nfa(expression: str, whole_alphabet: iter = None) -> Nfa:
     """
     if not expression:
         g = Nfa(1)
-        set_final(0, g)
+        g.set_final(0)
         return (g, 0, 0)
     if whole_alphabet is None:
         whole_alphabet = DEFAULT_ALPHABET
-    expression = list(tokenizer_re(expression, cat = "."))
+    expression = list(tokenizer_re(expression, cat="."))
 
     class ThompsonShuntingYardVisitor(DefaultShuntingYardVisitor):
         def __init__(self):

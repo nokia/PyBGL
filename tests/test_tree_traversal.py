@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from collections import defaultdict
-from pybgl.graph import DirectedGraph, Graph, add_edge
+from pybgl.graph import DirectedGraph, Graph
 from pybgl.graph_traversal import DefaultTreeTraversalVisitor, dfs_tree, bfs_tree
 from pybgl.property_map import ReadWritePropertyMap, make_assoc_property_map
 
@@ -21,7 +21,7 @@ class MyVisitor(DefaultTreeTraversalVisitor):
 def make_binary_tree(n = 10):
     g = DirectedGraph(n)
     for u in range(n - 1):
-        add_edge(int(u / 2), u + 1, g)
+        g.add_edge(int(u / 2), u + 1)
     return g
 
 def test_bfs_tree():

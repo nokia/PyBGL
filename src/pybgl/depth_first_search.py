@@ -5,7 +5,7 @@
 # https://github.com/nokia/pybgl
 
 from collections import deque, defaultdict
-from .graph import Graph, EdgeDescriptor, out_edges, target, vertices
+from .graph import Graph, EdgeDescriptor
 from .graph_traversal import WHITE, GRAY, BLACK
 from .property_map import ReadWritePropertyMap, make_assoc_property_map
 
@@ -141,19 +141,19 @@ def depth_first_search(
     vis.start_vertex(s, g)
     pmap_vcolor[s] = GRAY
     vis.discover_vertex(s, g)
-    u_edges = [e for e in out_edges(s, g) if if_push(e, g)]
+    u_edges = [e for e in g.out_edges(s) if if_push(e, g)]
     stack = deque([(s, 0, len(u_edges))])
 
     while stack:
         # Pop the current vertex u. Its (i-1)-th first out-edges have already
         # been visited. The out-degree of u is equal to n.
         (u, i, n) = stack.pop()
-        u_edges = [e for e in out_edges(u, g) if if_push(e, g)]
+        u_edges = [e for e in g.out_edges(u) if if_push(e, g)]
 
         while i != n:
             # e is the current edge.
             e = u_edges[i]
-            v = target(e, g)
+            v = g.target(e)
             vis.examine_edge(e, g)
             color_v = pmap_vcolor[v]
 
@@ -168,7 +168,7 @@ def depth_first_search(
                 u = v
                 pmap_vcolor[u] = GRAY
                 vis.discover_vertex(u, g)
-                u_edges = [e for e in out_edges(u, g) if if_push(e, g)]
+                u_edges = [e for e in g.out_edges(u) if if_push(e, g)]
                 i = 0
                 n = len(u_edges)
             else:
@@ -214,7 +214,7 @@ def depth_first_search_graph(
     if pmap_vcolor is None:
         map_vcolor = defaultdict(int)
         pmap_vcolor = make_assoc_property_map(map_vcolor)
-    for u in (sources if sources else vertices(g)):
+    for u in (sources if sources else g.vertices()):
         if pmap_vcolor[u] == WHITE:
             depth_first_search(u, g, pmap_vcolor, vis, if_push)
 

@@ -4,7 +4,7 @@
 # This file is part of the pybgl project.
 # https://github.com/nokia/pybgl
 
-from .trie import Trie, is_final
+from .trie import Trie
 from .parallel_breadth_first_search import (
     ParallelBreadthFirstSearchVisitor, parallel_breadth_first_search
 )
@@ -29,7 +29,7 @@ class TrieMatchingVisitor(ParallelBreadthFirstSearchVisitor):
         """
         Internal method, used to update :py:attr:`self.counters`.
         """
-        i = 1 * int(is_final(q1, g1)) + 2 * int(is_final(q2, g2))
+        i = 1 * int(g1.is_final(q1)) + 2 * int(g2.is_final(q2))
         self.counters[i] += 1
 
     def start_vertex(self, s1: int, g1: Trie, s2: int, g2: Trie):

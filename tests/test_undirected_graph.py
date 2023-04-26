@@ -154,4 +154,3 @@ def test_undirected_graph():
     assert out_degree(w, g) == 1
     assert in_degree(u, g) == 1
     assert in_degree(w, g) == 1
-

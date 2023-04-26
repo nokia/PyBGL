@@ -3,7 +3,7 @@
 
 from collections import defaultdict
 from pybgl.ipynb import in_ipynb
-from pybgl.graph import DirectedGraph, add_edge, source, target, vertices
+from pybgl.graph import DirectedGraph
 from pybgl.graph_dp import GraphDp
 from pybgl.graphviz import graph_to_html
 from pybgl.html import html
@@ -23,8 +23,8 @@ def edge_color(e, g, pmap_component, pmap_color, default_color = "black"):
         default_color: color returned if the color of the source and the
             target of e mismatch.
     """
-    u = source(e, g)
-    v = target(e, g)
+    u = g.source(e)
+    v = g.target(e)
     color_u = pmap_color[pmap_component[u]]
     color_v = pmap_color[pmap_component[v]]
     return color_u if color_u == color_v else default_color
@@ -59,14 +59,14 @@ def strong_components_to_html(g, pmap_color, pmap_component) -> str:
 def test_strong_components():
     # Create the graph
     g = DirectedGraph(7)
-    add_edge(0, 1, g)
-    add_edge(1, 2, g)
-    add_edge(2, 3, g)
-    add_edge(3, 1, g)
-    add_edge(3, 4, g)
-    add_edge(4, 5, g)
-    add_edge(5, 6, g)
-    add_edge(6, 4, g)
+    g.add_edge(0, 1)
+    g.add_edge(1, 2)
+    g.add_edge(2, 3)
+    g.add_edge(3, 1)
+    g.add_edge(3, 4)
+    g.add_edge(4, 5)
+    g.add_edge(5, 6)
+    g.add_edge(6, 4)
 
     # Find strong connected components
     map_component = defaultdict(lambda: None)

@@ -5,7 +5,7 @@
 # https://github.com/nokia/pybgl
 
 from copy import copy
-from .graph import Graph, edges, source, target, vertices
+from .graph import Graph
 from .graphviz import GraphvizStyle, enrich_kwargs, graphviz_type, to_dot
 
 JSON_GRAPH_FORMAT = """{
@@ -89,8 +89,8 @@ class GraphDp:
         """
         kwargs = enrich_kwargs(self.dpv, "dpv", **kwargs)
         kwargs = enrich_kwargs(self.dpe, "dpe", **kwargs)
-        kwargs = enrich_kwargs(self.dg,  "dg",  **kwargs)
-        kwargs = enrich_kwargs(self.dv,  "dv",  **kwargs)
+        kwargs = enrich_kwargs(self.dg, "dg", **kwargs)
+        kwargs = enrich_kwargs(self.dv, "dv", **kwargs)
         kwargs = enrich_kwargs(self.de,  "de",  **kwargs)
         kwargs = enrich_kwargs(self.extra_style, "extra_style", **kwargs)
         return to_dot(self.g, **kwargs)
@@ -110,8 +110,10 @@ class GraphDp:
             The corresponding JSON string.
         """
 
-        if vs is None: vs = vertices(self.g)
-        if es is None: es = edges(self.g)
+        if vs is None:
+            vs = self.g.vertices()
+        if es is None:
+            es = self.g.edges()
 
         return JSON_GRAPH_FORMAT % {
             "graph_type" : graphviz_type(self.g),
@@ -127,8 +129,8 @@ class GraphDp:
                 ]),
             "edges" : "[\n        %s\n    ]" % ", ".join([
                     JSON_EDGE_FORMAT % {
-                        "source" : source(e, self.g),
-                        "target" : target(e, self.g),
+                        "source" : self.g.source(e),
+                        "target" : self.g.target(e),
                         "attributes" : ",\n            ".join([
                             "\"%s\" : \"%s\"" % (k, pmap[e])
                             for k, pmap in self.dpe.items()

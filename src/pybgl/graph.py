@@ -182,11 +182,16 @@ class Graph:
         Raises:
             `KeyError` if ``u`` does not exist.
         """
-        # Remove in-edges related to u
+        # Remove in-edges
         for e in [e for e in edges(self)]:
             if u == target(e, self):
                 remove_edge(e, self)
-        # Remove u and its out-edges
+
+        # Remove out-edges
+        for e in [e for e in self.out_edges(u)]:
+            remove_edge(e, self)
+
+        # Remove u
         del self.adjacencies[u]
 
     def vertices(self) -> iter:
@@ -352,7 +357,7 @@ class Graph:
             ``(None, False)`` otherwise.
         """
         ret = (None, False)
-        candidates_edges = {e for e in out_edges(u, self) if target(e, self) == v}
+        candidates_edges = {e for e in self.out_edges(u) if self.target(e) == v}
         if len(candidates_edges) == 1:
             ret = (candidates_edges.pop(), True)
         return ret
@@ -375,7 +380,7 @@ class Graph:
             ``True`` if the graph has at least one vertex,
             ``False`` otherwise.
         """
-        for _ in vertices(self):
+        for _ in self.vertices():
             return True
         return False
 
@@ -387,7 +392,7 @@ class Graph:
             ``True`` if the graph has at least one edge,
             ``False`` otherwise.
         """
-        for _ in edges(self):
+        for _ in self.edges():
             return True
         return False
 
@@ -531,8 +536,8 @@ class UndirectedGraph(Graph):
         # source(e, g) and target(e, g) impose to returns (u, v)-like
         # EdgeDescriptors.
         return (
-            EdgeDescriptor(u, v, n) \
-            for v, s in self.adjacencies.get(u, dict()).items() \
+            EdgeDescriptor(u, v, n)
+            for v, s in self.adjacencies.get(u, dict()).items()
             for n in s
         )
 
@@ -544,8 +549,8 @@ class UndirectedGraph(Graph):
             e (EdgeDescriptor): The edge descriptor of the edge to be removed.
         """
         super().remove_edge(e)
-        u = source(e, self)
-        v = target(e, self)
+        u = self.source(e)
+        v = self.target(e)
         if u != v:
             # Remove the reverse adjacency
             n = e.m_distinguisher
@@ -577,20 +582,6 @@ class UndirectedGraph(Graph):
             for (v, s) in vs.items()
             for n in s if u <= v
         )
-
-    def remove_vertex(self, u: int):
-        """
-        Removes a vertex from this :py:class:`Graph` instance.
-
-        Args:
-            u (int): The vertex descriptor of the vertex to be removed.
-
-        Raises:
-            `KeyError` if ``u`` does not exist.
-        """
-        for e in [e for e in out_edges(u, self)]:
-            remove_edge(e, self)
-        del self.m_adjacencies[u]
 
 #-------------------------------------------------------------------
 # Common methods

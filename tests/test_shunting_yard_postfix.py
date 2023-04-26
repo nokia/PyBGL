@@ -8,7 +8,6 @@ from pybgl.shunting_yard_postfix import (
     shunting_yard_compute, shunting_yard_ast,
     tokenizer_re, tokenizer_alg
 )
-from pybgl.graph import num_vertices, num_edges
 from pybgl.ipynb import in_ipynb, ipynb_display_graph
 
 # class DebugShuntingYardVisitor(DefaultShuntingYardVisitor):
@@ -143,8 +142,8 @@ def test_rpn_deque_ast():
     ast = Ast()
     output = RpnDequeAst(map_operators=MAP_OPERATORS_RE, ast=ast)
     ret = shunting_yard_postfix(tokenized, MAP_OPERATORS_RE, output=output)
-    assert num_vertices(ast) == 11
-    assert num_edges(ast) == 10
+    assert ast.num_vertices() == 11
+    assert ast.num_edges() == 10
     [root] = ret
     assert root == 10
     from pybgl.graphviz import graph_to_html
@@ -153,6 +152,6 @@ def test_rpn_deque_ast():
 def test_shunting_yard_ast():
     tokenized = tokenizer_re("(a?b)*?c+d")
     (ast, root) = shunting_yard_ast(tokenized, MAP_OPERATORS_RE)
-    assert num_vertices(ast) == 11
-    assert num_edges(ast) == 10
+    assert ast.num_vertices() == 11
+    assert ast.num_edges() == 10
     assert root == 10

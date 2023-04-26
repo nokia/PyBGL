@@ -18,13 +18,13 @@ def make_second_nfa():
 def test_moore_determination():
     nfa = make_nfa()
     w = "babbbababcccccd"
-    assert accepts(w, nfa)
+    assert nfa.accepts(w)
 
     for complete in [True, False]:
         dfa = moore_determination(nfa, complete=complete)
         if in_ipynb():
             ipynb_display_graph(dfa)
-        assert accepts(w, dfa), f"accepts({w}, dfa) = {accepts(w, dfa)}"
+        assert dfa.accepts(w), f"dfa.accepts({w}) = {dfa.accepts(w)}"
 
     nfa = make_second_nfa()
     w = ""
@@ -34,4 +34,4 @@ def test_moore_determination():
         dfa = moore_determination(nfa, complete=complete)
         if in_ipynb():
             ipynb_display_graph(dfa)
-        assert accepts(w, dfa), f"accepts({w}, dfa) = {accepts(w, dfa)}"
+        assert dfa.accepts(w), f"dfa.accepts({w}) = {dfa.accepts(w)}"

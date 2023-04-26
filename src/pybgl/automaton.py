@@ -4,11 +4,11 @@
 # This file is part of the pybgl project.
 # https://github.com/nokia/pybgl
 
-from collections        import defaultdict
+from collections import defaultdict
 
 # NB: pybgl.graph.edge and pybgl.graph.add_edge are overloaded by this file because
 # they don't have the same signature.
-from .graph        import *
+from .graph import *
 from .property_map import ReadPropertyMap, make_assoc_property_map, make_func_property_map
 
 BOTTOM = None
@@ -140,8 +140,8 @@ class Automaton(DirectedGraph):
         Args:
             e (EdgeDescriptor): The edge descriptor of the transition to be removed.
         """
-        q = source(e, self)
-        a = label(e, self)
+        q = self.source(e)
+        a = self.label(e)
         adj_q = self.m_adjacencies.get(q)
         if adj_q:
             if a in adj_q.keys():
@@ -173,7 +173,7 @@ class Automaton(DirectedGraph):
         """
         return {
             a
-            for q in vertices(self)
+            for q in self.vertices()
             for a in self.m_adjacencies.get(q, dict()).keys()
         }
 
@@ -186,7 +186,7 @@ class Automaton(DirectedGraph):
             An iterator over the transitions.
         """
         return (
-            EdgeDescriptor(q, r, a) \
+            EdgeDescriptor(q, r, a)
             for (q, adj_q) in self.m_adjacencies.items()
             for (a, r) in adj_q.items()
         )
@@ -280,7 +280,11 @@ class Automaton(DirectedGraph):
             The vertex descriptors of the final state if set,
             ``None`` otherwise.
         """
-        return {q for q in vertices(self) if is_final(q, self)}
+        return {
+            q
+            for q in self.vertices()
+            if self.is_final(q)
+        }
 
     def to_dot(self, **kwargs) -> str:
         """
@@ -318,7 +322,7 @@ class Automaton(DirectedGraph):
         """
         for a in w:
             if q is BOTTOM: return q
-            q = delta(q, a, self)
+            q = self.delta(q, a)
         return q
 
     def accepts(self, w: str) -> bool:
@@ -334,29 +338,29 @@ class Automaton(DirectedGraph):
             ``True`` if the automaton accepts ``w``
             ``False`` otherwise.
         """
-        q0 = initial(self)
-        q = delta_word(q0, w, self)
-        return q is not BOTTOM and is_final(q, self)
+        q0 = self.initial()
+        q = self.delta_word(q0, w)
+        return q is not BOTTOM and self.is_final(q)
 
-    # TODO should be a class method
-    def is_finite(self) -> bool:
+    @staticmethod
+    def is_finite() -> bool:
         """
         Tests whether this :py:class:`Automaton` instance is finite or not.
 
         Returns:
             ``True``.
         """
-        return True # By design of Automaton.
+        return True  # By design of Automaton.
 
-    # TODO should be a class method
-    def is_deterministic(self) -> bool:
+    @staticmethod
+    def is_deterministic() -> bool:
         """
         Tests whether this :py:class:`Automaton` instance is deterministic or not.
 
         Returns:
             ``True``.
         """
-        return True # By design of Automaton.
+        return True  # By design of Automaton.
 
     def is_complete(self) -> bool:
         """
@@ -368,14 +372,55 @@ class Automaton(DirectedGraph):
             ``True`` if this :py:class:`Automaton` is complete,
             ``False`` otherwise.
         """
-        alpha = alphabet(self)
-        for q in vertices(self):
-            if sigma(q, self) != alpha:
+        alpha = self.alphabet()
+        for q in self.vertices():
+            if self.sigma(q) != alpha:
                 return False
         return True
 
+    def delta_best_effort(self, w: str) -> tuple:
+        """
+        Transition function, allowing to move from the initial state
+        to the state reached by consuming each character of a word ``w``,
+        while possible.
+        See also :py:meth:`Automaton.delta_word`.
+
+        Args:
+            w (str): The word.
+
+        Returns:
+            The reached state in best effort.
+        """
+        q = self.initial()
+        if not w:
+            return (q, 0)
+        for (i, a) in enumerate(w):
+            r = self.delta(q, a)
+            if r is BOTTOM:
+                return (q, i)
+            q = r
+        return (q, i + 1)
+
+    def automaton_insert_string(self, w: str) -> int:
+        """
+        Updates this :py:class:`Automaton` instance by adding states
+        and transition so that it accepts a word ``w``.
+
+        Args:
+            w (str): The word.
+
+        Returns:
+            The reached state in best effort.
+        """
+        (q, i) = self.delta_best_effort(w)
+        for a in w[i:]:
+            r = self.add_vertex()
+            self.add_edge(q, r, a)
+            q = r
+        self.set_final(q)
+
 #------------------------------------------------------------------
-# Methods wrappers. This is to reuse the same  naming as in the BGL
+# Methods wrappers. This is to reuse the same naming as in the BGL
 # but in python.
 #------------------------------------------------------------------
 
@@ -413,7 +458,8 @@ def accepts_debug(w: str, g: Automaton) -> bool:
     print(f"w = {w} q0 = {q}")
     for (i, a) in enumerate(w):
         print(f"w[{i}] = {a}, {q} -> {delta(q, a, g)}")
-        if q is BOTTOM: return False
+        if q is BOTTOM:
+            return False
         q = delta(q, a, g)
     return is_final(q, g)
 
@@ -722,7 +768,6 @@ def make_automaton(
             set_final(q, g)
     return g
 
-# TODO move to methods
 def delta_best_effort(g: Automaton, w: str) -> tuple:
     """
     Transition function, allowing to move from the initial state
@@ -737,19 +782,9 @@ def delta_best_effort(g: Automaton, w: str) -> tuple:
     Returns:
         The reached state in best effort.
     """
-    q = initial(g)
-    if not w:
-        return (q, 0)
-    for (i, a) in enumerate(w):
-        r = delta(q, a, g)
-        if r is BOTTOM:
-            return (q, i)
-        q = r
-    return (q, i + 1)
+    return g.delta_best_effort(w)
 
-# TODO swap parameters
-# TODO move to methods
-def automaton_insert_string(g: Automaton, w: str):
+def automaton_insert_string(g: Automaton, w: str) -> int:
     """
     Updates an :py:class:`Automaton` instance by adding states
     and transition so that it accepts a word ``w``.
@@ -761,9 +796,4 @@ def automaton_insert_string(g: Automaton, w: str):
     Returns:
         The reached state in best effort.
     """
-    (q, i) = delta_best_effort(g, w)
-    for a in w[i:]:
-        r = add_vertex(g)
-        add_edge(q, r, a, g)
-        q = r
-    set_final(q, g)
+    g.automaton_insert_string(w)

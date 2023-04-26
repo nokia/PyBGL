@@ -1,7 +1,10 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-from pybgl.levenshtein_distance import *
+from pybgl.levenshtein_distance import (
+    levenshtein_distance,
+    levenshtein_distance_naive
+)
 
 WORDS = [
     "book", "books", "cake",

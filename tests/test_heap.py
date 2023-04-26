@@ -45,13 +45,15 @@ def test_heap_empty():
     assert list(h1) == list()
     assert not h1
 
-def test_heap_le():
+def test_comparable_le():
     le = lambda a, b: a <= b
     values = [2, 1, 1, 3]
     comparables = [Comparable(x, le) for x in values]
     heapq.heapify(comparables)
     assert [x.obj for x in comparables] == [1, 1, 2, 3]
 
+def test_heap_le():
+    le = lambda a, b: a <= b
     h = Heap([2, 1, 1, 3], lambda u: Comparable(u, le))
     print(h)
     assert h
@@ -71,13 +73,15 @@ def test_heap_le():
     assert y == 1
     assert list(h) == [1, 2, 3, 4]
 
-def test_heap_ge():
+def test_comparable_ge():
     ge = lambda a, b: a >= b
     values = [2, 1, 1, 3]
     comparables = [Comparable(x, ge) for x in values]
     heapq.heapify(comparables)
     assert [x.obj for x in comparables] == [3, 2, 1, 1]
 
+def test_heap_ge():
+    ge = lambda a, b: a >= b
     h = Heap([2, 1, 1, 3], lambda u: Comparable(u, ge))
     print(h)
     assert h

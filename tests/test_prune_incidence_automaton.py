@@ -1,9 +1,7 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-from pybgl.incidence_automaton import (
-    edges, make_incidence_automaton, source, target, vertices
-)
+from pybgl.incidence_automaton import make_incidence_automaton
 from pybgl.prune_incidence_automaton import prune_incidence_automaton
 from pybgl.property_map import make_func_property_map
 
@@ -19,9 +17,9 @@ G1 = make_incidence_automaton(
 )
 
 def test_prune_incidence_automaton():
-    assert len(set(edges(G1))) == 8
+    assert len(set(G1.edges())) == 8
     prune_incidence_automaton(G1)
-    assert set(vertices(G1)) == {0, 1, 2}
+    assert set(G1.vertices()) == {0, 1, 2}
     assert set(
-        (source(e, G1), target(e, G1)) for e in edges(G1)
+        (G1.source(e), G1.target(e)) for e in G1.edges()
     ) == {(0, 1), (1, 2), (0, 0), (2, 1), (1, 1)}

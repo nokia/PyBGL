@@ -5,8 +5,8 @@ from pybgl.automaton import Automaton
 from pybgl.graphviz import graph_to_html
 from pybgl.html import html
 from pybgl.ipynb import in_ipynb
-from pybgl.trie import is_final, num_vertices, vertices
 from pybgl.suffix_trie import BOTTOM, factors, make_suffix_trie
+from pybgl.trie import Trie
 
 def test_factors():
     d = {
@@ -26,28 +26,22 @@ def test_factors():
         obtained = {factor for factor in factors(w)}
         assert expected == obtained
 
-def test_make_suffix_tree():
-    t = make_suffix_trie("ananas")
+def check(word, expected_num_vertices, max_len=None):
+    t = make_suffix_trie(word, max_len=max_len)
     if in_ipynb():
         html(graph_to_html(t))
-    assert num_vertices(t) == 16
-    for q in vertices(t):
-        assert is_final(q, t)
-    assert not is_final(BOTTOM, t)
+    assert t.num_vertices() == expected_num_vertices
+    for q in t.vertices():
+        assert t.is_final(q)
+    assert not t.is_final(BOTTOM)
+
+def test_make_suffix_tree():
+    check("ananas", 16)
 
 def test_make_suffix_tree_max_len():
-    t = make_suffix_trie("ananas", max_len=3)
-    if in_ipynb():
-        html(graph_to_html(t))
-    assert num_vertices(t) == 10
-    for q in vertices(t):
-        assert is_final(q, t)
-    assert not is_final(BOTTOM, t)
+    check("ananas", 10, max_len=3)
 
 def test_max_suffix_tree_g():
-    t = make_suffix_trie("ananas")
-    if in_ipynb(): html(graph_to_html(t))
-    assert num_vertices(t) == 16
-    for q in vertices(t):
-        assert is_final(q, t)
-    assert not is_final(BOTTOM, t)
+    g = Trie()
+    make_suffix_trie("ananas", g=g)
+    assert g.num_vertices() == 16

@@ -8,7 +8,7 @@ import sys
 from collections import defaultdict, deque
 from .algebra import INFINITY
 from .depth_first_search import DefaultDepthFirstSearchVisitor, depth_first_search_graph
-from .graph import DirectedGraph, out_edges, target, vertices
+from .graph import DirectedGraph
 from .graph_traversal import WHITE
 from .property_map import ReadWritePropertyMap, make_assoc_property_map
 
@@ -58,14 +58,17 @@ class TarjanVisitor(DefaultDepthFirstSearchVisitor):
             ``u`` if ``u`` has been discovered before ``v``,
             ``v`` otherwise.
         """
-        return u if self.m_pmap_discover_time[u] < self.m_pmap_discover_time[v] else v
+        return (
+            u if self.m_pmap_discover_time[u] < self.m_pmap_discover_time[v]
+            else v
+        )
 
     def finish_vertex(self, u: int, g: DirectedGraph):
         """
         Overloads the :py:meth:`DefaultDepthFirstSearchVisitor.finish_vertex` method.
         """
-        for e in out_edges(u, g):
-            v = target(e, g)
+        for e in g.out_edges(u):
+            v = g.target(e)
             if self.m_pmap_component[v] == INFINITY:
                 # u is attached to the "lowest" root among the root of u and v
                 self.m_pmap_root[u] = self.discover_min(
@@ -79,7 +82,8 @@ class TarjanVisitor(DefaultDepthFirstSearchVisitor):
                 v = self.m_stack.popleft()
                 self.m_pmap_component[v] = self.total
                 self.m_pmap_root[v] = u
-                if u == v: break
+                if u == v:
+                    break
             self.m_total += 1
 
 def strong_components(g: DirectedGraph, pmap_component: ReadWritePropertyMap) -> int:
@@ -124,5 +128,5 @@ def strong_components(g: DirectedGraph, pmap_component: ReadWritePropertyMap) ->
         stack
     )
 
-    depth_first_search_graph(g, vertices(g), pmap_vcolor, vis, None)
+    depth_first_search_graph(g, g.vertices(), pmap_vcolor, vis, None)
     return vis.total

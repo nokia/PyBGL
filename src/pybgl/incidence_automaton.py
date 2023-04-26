@@ -87,16 +87,16 @@ class IncidenceAutomaton(Automaton):
 
         # In-edges: (p, q) edges
         if q in self.in_adjacencies.keys():
-            for e in in_edges(q, self):
-                p = source(e, self)
-                a = label(e, self)
+            for e in self.in_edges(q):
+                p = self.source(e)
+                a = self.label(e)
                 del self.adjacencies[p][a]
             del self.in_adjacencies[q]
 
         # Out-edges: (q, r) edges
         if q in self.adjacencies.keys():
-            for e in out_edges(q, self):
-                r = target(e, self)
+            for e in self.out_edges(q):
+                r = self.target(e)
                 if q in self.in_adjacencies[r].keys():
                     # This test is required to cope with parallel (q, r) edges.
                     del self.in_adjacencies[r][q]
@@ -114,9 +114,9 @@ class IncidenceAutomaton(Automaton):
         super().remove_edge(e)
 
         # Clean self.in_adjacencies
-        q = source(e, self)
-        r = target(e, self)
-        a = label(e, self)
+        q = self.source(e)
+        r = self.target(e)
+        a = self.label(e)
         in_adjs_r = self.in_adjacencies[r]
         s = in_adjs_r[q]
         if a in s:
@@ -159,5 +159,5 @@ def make_incidence_automaton(
     """
     return make_automaton(
         transitions, q0n, pmap_vfinal,
-        AutomatonClass = IncidenceAutomaton
+        AutomatonClass=IncidenceAutomaton
     )

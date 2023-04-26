@@ -3,9 +3,7 @@
 
 from pybgl.property_map import make_func_property_map
 from pybgl.hopcroft_minimize import hopcroft_minimize
-from pybgl.incidence_automaton import (
-    make_incidence_automaton, num_vertices, num_edges
-)
+from pybgl.incidence_automaton import make_incidence_automaton
 
 G6 = make_incidence_automaton(
     [
@@ -67,14 +65,14 @@ G9 = make_incidence_automaton(
 
 def test_automaton_hopcroft_minimize():
     min_G6 = hopcroft_minimize(G6)
-    assert num_vertices(min_G6) == 4
-    assert num_edges(min_G6) == 8
+    assert min_G6.num_vertices() == 4
+    assert min_G6.num_edges() == 8
     min_G7 = hopcroft_minimize(G7)
-    assert num_vertices(min_G7) == 3
-    assert num_edges(min_G7) == 6
+    assert min_G7.num_vertices() == 3
+    assert min_G7.num_edges() == 6
     min_G8 = hopcroft_minimize(G8)
-    assert num_vertices(min_G8) == 2
-    assert num_edges(min_G8) == 2
+    assert min_G8.num_vertices() == 2
+    assert min_G8.num_edges() == 2
     min_G9 = hopcroft_minimize(G9)
-    assert num_vertices(min_G9) == 13
-    assert num_edges(min_G9) == 13
+    assert min_G9.num_vertices() == 13
+    assert min_G9.num_edges() == 13

@@ -3,7 +3,7 @@
 #
 
 from collections import defaultdict
-from .graph import Graph, EdgeDescriptor, add_vertex, add_edge, out_edges, source, target
+from .graph import Graph, EdgeDescriptor
 from .depth_first_search import depth_first_search
 from .property_map import (
     ReadWritePropertyMap, ReadPropertyMap,
@@ -75,7 +75,7 @@ class DepthFirstSearchCopyVisitor(DepthFirstSearchExtractVisitor):
             u (int): The vertex descriptor of the duplicated node.
             g (Graph): The input graph.
         """
-        u_dup = add_vertex(self.m_g_dup)
+        u_dup = self.m_g_dup.add_vertex()
         self.m_pmap_vertices[u] = u_dup
         self.m_dup_vertices.add(u)
         if self.m_callback_dup_vertex:
@@ -92,14 +92,14 @@ class DepthFirstSearchCopyVisitor(DepthFirstSearchExtractVisitor):
         """
         Overloads the :py:meth:`DepthFirstSearchExtractVisitor.examine_edge` method.
         """
-        u = source(e, g)
-        v = target(e, g)
+        u = g.source(e)
+        v = g.target(e)
         u_dup = self.m_pmap_vertices[u]
         v_dup = (
             self.m_pmap_vertices[v] if v in self.m_dup_vertices
             else self.dup_vertex(v, g)
         )
-        (e_dup, _) = add_edge(u_dup, v_dup, self.m_g_dup)
+        (e_dup, _) = self.m_g_dup.add_edge(u_dup, v_dup)
         if self.m_pmap_edges:
             self.m_pmap_edges[e] = e_dup
         if self.m_callback_dup_edge:
@@ -167,6 +167,6 @@ def graph_copy(
     # Copy g to g_copy according to pmap_erelevant using a DFS from s.
     depth_first_search(
         s, g, pmap_vcolor, vis,
-        if_push = lambda e, g: pmap_erelevant[e] and pmap_vrelevant[target(e, g)]
+        if_push = lambda e, g: pmap_erelevant[e] and pmap_vrelevant[g.target(e)]
     )
 

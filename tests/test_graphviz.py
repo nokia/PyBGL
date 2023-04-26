@@ -1,9 +1,16 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-from pybgl.graph import *
+from pybgl.automaton import Automaton
+from pybgl.graph import Graph, DirectedGraph, UndirectedGraph
 from pybgl.graph_dp import GraphDp
-from pybgl.graphviz import graphviz_escape_char, graphviz_escape_html, graph_to_html, read_graphviz
+from pybgl.graphviz import (
+    GraphvizStyle,
+    graphviz_escape_char,
+    graphviz_escape_html,
+    graph_to_html,
+    read_graphviz
+)
 from pybgl.html import html
 from pybgl.ipynb import in_ipynb, ipynb_display_graph
 
@@ -21,9 +28,8 @@ def test_graphviz_escape_char():
     assert not invalid_escape
 
 def test_graph_to_html_with_weird_chars():
-    from pybgl.automaton import Automaton, add_edge
     g = Automaton(2)
-    add_edge(0, 1, WEIRD_CHARS, g)
+    g.add_edge(0, 1, WEIRD_CHARS)
     graph_to_html(g)
     if in_ipynb():
         ipynb_display_graph(g)
@@ -44,17 +50,17 @@ def test_graphviz_escape_html():
 
 def test_graph_to_html():
     g = DirectedGraph(2)
-    (e, _) = add_edge(0, 1, g)
+    (e, _) = g.add_edge(0, 1)
     shtml = graph_to_html(g)
     if in_ipynb():
         ipynb_display_graph(g)
 
 def make_graph(G):
     g = G(10)
-    for u in vertices(g):
-        for v in vertices(g):
+    for u in g.vertices():
+        for v in g.vertices():
             if u < v < u + 3:
-                add_edge(u, v, g)
+                g.add_edge(u, v)
     return g
 
 def test_graph_to_html_with_pmaps():
@@ -64,14 +70,14 @@ def test_graph_to_html_with_pmaps():
     GraphvizStyle.set_bg_color("transparent")
     display_graph = ipynb_display_graph
 
-    from pybgl.graph_dp     import GraphDp
+    from pybgl.graph_dp import GraphDp
     from pybgl.property_map import make_func_property_map
 
     def vertex_filter(u):
         return u < 5
 
     def edge_filter(e, g, vertex_filter):
-        return vertex_filter(source(e, g)) and vertex_filter(target(e, g))
+        return vertex_filter(g.source(e)) and vertex_filter(g.target(e))
 
     for G in [DirectedGraph, UndirectedGraph]:
         html(str(G))
@@ -87,17 +93,17 @@ def test_graph_to_html_with_pmaps():
         }
         dpe = {
             "fontcolor": make_func_property_map(
-                lambda e: "blue" if source(e, g) % 2 else "red"
+                lambda e: "blue" if g.source(e) % 2 else "red"
             ),
             "label": make_func_property_map(
-                lambda e: f"({source(e, g)}, {target(e, g)})"
+                lambda e: f"({g.source(e)}, {g.target(e)})"
             )
         }
 
         # Choose view
         # Omit vs (resp. es) to iterate over all vertices (resp. edges)
-        vs = [u for u in vertices(g) if vertex_filter(u)]
-        es = [e for e in edges(g)    if edge_filter(e, g, vertex_filter)]
+        vs = [u for u in g.vertices() if vertex_filter(u)]
+        es = [e for e in g.edges() if edge_filter(e, g, vertex_filter)]
 
         # Method1: call helper (ipynb_display_graph, graph_to_html)
         shtml = graph_to_html(g, dpv=dpv, dpe=dpe, dv=dv, de=de, vs=vs, es=es)
@@ -121,11 +127,11 @@ def test_graph_to_html_with_pmaps():
             ipynb_display_graph(gdp, dpv=dpv, dpe=dpe, dv=dv, de=de, vs=vs, es=es)
 
 def test_graph_to_html_with_html_sequences():
-    from collections        import defaultdict
+    from collections import defaultdict
     from pybgl.property_map import make_assoc_property_map
 
     g = DirectedGraph(2)
-    (e, _) = add_edge(0, 1, g)
+    (e, _) = g.add_edge(0, 1)
     pmap_vlabel = make_assoc_property_map(defaultdict(str))
     pmap_elabel = make_assoc_property_map(defaultdict(str))
     gdp = GraphDp(
@@ -161,8 +167,8 @@ def test_read_graphviz_simple():
     read_graphviz(dot.splitlines(), g)
     if in_ipynb():
         ipynb_display_graph(g)
-    assert num_vertices(g) == 3
-    assert num_edges(g) == 1
+    assert g.num_vertices() == 3
+    assert g.num_edges() == 1
 
 def test_read_graphviz_custom():
     from collections import defaultdict
@@ -198,7 +204,8 @@ def test_read_graphviz_custom():
         make_assoc_property_map(map_elabel)
     )
     read_graphviz(dot.splitlines(), g, vis)
-    if in_ipynb(): ipynb_display_graph(g)
+    if in_ipynb():
+        ipynb_display_graph(g)
     assert map_vlabel == {0: "red", 1: "green", 2: "blue"}, map_vlabel
-    e_01 = next(iter(edges(g)))
+    e_01 = next(iter(g.edges()))
     assert map_elabel == {e_01: "my_label"}, map_vlabel

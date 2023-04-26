@@ -4,7 +4,7 @@
 from pybgl.html import html
 from pybgl.ipynb import in_ipynb
 from pybgl.graphviz import graph_to_html
-from pybgl.trie import Trie, finals, num_vertices
+from pybgl.trie import Trie
 from pybgl.digital_sequence import DigitalSequence
 
 def make_t1():
@@ -18,7 +18,7 @@ def test_trie_string():
     t1 = make_t1()
     if in_ipynb():
         html(graph_to_html(t1))
-    assert num_vertices(t1) == 17
+    assert t1.num_vertices() == 17
 
 def make_t2():
     t2 = Trie()
@@ -30,7 +30,7 @@ def test_trie_digital_sequence():
     t2 = make_t2()
     if in_ipynb():
         html(graph_to_html(t2))
-    assert num_vertices(t2) == 12
+    assert t2.num_vertices() == 12
 
 def test_trie_trie():
     t1 = make_t1()
@@ -38,14 +38,14 @@ def test_trie_trie():
     t1.insert(t2)
     if in_ipynb():
         html(graph_to_html(t1))
-    assert num_vertices(t1) == 26
-    assert num_vertices(t2) == 12
+    assert t1.num_vertices() == 26
+    assert t2.num_vertices() == 12
 
 def test_included_insertions():
     t3 = Trie()
     t3.insert("aaa")
-    assert {q for q in finals(t3)} == {3}
+    assert {q for q in t3.finals()} == {3}
     t3.insert("aa")
-    assert {q for q in finals(t3)} == {2, 3}
+    assert {q for q in t3.finals()} == {2, 3}
     t3.insert("")
-    assert {q for q in finals(t3)} == {0, 2, 3}
+    assert {q for q in t3.finals()} == {0, 2, 3}

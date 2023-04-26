@@ -1,7 +1,7 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-from pybgl.lcs_distance import *
+from pybgl.lcs_distance import lcs_distance, lcs_distance_naive
 
 WORDS = [
     "book", "books", "cake",

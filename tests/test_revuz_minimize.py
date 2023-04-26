@@ -1,31 +1,39 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
+from collections import defaultdict
 from pybgl.graphviz import graph_to_html
 from pybgl.html import beside, html
-from pybgl.incidence_automaton import make_incidence_automaton
-from pybgl.incidence_node_automaton import *
+from pybgl.incidence_automaton import (
+    IncidenceAutomaton,
+    make_incidence_automaton
+)
+from pybgl.incidence_node_automaton import make_incidence_node_automaton
 from pybgl.ipynb import in_ipynb
-from pybgl.revuz_minimize import *
+from pybgl.property_map import (
+    make_assoc_property_map,
+    make_func_property_map
+)
+from pybgl.revuz_minimize import revuz_height, revuz_minimize
 
 # Internals
 
 # class DebugRevuzMinimizeVisitor(DefaultRevuzMinimizeVisitor):
-#     def merging_states(self, q1: int, q2: int, g: IncidenceNodeAutomaton):
+#     def merging_states(self, q1: int, q2: int, g: IncidenceAutomaton):
 #         print("merging_states(%s, %s)" % (q1, q2))
 #
-#     def move_transition(self, e_old: EdgeDescriptor, e_new: EdgeDescriptor, g: IncidenceNodeAutomaton):
+#     def move_transition(self, e_old: EdgeDescriptor, e_new: EdgeDescriptor, g: IncidenceAutomaton):
 #         print("move_transition(%s, %s)" % (e_old, e_new))
 #
-#     def remove_vertex(self, u: int, g: IncidenceNodeAutomaton):
+#     def remove_vertex(self, u: int, g: IncidenceAutomaton):
 #         print("remove_vertex(%s)" % (u))
 #
-#     def states_merged(self, q1: int, q2: int, g: IncidenceNodeAutomaton):
+#     def states_merged(self, q1: int, q2: int, g: IncidenceAutomaton):
 #         print("states_merged(%s, %s)" % (q1, q2))
 
 
 def check_graph(g: IncidenceAutomaton, e_expected: set):
-    e_obtained = {(source(e, g), target(e, g)) for e in edges(g)}
+    e_obtained = {(g.source(e), g.target(e)) for e in g.edges()}
     assert e_obtained == e_expected, \
         f"""
         Invalid edges:

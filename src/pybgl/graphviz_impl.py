@@ -57,9 +57,9 @@ class GraphvizStyle(metaclass=Singleton):
                 :py:func:`html_to_graphviz`.
         """
         GraphvizStyle.graph["fontcolor"] = color
-        GraphvizStyle.node["color"]      = color
+        GraphvizStyle.node["color"] = color
         GraphvizStyle.node["fontcolor"]  = color
-        GraphvizStyle.edge["color"]      = color
+        GraphvizStyle.edge["color"] = color
         GraphvizStyle.edge["fontcolor"]  = color
 
     @staticmethod
@@ -103,8 +103,8 @@ class GraphvizStyle(metaclass=Singleton):
         return "; ".join(
             [
                 GraphvizStyle.attributes_to_dot("graph", GraphvizStyle.graph),
-                GraphvizStyle.attributes_to_dot("node",  GraphvizStyle.node),
-                GraphvizStyle.attributes_to_dot("edge",  GraphvizStyle.edge)
+                GraphvizStyle.attributes_to_dot("node", GraphvizStyle.node),
+                GraphvizStyle.attributes_to_dot("edge", GraphvizStyle.edge)
             ] + GraphvizStyle.extra_style
         )
 
@@ -291,9 +291,10 @@ def graphviz_dx_to_dot(prefix: str, dx: dict) -> str:
 
 def edge_to_graphviz(
     e,
-    g, dpe: dict = None,
-    source: callable = None,
-    target: callable = None,
+    g,
+    dpe: dict = None,
+    source: callable = None,  # TODO to remove
+    target: callable = None,  # TODO to remove
     is_directed: bool = None,
     vertex_to_str: callable = None
 ) -> str:

@@ -8,7 +8,7 @@ import re, sys
 
 from html.parser import HTMLParser
 from subprocess import Popen, PIPE
-from .graph import Graph, add_vertex, add_edge, EdgeDescriptor
+from .graph import Graph, EdgeDescriptor
 from .graphviz_impl import *
 
 #------------------------------------------------------------------
@@ -17,7 +17,7 @@ from .graphviz_impl import *
 
 class GraphvizOptsParser(HTMLParser):
     """
-    Implementation details for the :py:class:`ReadGraphvizVisitor` class.
+    Implementation details for the: py:class:`ReadGraphvizVisitor` class.
     used to parse the options related to a vertex or an edge.
     """
     def __init__(self):
@@ -41,7 +41,7 @@ class GraphvizOptsParser(HTMLParser):
 
 class GraphvizVisitor():
     """
-    Base of the :py:class:`GraphvizVisitor` class.
+    Base of the: py:class:`GraphvizVisitor` class.
     """
     def on_vertex(self, line: str, u: int, opts: str):
         pass
@@ -52,9 +52,9 @@ class GraphvizVisitor():
 
 class ReadGraphvizVisitor(GraphvizVisitor):
     """
-    The :py:class:`ReadGraphvizVisitor` is used to implement
-    the :py:func:`read_graphviz` function. It is used to
-    initialize a :py:class:`Graph` instance from a
+    The: py:class:`ReadGraphvizVisitor` is used to implement
+    the: py:func:`read_graphviz` function. It is used to
+    initialize a: py:class:`Graph` instance from a
     Graphviz file.
     """
     def __init__(self, g: Graph):
@@ -75,7 +75,7 @@ class ReadGraphvizVisitor(GraphvizVisitor):
         pass
 
     def on_vertex(self, line: str, u_alias: int, opts: str) -> int:
-        u = add_vertex(self.m_g)
+        u = self.m_g.add_vertex()
         self.m_aliases[u_alias] = u
         parser = GraphvizOptsParser()
         parser.feed(opts)
@@ -86,7 +86,7 @@ class ReadGraphvizVisitor(GraphvizVisitor):
     def on_edge(self, line: str, u_alias: int, v_alias: int, opts: str) -> EdgeDescriptor:
         u = self.m_aliases[u_alias]
         v = self.m_aliases[v_alias]
-        (e, added) = add_edge(u, v, self.m_g)
+        (e, added) = self.m_g.add_edge(u, v)
         assert added
         parser = GraphvizOptsParser()
         parser.feed(opts)
@@ -96,7 +96,7 @@ class ReadGraphvizVisitor(GraphvizVisitor):
 
 PATTERN_SPACE = "\\s*"
 PATTERN_VERTEX_ID = "([0-9]+)"
-PATTERN_EDGE_CONNECTOR = "->" #TODO manage -- for undirected graphs
+PATTERN_EDGE_CONNECTOR = "->" # TODO manage -- for undirected graphs
 PATTERN_OPTS = "(\\[(.*)\\])?"
 PATTERN_LINE_VERTEX = PATTERN_SPACE.join([PATTERN_VERTEX_ID, PATTERN_OPTS, ";"])
 PATTERN_LINE_EDGE = PATTERN_SPACE.join([
@@ -108,7 +108,7 @@ RE_GRAPHVIZ_SVG = re.compile(".*(<svg.*>.*</svg>).*")
 RE_LINE_VERTEX = re.compile(PATTERN_LINE_VERTEX)
 RE_LINE_EDGE = re.compile(PATTERN_LINE_EDGE)
 
-def read_graphviz(iterable, g :Graph, vis :ReadGraphvizVisitor = None):
+def read_graphviz(iterable, g: Graph, vis: ReadGraphvizVisitor = None):
     """
     Read an iterable where each element is a line of a graphviz string to
     extract a graph, but not its attributes. See read_graphviz_dp if needed.
@@ -120,11 +120,11 @@ def read_graphviz(iterable, g :Graph, vis :ReadGraphvizVisitor = None):
     - The vertices are described in the dot file before the edges
     - The vertex/edge attributes are not too weird strings
 
-    See the :py:func:`read_graphviz_dp` function to load Graphviz styles.
+    See the: py:func:`read_graphviz_dp` function to load Graphviz styles.
 
     Args:
         iterable: The input Graphviz lines (e.g. my_file.readlines() or my_str.splitlines())
-        g (Graph): Pass an empty :py:class:`DirectedGraph` or :py:class:`UndirectedGraph`
+        g (Graph): Pass an empty: py:class:`DirectedGraph` or: py:class:`UndirectedGraph`
             instance.
     """
     if not vis:
@@ -147,9 +147,9 @@ def read_graphviz(iterable, g :Graph, vis :ReadGraphvizVisitor = None):
 
 class ReadGraphvizDpVisitor(ReadGraphvizVisitor):
     """
-    The :py:class:`ReadGraphvizDpVisitor` is used to implement
-    the :py:func:`read_graphviz_dp` function. It is used to
-    initialize a :py:class:`Graph` instance from a
+    The: py:class:`ReadGraphvizDpVisitor` is used to implement
+    the: py:func:`read_graphviz_dp` function. It is used to
+    initialize a: py:class:`Graph` instance from a
     Graphviz file.
     """
     def __init__(self, g, dpv: dict, dpe: dict):
@@ -297,7 +297,7 @@ def graph_to_html(g, engine: str = "dot", **kwargs) -> str:
     Args:
         g (Graph): The input graph.
         engine (str): A graphviz engine (e.g. "dot", "fdp", "neato", ...).
-        **kwargs (dict): See the :py:meth:`Graph.to_dot` method.
+        **kwargs (dict): See the: py:meth:`Graph.to_dot` method.
 
     Returns:
         The corresponding HTML string.

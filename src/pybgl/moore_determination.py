@@ -4,8 +4,8 @@
 # This file is part of the pybgl project.
 # https://github.com/nokia/pybgl
 
-from .automaton import Automaton, alphabet, add_vertex, add_edge, delta, set_final
-from .nfa import Nfa, initials, is_final, sigma
+from .automaton import Automaton
+from .nfa import Nfa
 
 def moore_determination(nfa: Nfa, dfa: Automaton = None, complete: bool = True) -> Automaton:
     """
@@ -25,18 +25,18 @@ def moore_determination(nfa: Nfa, dfa: Automaton = None, complete: bool = True) 
     Returns:
         The corresponding :py:class:`Automaton` instance.
     """
-    def dfa_add_state(qs):
-        q = map_qs_q[qs] = add_vertex(dfa)
-        if any(is_final(_, nfa) for _ in qs):
-            set_final(q, dfa)
+    def dfa_add_state(qs: iter) -> int:
+        q = map_qs_q[qs] = dfa.add_vertex()
+        if any(nfa.is_final(_) for _ in qs):
+            dfa.set_final(q)
         return q
 
-    full_sigma = alphabet(nfa)
+    full_sigma = nfa.alphabet()
     if dfa is None:
         dfa = Automaton()
     map_qs_q = dict() # Maps subset of states of nfa with the corresponding dfa state.
 
-    q0s = frozenset(nfa.delta_epsilon(initials(nfa)))
+    q0s = frozenset(nfa.delta_epsilon(nfa.initials))
     unprocessed_qs = set() # Keeps track of qs for which delta is not yet installed in dfa
     unprocessed_qs.add(q0s)
     q0 = dfa_add_state(q0s)
@@ -46,17 +46,17 @@ def moore_determination(nfa: Nfa, dfa: Automaton = None, complete: bool = True) 
         q = map_qs_q[qs]
         sigma_ = (
             full_sigma if complete
-            else set.union(*[sigma(q, nfa) for q in qs]) if qs
+            else set.union(*[nfa.sigma(q) for q in qs]) if qs
             else set()
         )
         for a in sigma_:
             rs = (
-                frozenset(set.union(*[delta(q, a, nfa) for q in qs])) if qs
+                frozenset(set.union(*[nfa.delta(q, a) for q in qs])) if qs
                 else frozenset()
             )
             r = map_qs_q.get(rs)
             if r is None:
                 r = dfa_add_state(rs)
                 unprocessed_qs.add(rs)
-            add_edge(q, r, a, dfa)
+            dfa.add_edge(q, r, a)
     return dfa

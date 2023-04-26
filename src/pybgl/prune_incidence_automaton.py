@@ -6,9 +6,7 @@
 
 from collections import defaultdict
 from .graph import Graph
-from .incidence_automaton import (
-    IncidenceAutomaton, finals, initial, remove_vertex, vertices
-)
+from .incidence_automaton import IncidenceAutomaton
 from .depth_first_search  import depth_first_search_graph
 from .property_map import make_assoc_property_map
 from .reverse import reverse_graph
@@ -35,10 +33,10 @@ def prune_incidence_automaton(g: IncidenceAutomaton):
     Args:
         g: IncidenceAutomaton, an instance of IncidenceAutomaton
     """
-    to_keep = find_reachable_vertices(g, {initial(g)})
+    to_keep = find_reachable_vertices(g, {g.initial()})
     reverse_graph(g)
-    to_keep &= find_reachable_vertices(g, finals(g))
+    to_keep &= find_reachable_vertices(g, g.finals())
     reverse_graph(g)
-    to_remove = set(vertices(g)) - to_keep
+    to_remove = set(g.vertices()) - to_keep
     for q in to_remove:
-        remove_vertex(q, g)
+        g.remove_vertex(q)
