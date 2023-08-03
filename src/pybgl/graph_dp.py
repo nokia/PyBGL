@@ -135,7 +135,7 @@ class GraphDp:
                             "\"%s\" : \"%s\"" % (k, pmap[e])
                             for k, pmap in self.dpe.items()
                         ]),
-                        "sep" : "," if self.dpv else "",
+                        "sep" : "," if self.dpe else "",
                     } for e in es
                 ]
             )
