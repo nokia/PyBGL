@@ -51,7 +51,7 @@ from .dijkstra_shortest_paths import (
 #from .graph_copy import graph_copy
 from .graph_dp import GraphDp
 #from .graph_extract import graph_extract
-from .graph import EdgeDescriptor, Graph
+from .graph import EdgeDescriptor, Graph, DirectedGraph, UndirectedGraph
 from .graph_traversal import (
     WHITE, GRAY, BLACK,
     DefaultTreeTraversalVisitor, dfs_tree, bfs_tree
