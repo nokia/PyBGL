@@ -200,7 +200,7 @@ def depth_first_search_graph(
 
     Args:
         g (Graph): The graph being explored.
-        s (iter): An iterable over the sources, e.g., ``g.vertices()``.
+        sources (iter): An iterable over the sources, e.g., ``g.vertices()``.
         pmap_vcolor (ReadWritePropertyMap): A property map that maps each vertex
             with its current color (:py:data:`WHITE`, :py:data:`GRAY`
             or :py:data:`BLACK`)
@@ -217,4 +217,3 @@ def depth_first_search_graph(
     for u in (sources if sources else g.vertices()):
         if pmap_vcolor[u] == WHITE:
             depth_first_search(u, g, pmap_vcolor, vis, if_push)
-
