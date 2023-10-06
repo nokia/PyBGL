@@ -6,8 +6,8 @@
 
 from .graph import *
 from .graph import __len_gen__
-from .graphviz import to_dot
 from .property_map import ReadPropertyMap, make_func_property_map
+
 
 class GraphView:
     """
@@ -20,7 +20,7 @@ class GraphView:
     """
     def __init__(
         self,
-        g: DirectedGraph,
+        g: Graph,
         pmap_vrelevant: ReadPropertyMap = None,
         pmap_erelevant: ReadPropertyMap = None
     ):
@@ -57,7 +57,7 @@ class GraphView:
 
     def __or__(self, gv):
         """
-        Returns the union of self and another two :py:class:`GraphView` instance.
+        Returns the union of self and another :py:class:`GraphView` instance.
 
         Args:
             gv (GraphView): A :py:class:`GraphView` instance.
@@ -77,7 +77,8 @@ class GraphView:
 
     def __and__(self, gv):
         """
-        Returns the intersection of self and another two :py:class:`GraphView` instance.
+        Returns the intersection of self and another
+        :py:class:`GraphView` instance.
 
         Args:
             gv (GraphView): A :py:class:`GraphView` instance.
@@ -97,7 +98,8 @@ class GraphView:
 
     def __sub__(self, gv):
         """
-        Returns the substraction of self and another two :py:class:`GraphView` instance.
+        Returns the substraction of self and
+        another :py:class:`GraphView` instance.
 
         Args:
             gv (GraphView): A :py:class:`GraphView` instance.
@@ -167,6 +169,58 @@ class GraphView:
             and self.pmap_vrelevant[self.target(e)]
         )
 
+    def out_degree(self, u: int) -> int:
+        """
+        Gets the out-degree (the number of out-edges) of a vertex ``u``
+        involved in this :py:class:`GraphView` instance.
+
+        Args:
+            u (int): The considered vertex.
+
+        Returns:
+            The out-degree of ``u``
+        """
+        return __len_gen__(self.out_edges(u))
+
+    def in_edges(self, u: int) -> iter:
+        """
+        Gets an iterator over the relevant in-edges of a given
+        vertex of the nested :py:class:`IncidenceGraph` instance.
+
+        Raises:
+            RuntimeError: Raised if ``self.g`` does not expose an
+                ``in_edges`` method.
+
+        Args:
+            u (int): The considered vertex.
+
+        Returns:
+            An iterator over the relevant in-edges.
+        """
+        return (
+            e for e in self.g.in_edges(u)
+            if self.pmap_erelevant[e]
+            and self.pmap_vrelevant[self.source(e)]
+            and self.pmap_vrelevant[self.target(e)]
+        )
+
+    def in_degree(self, u: int) -> int:
+        """
+        Gets the in-degree (the number of out-edges) of a vertex ``u``
+        involved in this :py:class:`GraphView` instance.
+
+        Raises:
+            RuntimeError: Raised if ``self.g`` does not expose an
+                ``in_edges`` method.
+
+        Args:
+            u (int): The considered vertex.
+
+        Returns:
+            The out-degree of ``u``
+        """
+        return __len_gen__(self.in_edges(u))
+
     def num_vertices(self) -> int:
         """
         Counts the number of relevant vertices involved in this
@@ -196,9 +250,9 @@ class GraphView:
             The corresponding graphviz string.
         """
         return self.g.to_dot(
-            vs = [u for u in self.vertices()],
-            es = [e for e in self.edges()],
-            source = lambda e, g: self.source(e),
-            target = lambda e, g: self.target(e),
+            vs=[u for u in self.vertices()],
+            es=[e for e in self.edges()],
+            source=lambda e, g: self.source(e),
+            target=lambda e, g: self.target(e),
             *cls, **kwargs
         )
