@@ -12,4 +12,4 @@
 * Enabled CI
 * Improved documentation and tests
 * Improved code style (flake8)
-* Progessively removing graph primitives function to remove every "import *"
+* Progessively removing graph primitives function to remove every `import *`
