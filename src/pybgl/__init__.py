@@ -58,7 +58,8 @@ from .graph_traversal import (
 )
 from .graph_view import GraphView
 from .graphviz import (
-    GraphvizStyle, graph_to_html, to_dot
+    GraphvizStyle, dotstr_to_html, graph_to_html, enrich_kwargs,
+    run_graphviz, to_dot
 )
 from .heap import Comparable, Heap
 from .hopcroft_minimize import hopcroft_minimize
