@@ -192,21 +192,25 @@ def error(*cls):
     """
     print(*cls, file=sys.stderr)
 
-def run_graphviz(s_dot: str, layout_engine: str = "dot", format: str = "svg") -> bytes:
+def run_graphviz(s_dot: str, engine: str = None, format: str = "svg") -> bytes:
     """
     Converts a dot string (graphviz format) into a graphic file.
 
     Args:
-        s_dot: A string in the graphviz format.
-        layout_engine: The graphviz engine used for the rendering.
+        s_dot (str): A string in the graphviz format.
+        engine (str): The graphviz engine used for the rendering.
             See "man dot" for more details.
-        format: The output graphviz terminal.
-            See "man dot" for more details.
+            Valid values: (e.g., ``"dot"``, ``"fdp"``, ``"neato"``, ...).
+            You may also pass ``None`` to use the default engine (``"dot"``).
+        format (str): The output graphviz terminal, e.g. ``"svg"``, ``"png"``.
+            See `man dot <https://linux.die.net/man/1/dot>`__ for more details.
 
     Returns:
         The bytes/str of the output image iff successful, None otherwise.
     """
-    cmd = ['dot', '-T' + format, '-K', layout_engine]
+    if engine is None:
+        engine = "dot"
+    cmd = ['dot', '-T' + format, '-K', engine]
     dot = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
     stdout_data, stderr_data = dot.communicate(s_dot.encode("utf-8"))
     status = dot.wait()
@@ -225,9 +229,11 @@ def dot_to_svg(s_dot: str, engine: str = "dot", format: str = "svg") -> str:
     Converts a Graphviz string to SVG.
 
     Args:
-        s_dot (str): A Graphviz string.
-        engine (str): A graphviz engine (e.g.,
-            ``"dot"``, ``"fdp"``, ``"neato"``, ...).
+        s_dot (str): A string in the graphviz format.
+        engine (str): The graphviz engine used for the rendering.
+            See "man dot" for more details.
+            Valid values: (e.g., ``"dot"``, ``"fdp"``, ``"neato"``, ...).
+            You may also pass ``None`` to use the default engine (``"dot"``).
         format (str): The output graphviz terminal, e.g. ``"svg"``, ``"png"``.
             See `man dot <https://linux.die.net/man/1/dot>`__ for more details.
 
@@ -249,8 +255,10 @@ def write_graphviz(s_dot: str, filename: str, engine: str = "dot", format: str =
     Args:
         s_dot (str): A string in the graphviz format.
         filename (str): The path of the output file.
-        engine (str): A graphviz engine (e.g.,
-            ``"dot"``, ``"fdp"``, ``"neato"``, ...).
+        engine (str): The graphviz engine used for the rendering.
+            See "man dot" for more details.
+            Valid values: (e.g., ``"dot"``, ``"fdp"``, ``"neato"``, ...).
+            You may also pass ``None`` to use the default engine (``"dot"``).
         format (str): The output graphviz terminal, e.g. ``"svg"``, ``"png"``.
             See `man dot <https://linux.die.net/man/1/dot>`__ for more details.
 
@@ -281,22 +289,23 @@ def dotstr_to_html(s_dot: str, engine = "dot") -> str:
     Converts a Graphviz string to a HTML string.
 
     Args:
-        s_dot (str): A dot string.
-        engine (str): A graphviz engine (e.g.,
-            ``"dot"``, ``"fdp"``, ``"neato"``, ...).
+        s_dot (str): A string in the graphviz format.
+        engine (str): The graphviz engine used for the rendering.
+            See "man dot" for more details.
+            Valid values: (e.g., ``"dot"``, ``"fdp"``, ``"neato"``, ...).
+            You may also pass ``None`` to use the default engine (``"dot"``).
 
     Returns:
         The corresponding HTML string.
     """
     return str(run_graphviz(s_dot, engine, format="svg"))
 
-def graph_to_html(g, engine: str = "dot", **kwargs) -> str:
+def graph_to_html(g, engine: str = None, **kwargs) -> str:
     """
     Converts a graph to a HTML string.
 
     Args:
         g (Graph): The input graph.
-        engine (str): A graphviz engine (e.g. "dot", "fdp", "neato", ...).
         **kwargs (dict): See the: py:meth:`Graph.to_dot` method.
 
     Returns:

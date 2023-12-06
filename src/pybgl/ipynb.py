@@ -54,7 +54,13 @@ def ipynb_display_graph(g, background_color: str = None, **kwargs):
         **kwargs (dict): See the :py:meth:`Graph.to_dot` method.
     """
     template_html = background_template_html(background_color)
-    html(template_html % dotstr_to_html(g.to_dot(**kwargs)))
+    engine = kwargs.pop("engine", "dot")
+    html(
+        template_html % dotstr_to_html(
+            g.to_dot(**kwargs),
+            engine=engine
+        )
+    )
 
 def display_svg(svg, filename_svg: str, background_color: str = None):
     """
