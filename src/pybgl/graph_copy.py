@@ -147,10 +147,10 @@ def graph_copy(
 
     # Prepare the DepthFirstSearchCopyVisitor.
     if not pmap_vertices:
-        map_vertices = dict()
+        map_vertices = defaultdict(None)
         pmap_vertices = make_assoc_property_map(map_vertices)
     if not pmap_edges:
-        map_edges = dict()
+        map_edges = defaultdict(None)
         pmap_edges = make_assoc_property_map(map_edges)
 
     vis = DepthFirstSearchCopyVisitor(
