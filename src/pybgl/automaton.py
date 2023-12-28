@@ -759,13 +759,13 @@ def make_automaton(
     for (qn, rn, a) in transitions:
         q = map_vertices[qn]
         r = map_vertices[rn]
-        add_edge(q, r, a, g)
+        g.add_edge(q, r, a)
     q0 = map_vertices[q0n]
     g.set_initial(q0)
-    for q in vertices(g):
+    for q in g.vertices():
         qn = vertex_names[q]
         if pmap_vfinal[qn]:
-            set_final(q, g)
+            g.set_final(q)
     return g
 
 def delta_best_effort(g: Automaton, w: str) -> tuple:
