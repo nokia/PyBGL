@@ -236,14 +236,92 @@ class NodeAutomaton(Automaton):
         kwargs = enrich_kwargs(dpv, "dpv", **kwargs)
         return super().to_dot(**kwargs)
 
+
 def add_vertex(a: str, g: NodeAutomaton) -> int:
     return g.add_vertex(a)
+
 
 def symbol(q: int, g: NodeAutomaton) -> str:
     return g.symbol(q)
 
+
 def add_edge(u: int, v: int, g: NodeAutomaton) -> tuple:
     return g.add_edge(u, v)
 
+
 def edge(u: int, v: int, g: NodeAutomaton) -> tuple:
     return g.edge(u, v)
+
+
+def make_node_automaton(
+    transitions: list,
+    pmap_vlabel: ReadPropertyMap,
+    q0n: int = 0,
+    pmap_vfinal: ReadPropertyMap = None,
+    NodeAutomatonClass = NodeAutomaton
+) -> NodeAutomaton:
+    """
+    Makes an automaton of type `NodeAutomatonClass`
+    according to a list of transitions.
+    You may use any arbitrary identifier to characterize
+    the states involved in the transitions.
+
+    Args:
+        transitions (list): The list of transitions,
+            where is each transition is modeled by
+            a ``(qn, rn, a)`` tuple and where
+            ``qn`` identifies the source of the transition
+            ``rn`` identifies the target of the transition
+            and ``a`` labels the transition.
+        pmap_vlabel (ReadPropertyMap): A property map which maps each
+            state identifier with its corresponding symbol.
+        q0n (int): The identifier in transitions of the
+            initial state.
+        pmap_vfinal (ReadPropertyMap): A property map
+            which maps each state identifier with a boolean indicating
+            whether the state is final (``True``) or not (``False``).
+        NodeAutomatonClass: The class use to allocate the automaton.
+            Defaults to :py:class:`NodeAutomaton`.
+
+    Example:
+
+        >>> from collections import defaultdict
+        >>> from pybgl import Automaton, make_assoc_property_map, make_node_automaton
+        >>> transitions = [("root", "sink"), ("root", "sink")]
+        >>> map_vlabel = defaultdict(bool, {"root": "a", "sink": "b"})
+        >>> map_vfinal = defaultdict(bool, {"root": False, "sink": True})
+        >>> g = make_node_automaton(
+        ...     transitions,
+        ...     q0n="root",
+        ...     pmap_vlabel=make_assoc_property_map(map_vlabel),
+        ...     pmap_vfinal=make_assoc_property_map(map_vfinal)
+        ... )
+
+    Returns:
+        The corresponding `NodeAutomatonClass` instance.
+    """
+    if not pmap_vfinal:
+        pmap_vfinal = make_assoc_property_map(defaultdict(bool))
+    vertex_names = sorted(
+        list(
+            {qn for (qn, rn) in transitions} |
+            {rn for (qn, rn) in transitions}
+        )
+    )
+    map_vertices = {
+        qn: q
+        for (q, qn) in enumerate(vertex_names)
+    }
+    g = NodeAutomatonClass(0)
+    for vertex_name in vertex_names:
+        a = pmap_vlabel[vertex_name]
+        u = g.add_vertex(a)
+        if pmap_vfinal[u]:
+            g.set_final(u)
+    for (qn, rn) in transitions:
+        q = map_vertices[qn]
+        r = map_vertices[rn]
+        g.add_edge(q, r)
+    q0 = map_vertices[q0n]
+    g.set_initial(q0)
+    return g

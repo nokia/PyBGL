@@ -104,18 +104,16 @@ class IncidenceNodeAutomaton(NodeAutomaton):
         r = self.target(e)
         self.predecessors[r].remove(q)
 
+
 def make_incidence_node_automaton(
     transitions: list,
     pmap_vlabel: ReadPropertyMap,
     q0n: int = 0,
-    pmap_vfinal: ReadPropertyMap = None,
-    Constructor = IncidenceNodeAutomaton
+    pmap_vfinal: ReadPropertyMap = None
 ) -> IncidenceNodeAutomaton:
     """
-    Makes an automaton of type `AutomatonClass`
-    according to a list of transitions.
-    You may use any arbitrary identifier to characterize
-    the states involved in the transitions.
+    Specialization of the :py:func:`make_node_automaton` function for
+    the :py:class:`IncidenceNodeAutomaton` class.
 
     Args:
         transitions (list): The list of transitions,
@@ -131,54 +129,31 @@ def make_incidence_node_automaton(
         pmap_vfinal (ReadPropertyMap): A property map
             which maps each state identifier with a boolean indicating
             whether the state is final (``True``) or not (``False``).
-        AutomatonClass: The class use to allocate the automaton.
-            Defaults to :py:class:`Automaton`.
+        NodeAutomatonClass: The class use to allocate the automaton.
+            Defaults to :py:class:`NodeAutomaton`.
 
     Example:
 
         >>> from collections import defaultdict
-        >>> from pybgl import Automaton, make_incidence_node_automaton
-        >>> from pybgl.property_map import make_assoc_property_map
+        >>> from pybgl import Automaton, make_assoc_property_map, make_incidence_node_automaton
         >>> transitions = [("root", "sink"), ("root", "sink")]
         >>> map_vlabel = defaultdict(bool, {"root": "a", "sink": "b"})
         >>> map_vfinal = defaultdict(bool, {"root": False, "sink": True})
         >>> g = make_incidence_node_automaton(
         ...     transitions,
-        ...     q0n = "root",
-        ...     pmap_vlabel = make_assoc_property_map(map_vlabel),
-        ...     pmap_vfinal = make_assoc_property_map(map_vfinal)
+        ...     q0n="root",
+        ...     pmap_vlabel=make_assoc_property_map(map_vlabel),
+        ...     pmap_vfinal=make_assoc_property_map(map_vfinal)
         ... )
 
     Returns:
-        The corresponding py:class:`IncidenceNodeAutomaton` instance.
+        The corresponding :py:class:`IncidenceNodeAutomaton` instance.
+
     """
-    # Keep vertex order without regard transition ordering.
-    transitions = sorted(transitions)
-
-    if not pmap_vfinal:
-        pmap_vfinal = make_assoc_property_map(defaultdict(bool))
-
-    # Set initial state
-    g = Constructor(1)
-    q0 = 0
-    g.set_initial(q0)
-    map_vertices = {q0n:  q0}
-    if pmap_vfinal[q0n]:
-        g.set_final(q0)
-
-    # Add states
-    def _add_state(qn) -> int:
-        q = map_vertices.get(qn)
-        if q is None:
-            a = pmap_vlabel[qn]
-            q = g.add_vertex(a)
-            map_vertices[qn] = q
-            if pmap_vfinal[qn]:
-                g.set_final(q)
-        return q
-
-    for (qn, rn) in transitions:
-        q = _add_state(qn)
-        r = _add_state(rn)
-        g.add_edge(q, r)
-    return g
+    return make_node_automaton(
+        transitions,
+        pmap_vlabel,
+        q0n,
+        pmap_vfinal,
+        NodeAutomatonClass=IncidenceNodeAutomaton
+    )

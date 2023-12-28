@@ -119,7 +119,9 @@ def test_revuz_minimize_vlabel():
                 )
             )
         ),
-        e_expected={(0, 1), (0, 2), (1, 3), (2, 4), (3, 6), (4, 5), (5, 6), (6, 8)}
+        e_expected={
+            (0, 1), (0, 2), (1, 4), (2, 3), (3, 5), (4, 6), (5, 6), (6, 8)
+        }
     )
 
 def test_revuz_minimize_final():

@@ -77,7 +77,10 @@ from .lcs_distance import lcs_distance
 from .levenshtein_distance import levenshtein_distance
 from .moore_determination import moore_determination
 from .nfa import Nfa
-from .node_automaton import NodeAutomaton
+from .node_automaton import (
+    NodeAutomaton,
+    make_node_automaton,
+)
 from .parallel_breadth_first_search import (
     ParallelBreadthFirstSearchVisitor, parallel_breadth_first_search
 )
