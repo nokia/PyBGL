@@ -5,7 +5,7 @@ PyBGL package documentation
    :maxdepth: 3
    :caption: Contents:
 
-   installation <installation.md>
+   Installation <installation.md>
    API documentation <pybgl>
    Developer's corner <developers.md>
    contributing
