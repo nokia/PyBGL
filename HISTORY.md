@@ -13,3 +13,23 @@
 * Improved documentation and tests
 * Improved code style (flake8)
 * Progessively removing graph primitives function to remove every `import *`
+
+## 0.10.1 (2023-01-02)
+
+* Migrated sphinx theme to pydata
+* Improved documentation, code style, flake8 errors
+* Exposed some missing classes
+  * `DirectedGraph`
+  * `UndirectedGraph`
+  * `dotstr_to_html`
+  * `enrich_kwargs`
+  * `run_graphviz`
+  * `make_node_automaton`
+* Bug fix `*_copy`, `GraphView.*_degree`
+* The Graphviz-related function now correctly forward the kwargs arguments (e.g. `engine=`)
+  * `ipynb_display_graph`
+  * `graph_to_html`
+  * `dotstr_to_html`
+  * `write_graphviz`
+  * `run_graphviz`
+* `pybgl.AssocPropertyMap` can now only wrap a `defaultdict` (not a `dict`)
