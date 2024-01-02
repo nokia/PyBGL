@@ -9,6 +9,7 @@ pybgl.egg-info
 *.swo
 *.tar.gz
 .coverage
-coverage.xml
-.pytest_cache
+.hypothesis
 .idea
+.pytest_cache
+coverage.xml
