@@ -90,7 +90,7 @@ git commit -m "Updated README.md"
 
 ```bash
 poetry version patch --dry-run  # Possible values major / minor / patch
-poetry version patch            # If this is fine 
+poetry version patch            # If this is fine
 git push
 git push --tags
 ```
