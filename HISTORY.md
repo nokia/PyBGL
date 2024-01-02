@@ -33,3 +33,7 @@
   * `write_graphviz`
   * `run_graphviz`
 * `pybgl.AssocPropertyMap` can now only wrap a `defaultdict` (not a `dict`)
+
+## 0.10.2 (2023-01-2)
+
+* Migrated from `bumpversion` to `poetry-bumpversion`.

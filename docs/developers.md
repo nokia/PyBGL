@@ -89,7 +89,8 @@ git commit -m "Updated README.md"
 2. Increase the version number using `bumpversion`:
 
 ```bash
-bumpversion patch # Possible values major / minor / patch
+poetry version patch --dry-run  # Possible values major / minor / patch
+poetry version patch            # If this is fine 
 git push
 git push --tags
 ```

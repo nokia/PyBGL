@@ -34,7 +34,7 @@ optional = true
 
 [tool.poetry.group.dev.dependencies]
 pip = "*"
-bump2version = "*"
+poetry-bumpversion = "*"
 flake8 = "*"
 tox = "*"
 coverage = "*"
@@ -50,3 +50,5 @@ sphinx_mdinclude = "*"
 [build-system]
 requires = ["poetry-core", "dulwich", "poetry-plugin-export"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry_bumpversion.file."src/pybgl/__init__.py"]
