@@ -20,7 +20,7 @@ from .algebra import (
     ClosedOperator, ClosedPlus, ClosedTime, ClosedMin, ClosedMax
 )
 #from .automaton_copy import automaton_copy
-from .automaton import Automaton, make_automaton
+from .automaton import BOTTOM, Automaton, make_automaton
 from .bk_tree import BKTree, make_bk_tree
 from .breadth_first_search import (
     DefaultBreadthFirstSearchVisitor,
@@ -58,10 +58,12 @@ from .graph_traversal import (
 )
 from .graph_view import GraphView
 from .graphviz import (
-    GraphvizStyle, dotstr_to_html, graph_to_html, enrich_kwargs,
+    GraphvizStyle, ReadGraphvizVisitor,
+    dotstr_to_html, graph_to_html, enrich_kwargs,
+    read_graphviz,
     run_graphviz, to_dot
 )
-from .heap import Comparable, Heap
+from .heap import Comparable, Heap, compare_to_key
 from .hopcroft_minimize import hopcroft_minimize
 from .html import html, beside
 from .incidence_automaton import IncidenceAutomaton, make_incidence_automaton
@@ -76,7 +78,7 @@ from .ipynb import (
 from .lcs_distance import lcs_distance
 from .levenshtein_distance import levenshtein_distance
 from .moore_determination import moore_determination
-from .nfa import Nfa
+from .nfa import EPSILON, Nfa
 from .node_automaton import (
     NodeAutomaton,
     make_node_automaton,
@@ -95,7 +97,10 @@ from .regexp import compile_nfa, compile_dfa
 from .reverse import reverse_graph, reverse_dict
 from .revuz_minimize import DefaultRevuzMinimizeVisitor, revuz_minimize
 from .shunting_yard_postfix import (
+    MAP_OPERATORS_ALG, MAP_OPERATORS_RE,
     Ast, DefaultShuntingYardVisitor,
+    RpnDequeAlg, RpnDequeAst,
+    re_escape,
     shunting_yard_ast, shunting_yard_postfix, shunting_yard_compute,
     tokenizer_alg, tokenizer_re
 )
