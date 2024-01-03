@@ -1,39 +1,42 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-from pybgl.digital_sequence import *
+from pybgl import DigitalSequence
+
 
 def test_num_vertices():
-    assert num_vertices(DigitalSequence("")) == 1
-    assert num_vertices(DigitalSequence("a")) == 2
-    assert num_vertices(DigitalSequence("hello")) == 6
+    for w in ("", "a", "hello"):
+        assert DigitalSequence(w).num_vertices() == len(w) + 1
+
 
 def test_num_edges():
-    assert num_edges(DigitalSequence("")) == 0
-    assert num_edges(DigitalSequence("a")) == 1
-    assert num_edges(DigitalSequence("hello")) == 5
+    for w in ("", "a", "hello"):
+        assert DigitalSequence(w).num_edges() == len(w)
+
 
 def test_degree():
     for w in ["", "a", "hello"]:
         g = DigitalSequence(w)
-        for q in vertices(g):
-            if is_initial(q, g):
-                assert in_degree(q, g) == 0
+        for q in g.vertices():
+            if g.is_initial(q):
+                assert g.in_degree(q) == 0
             else:
-                assert in_degree(q, g) == 1
-            if is_final(q, g):
-                assert out_degree(q, g) == 0
+                assert g.in_degree(q) == 1
+            if g.is_final(q):
+                assert g.out_degree(q) == 0
             else:
-                assert out_degree(q, g) == 1
+                assert g.out_degree(q) == 1
+
 
 def test_sigma():
     w = "hello"
     g = DigitalSequence(w)
-    for q in vertices(g):
-        if is_final(q, g):
-            assert sigma(q, g) == set()
+    for q in g.vertices():
+        if g.is_final(q):
+            assert g.sigma(q) == set()
         else:
-            assert sigma(q, g) == {w[q]}
+            assert g.sigma(q) == {w[q]}
+
 
 def test_to_dot():
     for w in ["", "a", "hello"]:

@@ -1,8 +1,8 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-from pybgl.graph import DirectedGraph
-from pybgl.topological_sort import topological_sort
+from pybgl import DirectedGraph, topological_sort
+
 
 def test_topological_sort():
     # Example taken from:

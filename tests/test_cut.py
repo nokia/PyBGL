@@ -1,8 +1,8 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-from pybgl.cut import cut
-from pybgl.graph import DirectedGraph
+from pybgl import cut, DirectedGraph
+
 
 def test_cut():
     g = DirectedGraph(3)
@@ -21,6 +21,7 @@ def test_cut():
     obtained = cut(0, g, lambda e, g: True)
     assert obtained == {1}
 
+
 def test_cut_diamond():
     g = DirectedGraph(4)
     (e01, _) = g.add_edge(0, 1)
@@ -33,6 +34,7 @@ def test_cut_diamond():
 
     obtained = cut(0, g, lambda e, g: e in {e13, e23})
     assert obtained == {3}
+
 
 def test_cut_tree():
     g = DirectedGraph(9)

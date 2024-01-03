@@ -1,9 +1,12 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-from pybgl.property_map import make_func_property_map
-from pybgl.hopcroft_minimize import hopcroft_minimize
-from pybgl.incidence_automaton import make_incidence_automaton
+from pybgl import (
+    hopcroft_minimize,
+    make_incidence_automaton,
+    make_func_property_map,
+)
+
 
 G6 = make_incidence_automaton(
     [
@@ -62,6 +65,7 @@ G9 = make_incidence_automaton(
         (12, 12, 'a')
     ], 0, make_func_property_map(lambda q: q in {0, 2, 4, 6, 8, 10, 12})
 )
+
 
 def test_automaton_hopcroft_minimize():
     min_G6 = hopcroft_minimize(G6)

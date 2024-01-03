@@ -2,20 +2,19 @@
 # -*- coding: utf-8 -*-
 
 from collections import defaultdict
-from pybgl.dijkstra_shortest_paths import (
+from pybgl import (
     INFINITY,
-    DijkstraVisitor,
-    dijkstra_shortest_path,
-    dijkstra_shortest_paths
-)
-from pybgl.graph import Graph, DirectedGraph, EdgeDescriptor, UndirectedGraph
-from pybgl.ipynb import in_ipynb, ipynb_display_graph
-from pybgl.property_map import (
+    Graph, DirectedGraph, EdgeDescriptor, UndirectedGraph,
     ReadPropertyMap,
     ReadWritePropertyMap,
+    DijkstraVisitor,
+    dijkstra_shortest_path,
+    dijkstra_shortest_paths,
+    in_ipynb, ipynb_display_graph,
     make_assoc_property_map,
     make_func_property_map
 )
+
 
 # For debug purposes
 
@@ -33,7 +32,8 @@ def display_graph(
             dpe["color"] = make_func_property_map(
                 lambda e: "red" if e in shortest_path_dag else None
             )
-        ipynb_display_graph(g, dpe = dpe)
+        ipynb_display_graph(g, dpe=dpe)
+
 
 LINKS = [
     # (u, v, weight)
@@ -51,6 +51,7 @@ LINKS = [
     (8, 3, 3.99),
     (9, 2, 1)
 ]
+
 
 def make_graph(
     links: list,
@@ -80,6 +81,7 @@ def make_graph(
             pmap_eweight[e] = w
     return g
 
+
 def test_isolated_vertices():
     # Create 10 isolated vertices
     g = DirectedGraph(10)
@@ -99,7 +101,11 @@ def test_isolated_vertices():
         assert map_vpreds == dict()
 
         # Every target are at infinite distance excepted the source node.
-        assert map_vdist  == {u: INFINITY if u != s else 0 for u in g.vertices()}
+        assert map_vdist == {
+            u: INFINITY if u != s else 0
+            for u in g.vertices()
+        }
+
 
 def test_simple_graph():
     # Prepare graph, just a 0 -> 1 arc
@@ -132,6 +138,7 @@ def test_simple_graph():
         u: 0,
         v: w
     }
+
 
 def test_parallel_edges():
     # Prepare graph, two parallel edges from 0 to 1
@@ -166,34 +173,51 @@ def test_parallel_edges():
         v: w
     }
 
+
 class DijkstraDebugVisitor(DijkstraVisitor):
+    def __init__(self, debug: bool = False):
+        self.debug = debug
+
     def initialize_vertex(self, u: int, g: DirectedGraph):
-        print(f"initialize_vertex({u})")
+        if self.debug:
+            print(f"initialize_vertex({u})")
 
     def examine_vertex(self, u: int, g: DirectedGraph):
-        print(f"examine_vertex({u})")
+        if self.debug:
+            print(f"examine_vertex({u})")
 
     def examine_edge(self, e: EdgeDescriptor, g: DirectedGraph):
-        print(f"examine_edge({e} {e.m_distinguisher})")
+        if self.debug:
+            print(f"examine_edge({e} {e.m_distinguisher})")
 
     def discover_vertex(self, u: int, g: DirectedGraph):
-        print(f"discover_vertex({u})")
+        if self.debug:
+            print(f"discover_vertex({u})")
 
     def edge_relaxed(self, e: EdgeDescriptor, g: DirectedGraph):
-        print(f"edge_relaxed({e}  {e.m_distinguisher})")
+        if self.debug:
+            print(f"edge_relaxed({e}  {e.m_distinguisher})")
 
     def edge_not_relaxed(self, e: EdgeDescriptor, g: DirectedGraph):
-        print(f"edge_not_relaxed({e}  {e.m_distinguisher})")
+        if self.debug:
+            print(f"edge_not_relaxed({e}  {e.m_distinguisher})")
 
     def finish_vertex(self, u: int, g: DirectedGraph):
-        print(f"finish_vertex({u})")
+        if self.debug:
+            print(f"finish_vertex({u})")
+
 
 def test_directed_graph(links: list = None):
     if links is None:
         links = LINKS
     map_eweight = defaultdict()
     pmap_eweight = make_assoc_property_map(map_eweight)
-    g = make_graph(links, pmap_eweight, directed = True, build_reverse_edge = False)
+    g = make_graph(
+        links,
+        pmap_eweight,
+        directed=True,
+        build_reverse_edge=False
+    )
 
     map_vpreds = defaultdict(set)
     map_vdist = defaultdict()
@@ -202,7 +226,7 @@ def test_directed_graph(links: list = None):
         pmap_eweight,
         make_assoc_property_map(map_vpreds),
         make_assoc_property_map(map_vdist),
-        vis = DijkstraDebugVisitor()
+        vis=DijkstraDebugVisitor(debug=False)
     )
 
     edge_dict = {(g.source(e), g.target(e)): e for e in g.edges()}
@@ -229,6 +253,7 @@ def test_directed_graph(links: list = None):
         8: 10,
         9: INFINITY
     }
+
 
 def test_decrease_key():
     g = DirectedGraph(3)
@@ -262,6 +287,7 @@ def test_decrease_key():
         1: 2,
         2: 1,
     }
+
 
 def test_directed_symmetric_graph(links: list = None):
     if links is None:
@@ -306,6 +332,7 @@ def test_directed_symmetric_graph(links: list = None):
         9: 3
     }
 
+
 def test_dijkstra_shortest_path(links: list = None):
     if links is None:
         links = LINKS
@@ -328,8 +355,10 @@ def test_dijkstra_shortest_path(links: list = None):
     if in_ipynb():
         ipynb_display_graph(
             g,
-            dpe = {
-                "color": make_func_property_map(lambda e: "green" if e in path else "red"),
+            dpe={
+                "color": make_func_property_map(
+                    lambda e: "green" if e in path else "red"
+                ),
                 "label": pmap_eweight
             }
         )
@@ -337,6 +366,7 @@ def test_dijkstra_shortest_path(links: list = None):
         (g.source(e), g.target(e))
         for e in path
     ] == [(0, 5), (5, 6), (6, 8)]
+
 
 def test_dijkstra_shortest_paths_bandwidth():
     # Prepare graph
@@ -367,10 +397,9 @@ def test_dijkstra_shortest_paths_bandwidth():
         infty=0
     )
     display_graph(g, pmap_eweight)
-    print(map_vdist)
     assert map_vdist == {
         0: INFINITY,
         1: 100,
         2: 80,
         3: 30
-    }
+    }, map_vdist

@@ -2,9 +2,14 @@
 # -*- coding: utf-8 -*-
 
 from collections import defaultdict
-from pybgl.graphviz import graph_to_html
-from pybgl.property_map import make_assoc_property_map, make_func_property_map
-from pybgl.incidence_node_automaton import *
+from pybgl import (
+    BOTTOM,
+    IncidenceNodeAutomaton,
+    graph_to_html,
+    make_assoc_property_map,
+    make_func_property_map,
+    make_incidence_node_automaton,
+)
 
 
 (u, v, w) = (0, 1, 2)
@@ -12,193 +17,197 @@ from pybgl.incidence_node_automaton import *
 
 def make_g1() -> IncidenceNodeAutomaton:
     g1 = IncidenceNodeAutomaton()
-    add_vertex(None, g1)
-    add_vertex("a", g1)
-    add_vertex("b", g1)
+    g1.add_vertex(None)
+    g1.add_vertex("a")
+    g1.add_vertex("b")
     return g1
 
 
 def make_g2() -> IncidenceNodeAutomaton:
     g2 = make_g1()
-    add_edge(u, v, g2)
-    add_edge(u, w, g2)
-    add_edge(v, w, g2)
+    g2.add_edge(u, v)
+    g2.add_edge(u, w)
+    g2.add_edge(v, w)
     return g2
 
 
 def test_incidence_node_automaton_in_degree():
     g = make_g2()
-    assert in_degree(u, g) == 0
-    assert in_degree(v, g) == 1
-    assert in_degree(w, g) == 2
-    add_edge(u, v, g)
-    assert in_degree(u, g) == 0
-    assert in_degree(v, g) == 1 # Because NodeAutomaton remains deterministic
-    add_edge(u, u, g)
-    assert in_degree(u, g) == 1
+    assert g.in_degree(u) == 0
+    assert g.in_degree(v) == 1
+    assert g.in_degree(w) == 2
+    g.add_edge(u, v)
+    assert g.in_degree(u) == 0
+    assert g.in_degree(v) == 1  # Because NodeAutomaton remains deterministic
+    g.add_edge(u, u)
+    assert g.in_degree(u) == 1
 
 
 def test_incidence_node_automaton_determinism():
     g = make_g1()
-    (e, added) = add_edge(u, v, g)
+    (e, added) = g.add_edge(u, v)
     assert added
-    (e, added) = add_edge(u, v, g)
+    (e, added) = g.add_edge(u, v)
     assert not added
 
 
 def test_incidence_node_automaton_in_edges():
     g = make_g1()
-    (e0, added) = add_edge(u, u, g)
-    (e1, added) = add_edge(u, v, g)
-    (e2, added) = add_edge(u, w, g)
-    (e3, added) = add_edge(v, w, g)
-    assert {e for e in in_edges(u, g)} == {e0}
-    assert {e for e in in_edges(v, g)} == {e1}
-    assert {e for e in in_edges(w, g)} == {e2, e3}
+    (e0, added) = g.add_edge(u, u)
+    (e1, added) = g.add_edge(u, v)
+    (e2, added) = g.add_edge(u, w)
+    (e3, added) = g.add_edge(v, w)
+    assert {e for e in g.in_edges(u)} == {e0}
+    assert {e for e in g.in_edges(v)} == {e1}
+    assert {e for e in g.in_edges(w)} == {e2, e3}
+
 
 def test_incidence_node_automaton_edge():
     g = make_g1()
-    (e, added) = add_edge(u, v, g)
+    (e, added) = g.add_edge(u, v)
     assert e is not None
     assert added
-    assert source(e, g) == u
-    assert target(e, g) == v
-    assert label(e, g) == "a"
-    assert symbol(v, g) == "a"
+    assert g.source(e) == u
+    assert g.target(e) == v
+    assert g.label(e) == "a"
+    assert g.symbol(v) == "a"
 
 
 def test_incidence_node_automaton_num_vertices():
     g = make_g2()
-    assert num_vertices(g) == 3
+    assert g.num_vertices() == 3
     m = 0
-    for q in vertices(g):
+    for q in g.vertices():
         m += 1
     assert m == 3
 
 
 def test_incidence_node_automaton_num_edges():
     g = make_g2()
-    assert num_edges(g) == 3
+    assert g.num_edges() == 3
     n = 0
-    for e in edges(g):
+    for e in g.edges():
         n += 1
     assert n == 3
 
 
 def test_incidence_node_automaton_symbol():
-    g1 = make_g1()
-    assert symbol(u, g1) is None
-    assert symbol(v, g1) == "a"
-    assert symbol(w, g1) == "b"
+    g = make_g1()
+    assert g.symbol(u) is None
+    assert g.symbol(v) == "a"
+    assert g.symbol(w) == "b"
 
 
 def test_incidence_node_automaton_pmap_vlabel():
     map_vlabel = defaultdict(lambda: None)
     map_vlabel[v] = "a"
     map_vlabel[w] = "b"
-    g = IncidenceNodeAutomaton(3, pmap_vsymbol=make_assoc_property_map(map_vlabel))
-    assert num_vertices(g) == 3
-    print(g.adjacencies)
-    assert symbol(u, g) is None, f"Got {symbol(u, g)}"
-    assert symbol(v, g) == "a"
-    assert symbol(w, g) == "b"
-    assert num_edges(g) == 0
-    add_edge(u, v, g)
-    assert num_edges(g) == 1
-    add_edge(u, w, g)
-    assert num_edges(g) == 2
+    g = IncidenceNodeAutomaton(
+        3,
+        pmap_vsymbol=make_assoc_property_map(map_vlabel)
+    )
+    assert g.num_vertices() == 3
+    # print(g.adjacencies)
+    assert g.symbol(u) is None, f"Got {g.symbol(u)} != None"
+    assert g.symbol(v) == "a"
+    assert g.symbol(w) == "b"
+    assert g.num_edges() == 0
+    g.add_edge(u, v)
+    assert g.num_edges() == 1
+    g.add_edge(u, w)
+    assert g.num_edges() == 2
 
 
 def test_incidence_node_automaton_add_edge():
     # Make graph
     g = make_g1()
-    assert out_degree(u, g) == 0
-    assert num_edges(g) == 0
+    assert g.out_degree(u) == 0
+    assert g.num_edges() == 0
 
     # Add e1
-    (e1, added1) = add_edge(u, v, g)
+    (e1, added1) = g.add_edge(u, v)
     assert added1
-    (e, found) = edge(u, v, g)
+    (e, found) = g.edge(u, v)
     assert found
     assert e == e1
-    assert out_degree(u, g) == 1
-    assert num_edges(g) == 1
+    assert g.out_degree(u) == 1
+    assert g.num_edges() == 1
 
     # No arc
-    (e, found) = edge(u, w, g)
+    (e, found) = g.edge(u, w)
     assert not found
-    assert {e for e in out_edges(u, g)} == {e1}
+    assert {e for e in g.out_edges(u)} == {e1}
 
     # Add e2
-    (e2, added2) = add_edge(u, w, g)
+    (e2, added2) = g.add_edge(u, w)
     assert added2
-    assert {e for e in out_edges(u, g)} == {e1, e2}
-    assert out_degree(u, g) == 2
-    assert num_edges(g) == 2
+    assert {e for e in g.out_edges(u)} == {e1, e2}
+    assert g.out_degree(u) == 2
+    assert g.num_edges() == 2
 
 
 def test_incidence_node_automaton_delta():
-    g2 = make_g2()
-    assert delta(u, "a", g2) == v
-    assert delta(u, "b", g2) == w
-    assert delta(v, "a", g2) == BOTTOM
-    assert delta(v, "b", g2) == w
-    assert delta(w, "a", g2) == BOTTOM
-    assert delta(w, "b", g2) == BOTTOM
+    g = make_g2()
+    assert g.delta(u, "a") == v
+    assert g.delta(u, "b") == w
+    assert g.delta(v, "a") == BOTTOM
+    assert g.delta(v, "b") == w
+    assert g.delta(w, "a") == BOTTOM
+    assert g.delta(w, "b") == BOTTOM
 
 
 def test_incidence_node_automaton_add_vertex():
     g = make_g2()
-    assert num_vertices(g) == 3
-    assert num_edges(g) == 3
+    assert g.num_vertices() == 3
+    assert g.num_edges() == 3
 
     # Add node x
-    x = add_vertex("c", g)
-    assert num_vertices(g) == 4
-    assert symbol(x, g) == "c"
+    x = g.add_vertex("c")
+    assert g.num_vertices() == 4
+    assert g.symbol(x) == "c"
 
     # Add edge (v -> x)
-    (e1, found) = edge(v, w, g)
+    (e1, found) = g.edge(v, w)
     assert found
-    (e2, added) = add_edge(v, x, g)
-    assert label(e2, g) == "c"
-    assert num_edges(g) == 4
-    assert {e for e in out_edges(v, g)} == {e1, e2}
+    (e2, added) = g.add_edge(v, x)
+    assert g.label(e2) == "c"
+    assert g.num_edges() == 4
+    assert {e for e in g.out_edges(v)} == {e1, e2}
 
 
 def test_incidence_node_automaton_remove_edge():
     g = make_g2()
-    (e, found) = edge(v, w, g)
-    assert num_edges(g) == 3
-    assert delta(u, "a", g) == v
-    assert delta(u, "b", g) == w
-    assert delta(v, "b", g) == w
+    (e, found) = g.edge(v, w)
+    assert g.num_edges() == 3
+    assert g.delta(u, "a") == v
+    assert g.delta(u, "b") == w
+    assert g.delta(v, "b") == w
 
-    remove_edge(e, g)
-    assert num_edges(g) == 2
-    assert delta(u, "a", g) == v
-    assert delta(u, "b", g) == w
-    assert delta(v, "b", g) == BOTTOM
+    g.remove_edge(e)
+    assert g.num_edges() == 2
+    assert g.delta(u, "a") == v
+    assert g.delta(u, "b") == w
+    assert g.delta(v, "b") == BOTTOM
 
 
 def test_incidence_node_automaton_remove_vertex():
     g = make_g2()
-    assert num_vertices(g) == 3
-    assert num_edges(g) == 3
-    assert delta(u, "a", g) == v
-    assert delta(u, "b", g) == w
-    assert delta(v, "b", g) == w
+    assert g.num_vertices() == 3
+    assert g.num_edges() == 3
+    assert g.delta(u, "a") == v
+    assert g.delta(u, "b") == w
+    assert g.delta(v, "b") == w
 
-    remove_vertex(v, g)
-    assert num_vertices(g) == 2
-    assert num_edges(g) == 1
-    assert delta(u, "a", g) == BOTTOM
-    assert delta(u, "b", g) == w
+    g.remove_vertex(v)
+    assert g.num_vertices() == 2
+    assert g.num_edges() == 1
+    assert g.delta(u, "a") == BOTTOM
+    assert g.delta(u, "b") == w
 
 
 def test_incidence_node_automaton_graphviz():
     g = make_g2()
-    svg = graph_to_html(g)
+    _ = graph_to_html(g)
 
 
 def test_make_incidence_node_automaton():
@@ -237,7 +246,7 @@ def test_make_incidence_node_automaton():
 def test_make_incidence_node_automaton_finals():
     g = make_incidence_node_automaton(
         [(0, 1), (0, 2), (1, 2)],
-        q0n = 0,
+        q0n=0,
         pmap_vlabel=make_assoc_property_map(
             defaultdict(
                 lambda: None,
@@ -246,11 +255,11 @@ def test_make_incidence_node_automaton_finals():
         ),
         pmap_vfinal=make_func_property_map(lambda u: u in {0, 2})
     )
-    assert num_vertices(g) == 3
-    assert num_edges(g) == 3
-    for u in vertices(g):
-        assert is_initial(u, g) == (u == 0)
-        assert is_final(u, g) == (u in {0, 2})
-    assert symbol(0, g) is None
-    assert symbol(1, g) == "a"
-    assert symbol(2, g) == "b"
+    assert g.num_vertices() == 3
+    assert g.num_edges() == 3
+    for u in g.vertices():
+        assert g.is_initial(u) == (u == 0)
+        assert g.is_final(u) == (u in {0, 2})
+    assert g.symbol(0) is None
+    assert g.symbol(1) == "a"
+    assert g.symbol(2) == "b"

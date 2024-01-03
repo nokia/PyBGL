@@ -1,9 +1,12 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-from pybgl.incidence_automaton import make_incidence_automaton
-from pybgl.prune_incidence_automaton import prune_incidence_automaton
-from pybgl.property_map import make_func_property_map
+from pybgl import (
+    make_incidence_automaton,
+    prune_incidence_automaton,
+    make_func_property_map,
+)
+
 
 G1 = make_incidence_automaton(
     [
@@ -15,6 +18,7 @@ G1 = make_incidence_automaton(
     ], 0,
     make_func_property_map(lambda q: q in {1})
 )
+
 
 def test_prune_incidence_automaton():
     assert len(set(G1.edges())) == 8

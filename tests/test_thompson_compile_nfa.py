@@ -1,17 +1,23 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-from pybgl.ipynb import in_ipynb, ipynb_display_graph
-from pybgl.nfa import Nfa
+from pybgl import (
+    Nfa,
+    in_ipynb,
+    ipynb_display_graph,
+    thompson_compile_nfa
+)
+
+# thompson_compile_nfa internals
 from pybgl.thompson_compile_nfa import (
     DEFAULT_ALPHABET,
     alternation, bracket, concatenation, literal,
     one_or_more,
     parse_bracket, parse_escaped, parse_repetition,
     repetition, repetition_range,
-    thompson_compile_nfa,
     zero_or_one, zero_or_more,
 )
+
 
 def nfa_to_triple(nfa) -> tuple:
     q0s = set(nfa.initials)
@@ -22,9 +28,11 @@ def nfa_to_triple(nfa) -> tuple:
     f = fs.pop()
     return (nfa, q0, f)
 
+
 def make_nfa1() -> Nfa:
     (nfa, q0, f) = literal("x")
     return nfa
+
 
 def make_nfa2() -> Nfa:
     g = Nfa(2)
@@ -33,11 +41,13 @@ def make_nfa2() -> Nfa:
     g.set_final(1)
     return g
 
+
 def test_literal():
     (nfa, q0, f) = literal("a")
     assert set(nfa.initials) == {0}
     assert set(nfa.finals()) == {1}
     assert nfa.delta(0, "a") == {1}
+
 
 def test_concatenation():
     (nfa1, q01, f1) = nfa_to_triple(make_nfa1())
@@ -47,6 +57,7 @@ def test_concatenation():
     assert nfa.accepts("x") is False
     assert nfa.accepts("aab") is False
 
+
 def test_alternation():
     (nfa1, q01, f1) = nfa_to_triple(make_nfa1())
     (nfa2, q02, f2) = nfa_to_triple(make_nfa2())
@@ -54,6 +65,7 @@ def test_alternation():
     assert nfa.accepts("xaab") is False
     assert nfa.accepts("x") is True
     assert nfa.accepts("aab") is True
+
 
 def test_zero_or_one():
     (nfa, q0, f) = nfa_to_triple(make_nfa1())
@@ -63,6 +75,7 @@ def test_zero_or_one():
     assert nfa.accepts("xx") is False
     assert nfa.accepts("a") is False
 
+
 def test_zero_or_more():
     (nfa, q0, f) = nfa_to_triple(make_nfa1())
     (nfa, q0, f) = zero_or_more(nfa, q0, f)
@@ -71,6 +84,7 @@ def test_zero_or_more():
     assert nfa.accepts("xx") is True
     assert nfa.accepts("a") is False
 
+
 def test_one_or_more():
     (nfa, q0, f) = nfa_to_triple(make_nfa1())
     (nfa, q0, f) = one_or_more(nfa, q0, f)
@@ -78,6 +92,7 @@ def test_one_or_more():
     assert nfa.accepts("x") is True
     assert nfa.accepts("xx") is True
     assert nfa.accepts("a") is False
+
 
 def test_parse_repetition():
     for (m, n) in [(0, 1), (0, None), (1, None), (3, 3), (2, 4), (2, None)]:
@@ -88,6 +103,7 @@ def test_parse_repetition():
             )
             assert parse_repetition(s) == (m, n)
 
+
 def test_repetition():
     (nfa, q0, f) = nfa_to_triple(make_nfa1())
     m = 4
@@ -96,6 +112,7 @@ def test_repetition():
     # Exactly m repetition
     for (i, w) in enumerate(words):
         assert nfa.accepts(w) == (i == m)
+
 
 def test_repetition_range():
     a = "a"
@@ -107,6 +124,7 @@ def test_repetition_range():
             w = a * i
             obtained = nfa.accepts(w)
             assert obtained == expected, f"(m, n) = {(m, n)} i = {i} w = {w}"
+
 
 def test_parse_bracket():
     map_input_expected = {
@@ -135,6 +153,7 @@ def test_parse_bracket():
     for (s, expected) in map_input_expected.items():
         assert sorted(parse_bracket(s)) == expected
 
+
 def test_parse_bracket_custom():
     s = "[X-Z03a-e]"
     chars = parse_bracket(s)
@@ -144,9 +163,11 @@ def test_parse_bracket_custom():
     for a in "ABC12456789fghi":
         assert nfa.accepts(a) is False
 
+
 def test_parse_bracket_escaped():
     s = r"[\s]"
     assert parse_bracket(s) == {' ', '\t'}
+
 
 def test_parse_escaped():
     assert parse_escaped(r"\.") == {"."}
@@ -172,6 +193,7 @@ def test_parse_escaped():
     assert parse_escaped(r"\t") == {"\t"}
     assert parse_escaped(r"\v") == {"\v"}
 
+
 def test_escaped_operator():
     (nfa, q0, f) = thompson_compile_nfa("a\\?b")
     assert nfa.accepts("a?b") is True
@@ -183,13 +205,17 @@ def test_escaped_operator():
     assert nfa.accepts("ab") is True
     assert nfa.accepts("b") is True
 
-    for regexp in r"\|", r"\.", r"\*", r"\+", r"\(", r"\)", r"\{", r"\}", r"\[", r"\]":
+    for regexp in (
+        r"\|", r"\.", r"\*", r"\+", r"\(", r"\)",
+        r"\{", r"\}", r"\[", r"\]"
+    ):
         (nfa, q0, f) = thompson_compile_nfa(regexp)
         assert nfa.accepts(regexp.replace("\\", ""))
 
     regexp = r"\|\.\*\+\(\)\{\}\[\]"
     (nfa, q0, f) = thompson_compile_nfa(regexp)
     nfa.accepts(regexp.replace("\\", ""))
+
 
 def test_escaped_classes():
     whole_alphabet = DEFAULT_ALPHABET
@@ -204,23 +230,31 @@ def test_escaped_classes():
             allowed = set(whole_alphabet) - allowed
         (nfa, q0, f) = thompson_compile_nfa(regexp, whole_alphabet)
         for a in whole_alphabet:
-            assert nfa.accepts(a) == (a in allowed), \
-                f"regexp = {regexp} a = '{a}' ({ord(a)}) allowed = '{allowed}' obtained = {nfa.accepts(a)} expected = {a in allowed}"
+            assert nfa.accepts(a) == (a in allowed), (
+                f"regexp = {regexp} "
+                f"a = '{a}' ({ord(a)}) "
+                f"allowed = '{allowed}' "
+                f"obtained = {nfa.accepts(a)} "
+                f"expected = {a in allowed}"
+            )
+
 
 def test_class_s():
     for r in (r"\s+", r"[\s]+"):
-        print(r)
+        # print(r)
         (nfa, q0, f) = thompson_compile_nfa(r)
         assert nfa.accepts(" ")
         assert nfa.accepts("   ")
         assert nfa.accepts("\t\t")
         assert nfa.accepts(" \t \t ")
 
+
 def test_thompson_compile_nfa():
     (nfa, q0, f) = thompson_compile_nfa("(a?b)*?c+d")
     if in_ipynb():
         ipynb_display_graph(nfa)
     assert nfa.accepts("babbbababcccccd")
+
 
 def test_thompson_compile_nfa_alternation():
     (nfa, q0, f) = thompson_compile_nfa("a*|b")
@@ -229,6 +263,7 @@ def test_thompson_compile_nfa_alternation():
     assert not nfa.accepts("bbbbb")
     assert nfa.accepts("b")
     assert nfa.accepts("aaaaaa")
+
 
 def test_thompson_compile_nfa_concatenation():
     (nfa, q0, f) = thompson_compile_nfa("a+b+")
@@ -239,6 +274,7 @@ def test_thompson_compile_nfa_concatenation():
     assert not nfa.accepts("bbb")
     assert nfa.accepts("ab")
     assert nfa.accepts("aaaaaabbbbbb")
+
 
 def test_thompson_compile_nfa_zero_or_one():
     (nfa, q0, f) = thompson_compile_nfa("(ab?)*")
@@ -251,6 +287,7 @@ def test_thompson_compile_nfa_zero_or_one():
     assert nfa.accepts("aba")
     assert not nfa.accepts("abb")
 
+
 def test_thompson_compile_nfa_zero_or_more():
     (nfa, q0, f) = thompson_compile_nfa("(ab+)*")
     if in_ipynb():
@@ -259,6 +296,7 @@ def test_thompson_compile_nfa_zero_or_more():
     assert not nfa.accepts("b")
     assert nfa.accepts("abbbbb")
     assert nfa.accepts("abbbbbabbbbbabbbbb")
+
 
 def test_thompson_compile_nfa_one_or_more():
     (nfa, q0, f) = thompson_compile_nfa("(ab+)+")
@@ -269,12 +307,16 @@ def test_thompson_compile_nfa_one_or_more():
     assert nfa.accepts("abbbbb")
     assert nfa.accepts("abbbbbabbbbbabbbbb")
 
+
 def test_thompson_compile_nfa_repetition():
     (nfa, q0, f) = thompson_compile_nfa("((ab){3})*")
     if in_ipynb():
         ipynb_display_graph(nfa)
     for i in range(7):
-        assert nfa.accepts("ab" * i) == (i % 3 == 0), f"w = {'ab' * i}, i = {i}"
+        assert nfa.accepts("ab" * i) == (i % 3 == 0), (
+            f"w = {'ab' * i}, i = {i}"
+        )
+
 
 def test_thompson_compile_nfa_bracket_repetitions():
     (nfa, q0, f) = thompson_compile_nfa("[x-z]{1,3}")
@@ -287,6 +329,7 @@ def test_thompson_compile_nfa_bracket_repetitions():
 
     (nfa, q0, f) = thompson_compile_nfa("x{3}")
     assert nfa.accepts("xxx")
+
 
 def test_thompson_compile_nfa_escaped_operators():
     regexp = r"\|\.\*\+\(\)\{\}\[\]aa"

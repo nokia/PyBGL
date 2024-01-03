@@ -2,13 +2,14 @@
 # -*- coding: utf-8 -*-
 
 from collections import defaultdict
-from pybgl.graph import (
+from pybgl import (
+    BLACK,
+    DefaultDepthFirstSearchVisitor,
     DirectedGraph, Graph, EdgeDescriptor, UndirectedGraph,
+    depth_first_search,
+    make_assoc_property_map,
 )
-from pybgl.depth_first_search import (
-    DefaultDepthFirstSearchVisitor, depth_first_search, BLACK
-)
-from pybgl.property_map import make_assoc_property_map
+
 
 class MyDepthFirstSearchVisitor(DefaultDepthFirstSearchVisitor):
     def __init__(self, verbose: bool = False):
@@ -17,15 +18,19 @@ class MyDepthFirstSearchVisitor(DefaultDepthFirstSearchVisitor):
         self.verbose = verbose
 
     def discover_vertex(self, u: int, g: Graph):
-        if self.verbose: print("discover %s" % u)
+        if self.verbose:
+            print(f"discover {u}")
         self.num_vertices += 1
 
     def examine_edge(self, e: EdgeDescriptor, g: Graph):
-        if self.verbose: print("examine %s" % e)
+        if self.verbose:
+            print(f"examine {e}")
         self.num_edges += 1
 
     def finish_vertex(self, u: int, g: Graph):
-        if self.verbose: print("finish %s" % u)
+        if self.verbose:
+            print(f"finish {u}")
+
 
 def make_g1(directed: bool) -> Graph:
     g1 = DirectedGraph(7) if directed else UndirectedGraph(7)
@@ -39,6 +44,7 @@ def make_g1(directed: bool) -> Graph:
     g1.add_edge(6, 4)
     return g1
 
+
 def make_g2(directed: bool) -> Graph:
     g2 = DirectedGraph(4) if directed else UndirectedGraph(4)
     g2.add_edge(0, 1)
@@ -48,10 +54,11 @@ def make_g2(directed: bool) -> Graph:
     g2.add_edge(3, 2)
     return g2
 
-def test_all():
+
+def test_dfs():
     for directed in [True, False]:
         for (i, g) in enumerate([make_g1(directed), make_g2(directed)]):
-            print("Processing G%s (directed = %s)" % (i, directed))
+            # print(f"Processing G{i} (directed = {directed})")
             vis = MyDepthFirstSearchVisitor(verbose=False)
             map_color = defaultdict(int)
             depth_first_search(0, g, make_assoc_property_map(map_color), vis)
@@ -61,14 +68,15 @@ def test_all():
             n_ = vis.num_vertices
             m_ = vis.num_edges
 
-            # Our graph are connected, so these assertion should be verified
-            assert n_ == n, "Visited %s/%s vertices" % (n_, n)
+            # Our graphs are connected, so these assertions should be verified
+            assert n_ == n, f"Visited {n_}/{n} vertices"
             if directed:
-                assert m_ == m, "Visited %s/%s edges" % (m_, m)
+                assert m_ == m, f"Visited {m_}/{m} edges"
             else:
-                # Undirected edges are visited forward and backward, so they are visited "twice"
-                # Not that (u -> u) arc would be only visited once.
-                assert m_ == 2 * m, "Visited %s/%s edges" % (m_, m)
+                # Undirected edges are visited forward and backward,
+                # so they are visited "twice"
+                # Note that (u -> u) arc would be only visited once.
+                assert m_ == 2 * m, f"Visited {m_}/{m}"
 
             # Finally, all vertices should all be BLACK
             for u in g.vertices():

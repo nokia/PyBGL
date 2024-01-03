@@ -2,26 +2,40 @@
 # -*- coding: utf-8 -*-
 
 from collections import defaultdict
-from pybgl.ipynb import in_ipynb
-from pybgl.graph import DirectedGraph
-from pybgl.graph_dp import GraphDp
-from pybgl.graphviz import graph_to_html
-from pybgl.html import html
-from pybgl.strong_components import strong_components
-from pybgl.property_map import make_assoc_property_map, make_func_property_map
+from pybgl import (
+    DirectedGraph,
+    EdgeDescriptor,
+    GraphDp,
+    ReadPropertyMap,
+    graph_to_html,
+    html,
+    in_ipynb,
+    make_assoc_property_map, make_func_property_map,
+    strong_components,
+)
 
-def edge_color(e, g, pmap_component, pmap_color, default_color = "black"):
+
+def edge_color(
+    e: EdgeDescriptor,
+    g: GraphDp,
+    pmap_component: ReadPropertyMap,
+    pmap_color: ReadPropertyMap,
+    default_color: str = "black"
+) -> str:
     """
     Returns the color assigned to an edge.
 
     Args:
-        e: An EdgeDescriptor.
-        g: A DirectedGraph.
-        pmap_component: A ReadPropertyMap, mapping a vertex with its strongly
+        e: The edge being processed.
+        g: The graph of being procesed.
+        pmap_component (ReadPropertyMap): Maps each vertex with its strongly
             connected component.
-        pmap_color: A ReadPropertyMap, mapping a component ID with a color.
-        default_color: color returned if the color of the source and the
-            target of e mismatch.
+        pmap_color (ReadPropertyMap): Maps a component ID with a color.
+        default_color (str): The color returned if the color of the source
+            and the target of e mismatch.
+
+    Returns:
+        The edge color.
     """
     u = g.source(e)
     v = g.target(e)
@@ -29,12 +43,22 @@ def edge_color(e, g, pmap_component, pmap_color, default_color = "black"):
     color_v = pmap_color[pmap_component[v]]
     return color_u if color_u == color_v else default_color
 
-def strong_components_to_html(g, pmap_color, pmap_component) -> str:
+
+def strong_components_to_html(
+    g: DirectedGraph,
+    pmap_color: ReadPropertyMap,
+    pmap_component: ReadPropertyMap
+) -> str:
     """
+    Run the GraphViz rendering for the :py:func:`strong_components` function.
+
     Args:
-        g: A DirectedGraph.
-        pmap_component: A ReadPropertyMap, mapping a vertex with its strongly
+        g (DirectedGraph): A DirectedGraph.
+        pmap_component (ReadPropertyMap): Maps each vertex with its strongly
             connected component.
+
+    Returns:
+        The corresponding HTML rendering.
     """
     return graph_to_html(
         g,
@@ -49,12 +73,15 @@ def strong_components_to_html(g, pmap_color, pmap_component) -> str:
             ),
             "style": make_func_property_map(
                 lambda e: (
-                    "solid" if edge_color(e, g, pmap_component, pmap_color, None)
+                    "solid" if edge_color(
+                        e, g, pmap_component, pmap_color, None
+                    )
                     else "dashed"
                 )
             ),
         }
     )
+
 
 def test_strong_components():
     # Create the graph
@@ -96,4 +123,8 @@ def test_strong_components():
     }
 
     if in_ipynb():
-        html(strong_components_to_html(g, pmap_color, pmap_component).replace("\\n", ""))
+        html(
+            strong_components_to_html(
+                g, pmap_color, pmap_component
+            ).replace("\\n", "")
+        )

@@ -1,20 +1,38 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-from pybgl.automaton import Automaton
-from pybgl.graph import Graph, DirectedGraph, UndirectedGraph
-from pybgl.graph_dp import GraphDp
-from pybgl.graphviz import (
+from collections import defaultdict
+from pybgl import (
+    Automaton,
+    DirectedGraph,
+    GraphDp,
     GraphvizStyle,
-    graphviz_escape_char,
-    graphviz_escape_html,
+    ReadWritePropertyMap,
+    ReadGraphvizVisitor,
+    UndirectedGraph,
     graph_to_html,
+    make_assoc_property_map,
+    make_func_property_map,
+    html,
+    in_ipynb,
+    ipynb_display_graph,
     read_graphviz
 )
-from pybgl.html import html
-from pybgl.ipynb import in_ipynb, ipynb_display_graph
+from pybgl.graphviz import (
+    graphviz_escape_char,
+    graphviz_escape_html,
+)
+
 
 WEIRD_CHARS = "&<>\n\t\r[]{}" + "".join([chr(i) for i in range(32)])
+
+
+def display_graph(g, *args, **kwargs):
+    if in_ipynb():
+        ipynb_display_graph(g, *args, **kwargs)
+    else:
+        _ = g.to_dot()
+
 
 def test_graphviz_escape_char():
     # All these characters must be escaped otherwise graphviz crashes.
@@ -22,10 +40,11 @@ def test_graphviz_escape_char():
     chars = WEIRD_CHARS
     for a in chars:
         escaped = graphviz_escape_char(a)
-        print(ord(a), escaped)
+        # print(ord(a), escaped)
         if a == escaped:
             invalid_escape.add(a)
     assert not invalid_escape
+
 
 def test_graph_to_html_with_weird_chars():
     g = Automaton(2)
@@ -34,8 +53,11 @@ def test_graph_to_html_with_weird_chars():
     if in_ipynb():
         ipynb_display_graph(g)
 
+
 def test_graphviz_escape_html():
-    assert graphviz_escape_html("<table><tr><td>foo</td></tr></table>") == "<table><tr><td>foo</td></tr></table>"
+    assert graphviz_escape_html(
+        "<table><tr><td>foo</td></tr></table>"
+    ) == "<table><tr><td>foo</td></tr></table>"
     assert graphviz_escape_html("<b>foo</b>") == "<b>foo</b>"
     assert graphviz_escape_html("<") == "&#60;"
     assert graphviz_escape_html(">") == "&#62;"
@@ -48,12 +70,14 @@ def test_graphviz_escape_html():
     assert graphviz_escape_html("<foo>") == "&#60;foo&#62;"
     assert graphviz_escape_html("<b>foo</b><bar>") == "<b>foo</b>&#60;bar&#62;"
 
+
 def test_graph_to_html():
     g = DirectedGraph(2)
     (e, _) = g.add_edge(0, 1)
-    shtml = graph_to_html(g)
+    _ = graph_to_html(g)
     if in_ipynb():
-        ipynb_display_graph(g)
+        display_graph(g)
+
 
 def make_graph(G):
     g = G(10)
@@ -63,15 +87,11 @@ def make_graph(G):
                 g.add_edge(u, v)
     return g
 
+
 def test_graph_to_html_with_pmaps():
     # Configure theme
-
     GraphvizStyle.set_fg_color("grey")
     GraphvizStyle.set_bg_color("transparent")
-    display_graph = ipynb_display_graph
-
-    from pybgl.graph_dp import GraphDp
-    from pybgl.property_map import make_func_property_map
 
     def vertex_filter(u):
         return u < 5
@@ -80,7 +100,8 @@ def test_graph_to_html_with_pmaps():
         return vertex_filter(g.source(e)) and vertex_filter(g.target(e))
 
     for G in [DirectedGraph, UndirectedGraph]:
-        html(str(G))
+        if in_ipynb():
+            html(str(G))
         g = make_graph(G)
 
         # Graph configuration display
@@ -108,8 +129,7 @@ def test_graph_to_html_with_pmaps():
         # Method1: call helper (ipynb_display_graph, graph_to_html)
         shtml = graph_to_html(g, dpv=dpv, dpe=dpe, dv=dv, de=de, vs=vs, es=es)
         assert isinstance(shtml, str)
-        if in_ipynb():
-            ipynb_display_graph(g, dpv=dpv, dpe=dpe, dv=dv, de=de, vs=vs, es=es)
+        display_graph(g, dpv=dpv, dpe=dpe, dv=dv, de=de, vs=vs, es=es)
 
         # Method2: use GraphDp. This offers the opportunity to export the
         # displayed graph to other export formats.
@@ -118,17 +138,22 @@ def test_graph_to_html_with_pmaps():
         # These two commands have the same outcome
         shtml = graph_to_html(gdp, vs=vs, es=es)
         assert isinstance(shtml, str)
-        shtml = graph_to_html(gdp, dpv=dpv, dpe=dpe, dv=dv, de=de, vs=vs, es=es)
+        shtml = graph_to_html(
+            gdp,
+            dpv=dpv, dpe=dpe, dv=dv, de=de, vs=vs, es=es
+        )
         assert isinstance(shtml, str)
 
-        if in_ipynb():
-            # These two commands have the same outcome
-            ipynb_display_graph(gdp, vs=vs, es=es)
-            ipynb_display_graph(gdp, dpv=dpv, dpe=dpe, dv=dv, de=de, vs=vs, es=es)
+        # These two commands have the same outcome
+        display_graph(gdp, vs=vs, es=es)
+        display_graph(gdp, dpv=dpv, dpe=dpe, dv=dv, de=de, vs=vs, es=es)
 
-def test_graph_to_html_with_html_sequences():
-    from collections import defaultdict
-    from pybgl.property_map import make_assoc_property_map
+
+def test_graph_to_html_with_html_sequences(debug: bool = False):
+
+    if not debug:
+        def print(*args, **kwargs):
+            pass
 
     g = DirectedGraph(2)
     (e, _) = g.add_edge(0, 1)
@@ -136,8 +161,8 @@ def test_graph_to_html_with_html_sequences():
     pmap_elabel = make_assoc_property_map(defaultdict(str))
     gdp = GraphDp(
         g,
-        dpv = {"label": pmap_vlabel},
-        dpe = {"label": pmap_elabel}
+        dpv={"label": pmap_vlabel},
+        dpe={"label": pmap_elabel}
     )
 
     for label in [
@@ -146,14 +171,15 @@ def test_graph_to_html_with_html_sequences():
         "<bar><b>foo</b>",
         "<font color='red'><b>foo</b></font>",
         # NB: foo.png must exists + graphviz imposes <img/> not <img>
-        #"<table><tr><td><img src='foo.png'/></td></tr></table>",
+        # "<table><tr><td><img src='foo.png'/></td></tr></table>",
     ]:
         print(f"{label} --> {graphviz_escape_html(label)}")
         pmap_vlabel[0] = pmap_vlabel[1] = pmap_elabel[e] = label
         shtml = graph_to_html(gdp)
         if in_ipynb():
             html(shtml)
-            ipynb_display_graph(gdp)
+        display_graph(gdp)
+
 
 # Graphviz file parsing
 def test_read_graphviz_simple():
@@ -165,19 +191,20 @@ def test_read_graphviz_simple():
         0->1;
     }"""
     read_graphviz(dot.splitlines(), g)
-    if in_ipynb():
-        ipynb_display_graph(g)
+    display_graph(g)
     assert g.num_vertices() == 3
     assert g.num_edges() == 1
 
+
 def test_read_graphviz_custom():
-    from collections import defaultdict
-    from pybgl.property_map import ReadWritePropertyMap, make_assoc_property_map
-    from pybgl.graphviz import ReadGraphvizVisitor
 
     class MyReadGraphvizVisitor(ReadGraphvizVisitor):
-        def __init__(self, g: Graph, pmap_vlabel: ReadWritePropertyMap, pmap_elabel: ReadWritePropertyMap):
-            super().__init__(g)
+        def __init__(
+            self,
+            pmap_vlabel: ReadWritePropertyMap,
+            pmap_elabel: ReadWritePropertyMap
+        ):
+            super().__init__()
             self.pmap_vlabel = pmap_vlabel
             self.pmap_elabel = pmap_elabel
 
@@ -199,13 +226,11 @@ def test_read_graphviz_custom():
         0->1 [label='my_label'];
     }"""
     vis = MyReadGraphvizVisitor(
-        g,
         make_assoc_property_map(map_vlabel),
         make_assoc_property_map(map_elabel)
     )
     read_graphviz(dot.splitlines(), g, vis)
-    if in_ipynb():
-        ipynb_display_graph(g)
+    display_graph(g)
     assert map_vlabel == {0: "red", 1: "green", 2: "blue"}, map_vlabel
     e_01 = next(iter(g.edges()))
     assert map_elabel == {e_01: "my_label"}, map_vlabel

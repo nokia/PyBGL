@@ -1,11 +1,26 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-from pybgl.graph import DirectedGraph
-from pybgl.graph_view import GraphView
-from pybgl.html import html
-from pybgl.ipynb import ipynb_display_graph
-from pybgl.property_map import make_func_property_map
+from pybgl import (
+    DirectedGraph,
+    GraphView,
+    html as _html,
+    in_ipynb, ipynb_display_graph,
+    make_func_property_map,
+)
+
+
+def display_graph(g, *args, **kwargs):
+    if in_ipynb():
+        ipynb_display_graph(g, *args, **kwargs)
+    else:
+        _ = g.to_dot()
+
+
+def html(s):
+    if in_ipynb():
+        _html(s)
+
 
 def make_graph() -> DirectedGraph:
     g = DirectedGraph(10)
@@ -14,16 +29,14 @@ def make_graph() -> DirectedGraph:
             g.add_edge(u, u + 1)
     return g
 
+
 def test_graph_view_default():
-    print("test_graph_view_default")
     g = make_graph()
     gv = GraphView(g)
     e = next(iter(gv.edges()))
-    print(e)
     assert gv.source(e) == 0
     assert gv.target(e) == 1
-    html("gv")
-    ipynb_display_graph(gv)
+    display_graph(gv)
     assert set(g.vertices()) == set(gv.vertices())
     assert set(g.edges()) == set(gv.edges())
     assert set(g.out_edges(0)) == set(gv.out_edges(0))
@@ -35,8 +48,7 @@ def test_graph_view_default():
             lambda u: bool(u % 3 != 0)
         )
     )
-    html("gv1")
-    ipynb_display_graph(gv1)
+    display_graph(gv1)
     assert gv1.num_vertices() == 6
     assert gv1.num_edges() == 3
 
@@ -47,26 +59,27 @@ def test_graph_view_default():
         )
     )
     html("gv2")
-    ipynb_display_graph(gv2)
+    display_graph(gv2)
     assert set(g.vertices()) == set(gv2.vertices())
     assert set(g.edges()) != set(gv2.edges())
     assert gv2.num_vertices() == g.num_vertices()
     assert gv2.num_edges() == 4
 
+
 def test_graph_view_or():
-    print("test_graph_view_or")
     g = make_graph()
     gv1 = GraphView(g, pmap_vrelevant=make_func_property_map(lambda u: u < 5))
     gv2 = GraphView(g, pmap_vrelevant=make_func_property_map(lambda u: u > 5))
     gv = gv1 | gv2
     html("gv1")
-    ipynb_display_graph(gv1)
+    display_graph(gv1)
     html("gv2")
-    ipynb_display_graph(gv2)
+    display_graph(gv2)
     html("gv1 | gv2")
-    ipynb_display_graph(gv)
+    display_graph(gv)
     assert gv.num_vertices() == 9
     assert gv.num_edges() == 7
+
 
 def test_graph_view_and():
     g = make_graph()
@@ -74,11 +87,11 @@ def test_graph_view_and():
     gv2 = GraphView(g, pmap_vrelevant=make_func_property_map(lambda u: u < 6))
     gv = gv1 & gv2
     html("gv1")
-    ipynb_display_graph(gv1)
+    display_graph(gv1)
     html("gv2")
-    ipynb_display_graph(gv2)
+    display_graph(gv2)
     html("gv1 & gv2")
-    ipynb_display_graph(gv)
+    display_graph(gv)
     assert set(g.vertices()) != set(gv.vertices())
     assert set(g.edges()) != set(gv.edges())
     assert set(g.out_edges(2)) != set(gv.out_edges(2))
@@ -88,17 +101,18 @@ def test_graph_view_and():
     assert gv.num_vertices() == 3
     assert gv.num_edges() == 2
 
+
 def test_graph_view_sub():
     g = make_graph()
     gv1 = GraphView(g, pmap_vrelevant=make_func_property_map(lambda u: u > 2))
     gv2 = GraphView(g, pmap_vrelevant=make_func_property_map(lambda u: u > 6))
     gv = gv1 - gv2
     html("gv1")
-    ipynb_display_graph(gv1)
+    display_graph(gv1)
     html("gv2")
-    ipynb_display_graph(gv2)
+    display_graph(gv2)
     html("gv1 - gv2")
-    ipynb_display_graph(gv)
+    display_graph(gv)
     assert set(g.vertices()) != set(gv.vertices())
     assert set(g.edges()) != set(gv.edges())
     assert gv.num_vertices() == 4

@@ -1,22 +1,23 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-from pybgl.breadth_first_search import (
+from pybgl import (
     DefaultBreadthFirstSearchVisitor,
-    breadth_first_search
-)
-from pybgl.depth_first_search import (
     DefaultDepthFirstSearchVisitor,
-    depth_first_search
+    IncidenceGraph,
+    breadth_first_search,
+    depth_first_search,
+    reverse_dict,
+    reverse_graph,
 )
-from pybgl.incidence_graph import IncidenceGraph
-from pybgl.reverse import reverse_dict, reverse_graph
+
 
 def test_revert_dict():
     d = {1: "a", 2: "b"}
     assert reverse_dict(d) == {"a": 1, "b": 2}
     d = {1: "a", 2: "b", 3: "b"}
     assert reverse_dict(d) == {"a": 1, "b": 3}
+
 
 def test_reverse_graph():
     g = IncidenceGraph(2)
@@ -36,6 +37,7 @@ def test_reverse_graph():
     assert [e for e in g.in_edges(0)] == [e01]
     assert [e for e in g.out_edges(0)] == []
 
+
 class RecordMixin:
     def __init__(self):
         self.vertices = list()
@@ -50,13 +52,16 @@ class RecordMixin:
     def edges_to_pairs(self, g):
         return [(g.source(e), g.target(e)) for e in self.edges]
 
+
 class RecordDfsVisitor(RecordMixin, DefaultDepthFirstSearchVisitor):
     def __init__(self):
         super().__init__()
 
+
 class RecordBfsVisitor(RecordMixin, DefaultBreadthFirstSearchVisitor):
     def __init__(self):
         super().__init__()
+
 
 def test_reverse_traversal():
     g = IncidenceGraph(4)

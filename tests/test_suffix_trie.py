@@ -1,12 +1,16 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-from pybgl.automaton import Automaton
-from pybgl.graphviz import graph_to_html
-from pybgl.html import html
-from pybgl.ipynb import in_ipynb
-from pybgl.suffix_trie import BOTTOM, factors, make_suffix_trie
-from pybgl.trie import Trie
+from pybgl import (
+    BOTTOM,
+    Trie,
+    make_suffix_trie,
+    graph_to_html,
+    html,
+    in_ipynb,
+    factors,
+)
+
 
 def test_factors():
     d = {
@@ -26,6 +30,7 @@ def test_factors():
         obtained = {factor for factor in factors(w)}
         assert expected == obtained
 
+
 def check(word, expected_num_vertices, max_len=None):
     t = make_suffix_trie(word, max_len=max_len)
     if in_ipynb():
@@ -35,11 +40,14 @@ def check(word, expected_num_vertices, max_len=None):
         assert t.is_final(q)
     assert not t.is_final(BOTTOM)
 
+
 def test_make_suffix_tree():
     check("ananas", 16)
 
+
 def test_make_suffix_tree_max_len():
     check("ananas", 10, max_len=3)
+
 
 def test_max_suffix_tree_g():
     g = Trie()

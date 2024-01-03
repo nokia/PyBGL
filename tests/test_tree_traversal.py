@@ -2,27 +2,39 @@
 # -*- coding: utf-8 -*-
 
 from collections import defaultdict
-from pybgl.graph import DirectedGraph, Graph
-from pybgl.graph_traversal import DefaultTreeTraversalVisitor, dfs_tree, bfs_tree
-from pybgl.property_map import ReadWritePropertyMap, make_assoc_property_map
+from pybgl import (
+    DirectedGraph, Graph,
+    DefaultTreeTraversalVisitor, dfs_tree, bfs_tree,
+    ReadWritePropertyMap, make_assoc_property_map,
+)
 
-# This visitor marks for each visited vertex how many vertices have been seen so far.
+
+# This visitor marks for each visited vertex how many vertices
+# have been discovered so far.
 class MyVisitor(DefaultTreeTraversalVisitor):
-    def __init__(self, pmap_order: ReadWritePropertyMap):
-        super(MyVisitor, self).__init__()
-        self.m_last_index = 0
-        self.m_pmap_order = pmap_order
+    def __init__(
+        self,
+        pmap_order: ReadWritePropertyMap,
+        debug: bool = False
+    ):
+        super().__init__()
+        self.last_index = 0
+        self.pmap_order = pmap_order
+        self.debug = debug
 
     def discover_vertex(self, u: int, g: Graph):
-        print("discover_vertex %s" % u)
-        self.m_pmap_order[u] = self.m_last_index
-        self.m_last_index += 1
+        if self.debug:
+            print(f"discover_vertex {u}")
+        self.pmap_order[u] = self.last_index
+        self.last_index += 1
 
-def make_binary_tree(n = 10):
+
+def make_binary_tree(n: int = 10):
     g = DirectedGraph(n)
     for u in range(n - 1):
         g.add_edge(int(u / 2), u + 1)
     return g
+
 
 def test_bfs_tree():
     map_order = defaultdict()
@@ -42,6 +54,7 @@ def test_bfs_tree():
         8: 8,
         9: 9,
     }
+
 
 def test_dfs_tree():
     map_order = defaultdict()

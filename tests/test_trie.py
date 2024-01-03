@@ -1,11 +1,8 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-from pybgl.html import html
-from pybgl.ipynb import in_ipynb
-from pybgl.graphviz import graph_to_html
-from pybgl.trie import Trie
-from pybgl.digital_sequence import DigitalSequence
+from pybgl import DigitalSequence, Trie, graph_to_html, html, in_ipynb
+
 
 def make_t1():
     t1 = Trie()
@@ -14,11 +11,13 @@ def make_t1():
     t1.insert("ananas")
     return t1
 
+
 def test_trie_string():
     t1 = make_t1()
     if in_ipynb():
         html(graph_to_html(t1))
     assert t1.num_vertices() == 17
+
 
 def make_t2():
     t2 = Trie()
@@ -26,11 +25,13 @@ def make_t2():
     t2.insert(DigitalSequence("bonsoir"))
     return t2
 
+
 def test_trie_digital_sequence():
     t2 = make_t2()
     if in_ipynb():
         html(graph_to_html(t2))
     assert t2.num_vertices() == 12
+
 
 def test_trie_trie():
     t1 = make_t1()
@@ -40,6 +41,7 @@ def test_trie_trie():
         html(graph_to_html(t1))
     assert t1.num_vertices() == 26
     assert t2.num_vertices() == 12
+
 
 def test_included_insertions():
     t3 = Trie()

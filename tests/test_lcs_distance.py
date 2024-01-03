@@ -1,16 +1,20 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-from pybgl.lcs_distance import lcs_distance, lcs_distance_naive
+from pybgl import lcs_distance
+from pybgl.lcs_distance import lcs_distance_naive
+
 
 WORDS = [
     "book", "books", "cake",
     "boo", "boon", "cook", "cake", "cape", "cart"
 ]
 
+
 def test_lcs_distance_identity():
     for w in ["", "abc"]:
         assert lcs_distance(w, w) == 0
+
 
 def test_lcs_distance_symmetry():
     w1 = "abcd"
@@ -19,6 +23,7 @@ def test_lcs_distance_symmetry():
     assert lcs_distance(w2, "") == lcs_distance("", w2)
     assert lcs_distance(w1, w2) == lcs_distance(w2, w1)
 
+
 def test_lcs_distance():
     for wi in WORDS:
         for wj in WORDS:
@@ -26,6 +31,7 @@ def test_lcs_distance():
                 d1 = lcs_distance_naive(wi, wj)
                 d2 = lcs_distance(wi, wj)
                 assert d1 == d2
+
 
 def test_lcs_distance_explicit():
     map_xy_expected = {

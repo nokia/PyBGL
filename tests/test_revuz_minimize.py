@@ -2,19 +2,20 @@
 # -*- coding: utf-8 -*-
 
 from collections import defaultdict
-from pybgl.graphviz import graph_to_html
-from pybgl.html import beside, html
-from pybgl.incidence_automaton import (
+from pybgl import (
     IncidenceAutomaton,
-    make_incidence_automaton
-)
-from pybgl.incidence_node_automaton import make_incidence_node_automaton
-from pybgl.ipynb import in_ipynb
-from pybgl.property_map import (
+    beside,
+    graph_to_html,
+    html,
+    in_ipynb,
+    make_incidence_node_automaton,
+    make_incidence_automaton,
     make_assoc_property_map,
-    make_func_property_map
+    make_func_property_map,
+    revuz_minimize,
 )
-from pybgl.revuz_minimize import revuz_height, revuz_minimize
+from pybgl.revuz_minimize import revuz_height
+
 
 # Internals
 
@@ -22,7 +23,12 @@ from pybgl.revuz_minimize import revuz_height, revuz_minimize
 #     def merging_states(self, q1: int, q2: int, g: IncidenceAutomaton):
 #         print("merging_states(%s, %s)" % (q1, q2))
 #
-#     def move_transition(self, e_old: EdgeDescriptor, e_new: EdgeDescriptor, g: IncidenceAutomaton):
+#     def move_transition(
+#         self,
+#         e_old: EdgeDescriptor,
+#         e_new: EdgeDescriptor,
+#         g: IncidenceAutomaton
+#     ):
 #         print("move_transition(%s, %s)" % (e_old, e_new))
 #
 #     def remove_vertex(self, u: int, g: IncidenceAutomaton):
@@ -41,15 +47,22 @@ def check_graph(g: IncidenceAutomaton, e_expected: set):
             obtained: {sorted(e_obtained)}
         """
 
+
 def _test_revuz_minimize(g: IncidenceAutomaton, e_expected: set):
     before_html = graph_to_html(g) if in_ipynb() else None
     revuz_minimize(g)
     if in_ipynb():
         after_html = graph_to_html(g)
-        html(beside(before_html, after_html, "Minimization", "Before", "After"))
+        html(
+            beside(
+                before_html,
+                after_html,
+                "Minimization",
+                "Before", "After"
+            )
+        )
     check_graph(g, e_expected)
 
-# Tests
 
 def test_revuz_height():
     g = make_incidence_node_automaton(
@@ -79,7 +92,8 @@ def test_revuz_height():
         html(graph_to_html(g))
 
     assert map_vheight == {0: 3, 1: 2, 2: 1, 3: 1, 4: 0}
-    assert max_height  == 3, f"Expected max_height = 3, got {max_height}"
+    assert max_height == 3, f"Expected max_height = 3, got {max_height}"
+
 
 def test_revuz_minimize_elabel():
     _test_revuz_minimize(
@@ -99,6 +113,7 @@ def test_revuz_minimize_elabel():
             (0, 2), (2, 3), (3, 5), (5, 7), (7, 8)
         }
     )
+
 
 def test_revuz_minimize_vlabel():
     _test_revuz_minimize(
@@ -123,6 +138,7 @@ def test_revuz_minimize_vlabel():
             (0, 1), (0, 2), (1, 4), (2, 3), (3, 5), (4, 6), (5, 6), (6, 8)
         }
     )
+
 
 def test_revuz_minimize_final():
     _test_revuz_minimize(

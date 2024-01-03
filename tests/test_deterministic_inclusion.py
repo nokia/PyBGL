@@ -1,12 +1,17 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-from pybgl.automaton import Automaton, make_automaton
-from pybgl.ipynb import in_ipynb
-from pybgl.property_map import make_func_property_map
-from pybgl.deterministic_inclusion import deterministic_inclusion
+from pybgl import (
+    Automaton,
+    deterministic_inclusion,
+    in_ipynb,
+    make_automaton,
+    make_func_property_map
+)
+
 
 TEMPLATE_HTML = "<div style='background-color:white;'>%s</div>"
+
 
 def make_dafsa1():
     return make_automaton(
@@ -17,6 +22,7 @@ def make_dafsa1():
         make_func_property_map(lambda q: q in {4})
     )
 
+
 def make_dafsa2():
     return make_automaton(
         [
@@ -25,6 +31,7 @@ def make_dafsa2():
         ], 0,
         make_func_property_map(lambda q: q in {4})
     )
+
 
 def make_fda1():
     return make_automaton(
@@ -35,6 +42,7 @@ def make_fda1():
         make_func_property_map(lambda q: q in {4})
     )
 
+
 def make_fda2():
     return make_automaton(
         [
@@ -42,6 +50,7 @@ def make_fda2():
         ], 0,
         make_func_property_map(lambda q: q in {1})
     )
+
 
 def check_deterministic_inclusion(
     g1: Automaton,
@@ -53,22 +62,27 @@ def check_deterministic_inclusion(
     obtained = deterministic_inclusion(g1, g2)
 
     if in_ipynb():
-        from pybgl.graphviz import graph_to_html
-        from pybgl.html     import html
-        l = list()
+        from pybgl import graph_to_html, html
+        results = list()
         if show_g1:
-            l += ["<b>A</b>",  TEMPLATE_HTML % graph_to_html(g1)]
+            results += ["<b>A</b>",  TEMPLATE_HTML % graph_to_html(g1)]
         if show_g2:
-            l += ["<b>A'</b>", TEMPLATE_HTML % graph_to_html(g2)]
-        result = "A c A'" if obtained == 1 else \
-                 "A = A'" if obtained == 0 else \
-                 "A' c A" if obtained == -1 else \
-                 "A ! A'" if obtained is None else \
-                 "??????"
-        l.append(result)
-        html("<br/>".join(l))
+            results += ["<b>A'</b>", TEMPLATE_HTML % graph_to_html(g2)]
+        result = (
+            "A c A'" if obtained == 1
+            else "A = A'" if obtained == 0
+            else "A' c A" if obtained == -1
+            else "A ! A'" if obtained is None
+            else "??????"
+        )
+        results.append(result)
+        html("<br/>".join(results))
 
-    assert obtained == expected, "obtained = %s expected = %s" % (obtained, expected)
+    assert obtained == expected, (
+        f"obtained = {obtained} "
+        f"expected = {expected}"
+    )
+
 
 def test_deterministic_inclusion_dafsa():
     g1 = make_dafsa1()
@@ -76,6 +90,7 @@ def test_deterministic_inclusion_dafsa():
     tests = [(g1, g2, -1), (g2, g1, 1), (g1, g1, 0), (g2, g2, 0)]
     for args in tests:
         check_deterministic_inclusion(*args)
+
 
 def test_deterministic_inclusion_fda():
     g1 = make_dafsa1()

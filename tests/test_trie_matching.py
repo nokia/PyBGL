@@ -1,11 +1,14 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-from pybgl.graphviz import graph_to_html
-from pybgl.html import html
-from pybgl.ipynb import in_ipynb
-from pybgl.trie import Trie
-from pybgl.trie_matching import trie_matching
+from pybgl import (
+    Trie,
+    graph_to_html,
+    html,
+    in_ipynb,
+    trie_matching,
+)
+
 
 def test_matching_tries():
     both = {"an", "banana"}

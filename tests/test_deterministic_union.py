@@ -1,10 +1,13 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-from pybgl.automaton import make_automaton
-from pybgl.ipynb import in_ipynb
-from pybgl.property_map import make_func_property_map
-from pybgl.deterministic_union import deterministic_union
+from pybgl import (
+    deterministic_union,
+    in_ipynb,
+    make_automaton,
+    make_func_property_map,
+)
+
 
 def make_dafsa1():
     return make_automaton(
@@ -15,6 +18,7 @@ def make_dafsa1():
         make_func_property_map(lambda q: q in {4})
     )
 
+
 def make_dafsa2():
     return make_automaton(
         [
@@ -23,6 +27,7 @@ def make_dafsa2():
         ], 0,
         make_func_property_map(lambda q: q in {4})
     )
+
 
 def test_deterministic_union(
     show_g1: bool = True,
@@ -34,8 +39,8 @@ def test_deterministic_union(
     g12 = deterministic_union(g1, g2)
 
     if in_ipynb():
-        from pybgl.graphviz import graph_to_html
-        from pybgl.html import html
+        from pybgl import graph_to_html
+        from pybgl import html
         lines = list()
         if show_g1:
             lines += ["<b>A</b>",  graph_to_html(g1)]

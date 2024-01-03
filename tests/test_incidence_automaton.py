@@ -1,129 +1,154 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-from pybgl.graphviz import graph_to_html
-from pybgl.property_map import make_func_property_map
-from pybgl.incidence_automaton import *
+from pybgl import (
+    BOTTOM,
+    IncidenceAutomaton,
+    graph_to_html,
+    make_func_property_map,
+    make_incidence_automaton,
+)
 
 G1 = make_incidence_automaton(
     [
         (0, 0, 'a'), (0, 1, 'b'),
         (1, 2, 'a'), (1, 1, 'b'),
         (2, 1, 'a'), (2, 1, 'b'),
-    ], 0, make_func_property_map(lambda q: q in {1})
+    ],
+    0,
+    make_func_property_map(lambda q: q in {1})
 )
 
 G2 = make_incidence_automaton(
     [
         (0, 0, 'a'), (0, 1, 'b'),
-    ], 0, make_func_property_map(lambda q: q in {1})
+    ],
+    0,
+    make_func_property_map(lambda q: q in {1})
 )
 
 G3 = make_incidence_automaton(
     [
         (0, 0, 'a'), (0, 1, 'b'),
-    ], 0, make_func_property_map(lambda q: False)
+    ],
+    0,
+    make_func_property_map(lambda q: False)
 )
 
 G4 = make_incidence_automaton(
     [
         (0, 0, 'a'), (0, 1, 'b'),
         (1, 1, 'b'), (1, 0, 'a')
-    ], 0, make_func_property_map(lambda q: q in {1})
+    ],
+    0,
+    make_func_property_map(lambda q: q in {1})
 )
 
 G5 = make_incidence_automaton(
     [
         (0, 0, 'a'), (0, 1, 'b'),
         (1, 1, 'b'), (1, 0, 'a')
-    ], 0, make_func_property_map(lambda q: False)
+    ],
+    0,
+    make_func_property_map(lambda q: False)
 )
 
+
 def test_incidence_automaton_initial():
-    assert initial(G1) == 0
+    assert G1.initial() == 0
+
 
 def test_incidence_automaton_final():
-    assert finals(G1) == {1}
+    assert G1.finals() == {1}
+
 
 def test_incidence_automaton_is_deterministic():
-    assert is_deterministic(G1) is True
+    assert G1.is_deterministic() is True
+
 
 def test_incidence_automaton_is_finite():
-    assert is_finite(G1) is True
+    assert G1.is_finite() is True
+
 
 def test_incidence_automaton_is_complete():
-    assert is_complete(G1) is True
-    assert is_complete(G2) is False
-    assert is_complete(G3) is False
-    assert is_complete(G4) is True
-    assert is_complete(G5) is True
+    assert G1.is_complete() is True
+    assert G2.is_complete() is False
+    assert G3.is_complete() is False
+    assert G4.is_complete() is True
+    assert G5.is_complete() is True
+
 
 def test_incidence_automaton_accepts():
-    assert accepts("", G1) is False
-    assert accepts("aaab", G1) is True
-    assert accepts("aaaba", G1) is False
-    assert accepts("aaabaa", G1) is True
-    assert accepts("aaabaabb", G1) is True
+    assert G1.accepts("") is False
+    assert G1.accepts("aaab") is True
+    assert G1.accepts("aaaba") is False
+    assert G1.accepts("aaabaa") is True
+    assert G1.accepts("aaabaabb") is True
+
 
 def test_incidence_automaton_sigma():
-    assert sigma(0, G1) == {"a", "b"}
-    assert sigma(1, G3) == set()
-    assert sigma(None, G1) == set()
+    assert G1.sigma(0) == {"a", "b"}
+    assert G3.sigma(1) == set()
+    assert G1.sigma(None) == set()
+
 
 def test_incidence_automaton_alphabet():
-    assert alphabet(G1) == {"a", "b"}
-    assert alphabet(G2) == {"a", "b"}
-    assert alphabet(G3) == {"a", "b"}
+    assert G1.alphabet() == {"a", "b"}
+    assert G2.alphabet() == {"a", "b"}
+    assert G3.alphabet() == {"a", "b"}
+
 
 def test_incidence_automaton_add_vertex():
     g = IncidenceAutomaton(2)
-    assert num_vertices(g) == 2
-    assert num_edges(g) == 0
-    q = add_vertex(g)
-    assert num_vertices(g) == 3
-    assert num_edges(g) == 0
+    assert g.num_vertices() == 2
+    assert g.num_edges() == 0
+    _ = g.add_vertex()
+    assert g.num_vertices() == 3
+    assert g.num_edges() == 0
+
 
 def test_incidence_automaton_add_edge():
     g = IncidenceAutomaton(3)
     a = 'a'
     b = 'b'
     c = 'c'
-    (u, v, w) = (q for q in vertices(g))
-    assert num_vertices(g) == 3
-    assert num_edges(g) == 0
-    assert delta(u, a, g) == BOTTOM
-    assert delta(u, b, g) == BOTTOM
-    assert delta(u, c, g) == BOTTOM
+    (u, v, w) = (q for q in g.vertices())
+    assert g.num_vertices() == 3
+    assert g.num_edges() == 0
+    assert g.delta(u, a) == BOTTOM
+    assert g.delta(u, b) == BOTTOM
+    assert g.delta(u, c) == BOTTOM
 
-    (e, added) = add_edge(u, v, a, g)
+    (e, added) = g.add_edge(u, v, a)
     assert added
-    assert source(e, g) == u
-    assert target(e, g) == v
-    assert label(e, g) == a
-    assert num_edges(g) == 1
-    assert delta(u, a, g) == v
-    assert delta(u, b, g) == BOTTOM
-    assert delta(u, c, g) == BOTTOM
+    assert g.source(e) == u
+    assert g.target(e) == v
+    assert g.label(e) == a
+    assert g.num_edges() == 1
+    assert g.delta(u, a) == v
+    assert g.delta(u, b) == BOTTOM
+    assert g.delta(u, c) == BOTTOM
 
-    (e, added) = add_edge(u, v, b, g)
+    (e, added) = g.add_edge(u, v, b)
     assert added
-    assert source(e, g) == u
-    assert target(e, g) == v
-    assert label(e, g) == b
-    assert num_edges(g) == 2
-    assert delta(u, a, g) == v
-    assert delta(u, b, g) == v
-    assert delta(u, c, g) == BOTTOM
+    assert g.source(e) == u
+    assert g.target(e) == v
+    assert g.label(e) == b
+    assert g.num_edges() == 2
+    assert g.delta(u, a) == v
+    assert g.delta(u, b) == v
+    assert g.delta(u, c) == BOTTOM
 
-    (e, added) = add_edge(u, w, c, g)
+    (e, added) = g.add_edge(u, w, c)
     assert added
-    assert source(e, g) == u
-    assert target(e, g) == w
-    assert label(e, g) == c
-    assert num_edges(g) == 3
-    assert delta(u, a, g) == v
-    assert delta(u, b, g) == v
-    assert delta(u, c, g) == w
+    assert g.source(e) == u
+    assert g.target(e) == w
+    assert g.label(e) == c
+    assert g.num_edges() == 3
+    assert g.delta(u, a) == v
+    assert g.delta(u, b) == v
+    assert g.delta(u, c) == w
+
 
 def test_remove_edge():
     transitions = [
@@ -132,25 +157,32 @@ def test_remove_edge():
         (2, 1, 'a'), (2, 1, 'b'),
     ]
 
-    g = make_incidence_automaton(transitions, 0, make_func_property_map(lambda q: q in {1}))
-    n = num_edges(g)
+    g = make_incidence_automaton(
+        transitions, 0,
+        make_func_property_map(lambda q: q in {1})
+    )
+    n = g.num_edges()
     assert n == 6
     for (u, v, a) in transitions:
-        (e, found) = edge(u, v, a, g)
+        (e, found) = g.edge(u, v, a)
         assert found
-        assert source(e, g) == u
-        assert target(e, g) == v
-        du = out_degree(u, g)
+        assert g.source(e) == u
+        assert g.target(e) == v
+        du = g.out_degree(u)
         assert isinstance(du, int)
-        dv = in_degree(v, g)
+        dv = g.in_degree(v)
         assert isinstance(dv, int)
-        remove_edge(e, g)
-        assert out_degree(u, g) == du - 1
-        assert in_degree(v, g) == dv - 1
+        g.remove_edge(e)
+        assert g.out_degree(u) == du - 1
+        assert g.in_degree(v) == dv - 1
         n -= 1
-        assert num_edges(g) == n
+        assert g.num_edges() == n
 
-def test_incidence_automaton_remove_vertex():
+
+def test_incidence_automaton_remove_vertex(debug: bool = False):
+    if not debug:
+        def print(*args, **kwargs):
+            pass
     g = make_incidence_automaton([
             (0, 0, 'a'), (0, 1, 'b'),
             (1, 2, 'a'), (1, 1, 'b'),
@@ -159,30 +191,38 @@ def test_incidence_automaton_remove_vertex():
             (0, 0, 'c'),
             (1, 0, 'c'),
             (2, 2, 'c')
-        ], 0, make_func_property_map(lambda q: q in {1})
+        ],
+        0,
+        make_func_property_map(lambda q: q in {1})
     )
-    assert num_vertices(g) == 3
-    assert num_edges(g) == 9
+    assert g.num_vertices() == 3
+    assert g.num_edges() == 9
 
     print("remove_vertex(0)")
-    remove_vertex(0, g)
-    assert num_vertices(g) == 2
-    assert num_edges(g) == 5
+    g.remove_vertex(0)
+    assert g.num_vertices() == 2
+    assert g.num_edges() == 5
 
     print("remove_vertex(2)")
-    remove_vertex(2, g)
-    assert num_vertices(g) == 1
-    assert num_edges(g) == 1
+    g.remove_vertex(2)
+    assert g.num_vertices() == 1
+    assert g.num_edges() == 1
 
     print("remove_vertex(1)")
-    remove_vertex(1, g)
-    assert num_vertices(g) == 0
-    assert num_edges(g) == 0
+    g.remove_vertex(1)
+    assert g.num_vertices() == 0
+    assert g.num_edges() == 0
+
 
 def test_incidence_automaton_graphviz():
-    svg = graph_to_html(G1)
+    _ = graph_to_html(G1)
 
-def test_incidence_automaton():
+
+def test_incidence_automaton(debug: bool = False):
+    if not debug:
+        def print(*args, **kwargs):
+            pass
+
     print("Testing num_vertices")
     g = IncidenceAutomaton(2)
     u = 0
@@ -191,7 +231,7 @@ def test_incidence_automaton():
     b = "b"
     c = "c"
     d = "d"
-    assert num_vertices(g) == 2
+    assert g.num_vertices() == 2
 
     # e1: (u, v, a)
     # e2: (u, v, b)
@@ -201,62 +241,62 @@ def test_incidence_automaton():
     # e6: (w, v, b)
 
     print("Testing edge (1)")
-    (e1, added1) = add_edge(u, v, a, g)
+    (e1, added1) = g.add_edge(u, v, a)
     assert added1
-    (e, found) = edge(u, v, a, g)
+    (e, found) = g.edge(u, v, a)
     assert found
     assert e == e1
 
     print("Testing *_degree and *_edges (1)")
-    assert {e for e in in_edges(v, g)} == {e1}
-    assert {e for e in out_edges(u, g)} == {e1}
-    assert out_degree(u, g) == 1
-    assert in_degree(v, g) == 1
-    assert num_edges(g) == 1
+    assert {e for e in g.in_edges(v)} == {e1}
+    assert {e for e in g.out_edges(u)} == {e1}
+    assert g.out_degree(u) == 1
+    assert g.in_degree(v) == 1
+    assert g.num_edges() == 1
 
     print("Testing edge (2)")
-    (e, found) = edge(u, v, a, g)
+    (e, found) = g.edge(u, v, a)
     assert found
     assert e == e1
 
     print("Testing *_degree and *_edges (2)")
-    (e2, added2) = add_edge(u, v, b, g)
+    (e2, added2) = g.add_edge(u, v, b)
     assert added2
-    assert {e for e in in_edges(v, g)} == {e1, e2}
-    assert {e for e in out_edges(u, g)} == {e1, e2}
-    assert out_degree(u, g) == 2
-    assert in_degree(v, g) == 2
-    assert num_edges(g) == 2
+    assert {e for e in g.in_edges(v)} == {e1, e2}
+    assert {e for e in g.out_edges(u)} == {e1, e2}
+    assert g.out_degree(u) == 2
+    assert g.in_degree(v) == 2
+    assert g.num_edges() == 2
 
     print("Testing add_vertex")
-    w = add_vertex(g)
-    assert num_vertices(g) == 3
-    (e3, added3) = add_edge(u, w, c, g)
-    (e4, added4) = add_edge(u, w, d, g)
-    assert {e for e in out_edges(u, g)} == {e1, e2, e3, e4}
-    assert {e for e in in_edges(w, g)} == {e3, e4}
-    assert num_edges(g) == 4
+    w = g.add_vertex()
+    assert g.num_vertices() == 3
+    (e3, added3) = g.add_edge(u, w, c)
+    (e4, added4) = g.add_edge(u, w, d)
+    assert {e for e in g.out_edges(u)} == {e1, e2, e3, e4}
+    assert {e for e in g.in_edges(w)} == {e3, e4}
+    assert g.num_edges() == 4
 
-    (e5, added3) = add_edge(w, v, a, g)
-    (e6, added4) = add_edge(w, v, b, g)
-    assert {e for e in out_edges(w, g)} == {e5, e6}
-    assert {e for e in in_edges(v, g)} == {e1, e2, e5, e6}
-    assert num_edges(g) == 6
+    (e5, added3) = g.add_edge(w, v, a)
+    (e6, added4) = g.add_edge(w, v, b)
+    assert {e for e in g.out_edges(w)} == {e5, e6}
+    assert {e for e in g.in_edges(v)} == {e1, e2, e5, e6}
+    assert g.num_edges() == 6
 
     print("Testing remove_edge(%s)" % e1)
-    remove_edge(e1, g)
-    assert num_edges(g) == 5
-    assert {e for e in out_edges(u, g)} == {e2, e3, e4}
-    assert {e for e in in_edges(v, g)} == {e2, e5, e6}
-    (e, found) = edge(u, v, a, g)
+    g.remove_edge(e1)
+    assert g.num_edges() == 5
+    assert {e for e in g.out_edges(u)} == {e2, e3, e4}
+    assert {e for e in g.in_edges(v)} == {e2, e5, e6}
+    (e, found) = g.edge(u, v, a)
     assert not found
-    (e, found) = edge(u, v, b, g)
+    (e, found) = g.edge(u, v, b)
     assert found
     assert e == e2
 
     print("Testing remove_vertex(%s)" % u)
-    remove_vertex(u, g)
-    assert num_vertices(g) == 2
-    assert num_edges(g) == 2
-    assert {e for e in out_edges(w, g)} == {e5, e6}
-    assert {e for e in in_edges(v, g)} == {e5, e6}
+    g.remove_vertex(u)
+    assert g.num_vertices() == 2
+    assert g.num_edges() == 2
+    assert {e for e in g.out_edges(w)} == {e5, e6}
+    assert {e for e in g.in_edges(v)} == {e5, e6}

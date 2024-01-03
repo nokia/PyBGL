@@ -1,16 +1,18 @@
 #!/usr/bin/env pytest-3
 # -*- coding: utf-8 -*-
 
-import sys
-
 from collections import defaultdict
-from pybgl.graph import DirectedGraph
-from pybgl.graph_dp import GraphDp
+from pybgl import (
+    DirectedGraph,
+    GraphDp,
+    dotstr_to_html,
+    html,
+    in_ipynb,
+    make_assoc_property_map,
+    make_func_property_map
+)
 from pybgl.graph_extract import graph_extract
-from pybgl.graphviz import dotstr_to_html
-from pybgl.html import html
-from pybgl.ipynb import in_ipynb
-from pybgl.property_map import make_assoc_property_map, make_func_property_map
+
 
 def _test_graph_extract_small(threshold: int = 50):
     g = DirectedGraph(5)
@@ -39,11 +41,13 @@ def _test_graph_extract_small(threshold: int = 50):
     )
 
     extracted_edges = set()
-    pmap_erelevant = make_func_property_map(lambda e: pmap_eweight[e] >= threshold)
+    pmap_erelevant = make_func_property_map(
+        lambda e: pmap_eweight[e] >= threshold
+    )
     graph_extract(
         0, g,
         pmap_erelevant=pmap_erelevant,
-        callback_edge_extract = lambda e, g: extracted_edges.add(e)
+        callback_edge_extract=lambda e, g: extracted_edges.add(e)
     )
 
     if in_ipynb():
@@ -52,12 +56,18 @@ def _test_graph_extract_small(threshold: int = 50):
             dotstr_to_html(
                 GraphDp(
                     g,
-                    dpe = {
+                    dpe={
                         "color": make_func_property_map(
-                            lambda e: "darkgreen" if pmap_extracted[e] else "lightgrey"
+                            lambda e: (
+                                "darkgreen" if pmap_extracted[e]
+                                else "lightgrey"
+                            )
                         ),
                         "style": make_func_property_map(
-                            lambda e: "solid" if pmap_extracted[e] else "dashed"
+                            lambda e: (
+                                "solid" if pmap_extracted[e]
+                                else "dashed"
+                            )
                         ),
                         "label": pmap_eweight,
                     }
@@ -80,6 +90,7 @@ def _test_graph_extract_small(threshold: int = 50):
             extracted: %s
             expected: %s
         """ % (threshold, sorted(extracted_edges), sorted(expected_edges))
+
 
 def test_graph_extract_small():
     for threshold in [0, 50, 100]:
