@@ -17,8 +17,8 @@ from .graphviz_impl import *
 
 class GraphvizOptsParser(HTMLParser):
     """
-    Implementation details for the: py:class:`ReadGraphvizVisitor` class.
-    used to parse the options related to a vertex or an edge.
+    The py:class:`GraphvizOptsVisitor` is
+    used to parse HTML content related to a vertex or an edge.
     """
     def __init__(self):
         """
@@ -41,11 +41,12 @@ class GraphvizOptsParser(HTMLParser):
 
 class GraphvizVisitor():
     """
-    Base of the: py:class:`GraphvizVisitor` class.
+    The py:class:`GraphvizVisitor`
+    is the base of the py:class:`ReadGraphvizVisitor` class.
     """
-    def on_vertex(self, line: str, u: int, opts: str):
+    def on_vertex(self, line: str, u: int, g: Graph, opts: str):
         pass
-    def on_edge(self, line: str, u: int, v: int, opts: str):
+    def on_edge(self, line: str, u: int, v: int, g: Graph, opts: str):
         pass
     def on_else(self, line: str):
         pass
@@ -57,16 +58,12 @@ class ReadGraphvizVisitor(GraphvizVisitor):
     initialize a: py:class:`Graph` instance from a
     Graphviz file.
     """
-    def __init__(self, g: Graph):
+    def __init__(self):
         """
         Constructor.
-
-        Args:
-            g: The graph to populate.
         """
         super().__init__()
-        self.m_g = g
-        self.m_aliases = dict()
+        self.aliases = dict()
 
     def on_install_vertex_property(self, u, g, key, value):
         pass
@@ -74,25 +71,26 @@ class ReadGraphvizVisitor(GraphvizVisitor):
     def on_install_edge_property(self, e, g, key, value):
         pass
 
-    def on_vertex(self, line: str, u_alias: int, opts: str) -> int:
-        u = self.m_g.add_vertex()
-        self.m_aliases[u_alias] = u
+    def on_vertex(self, line: str, u_alias: int, g: Graph, opts: str) -> int:
+        u = g.add_vertex()
+        self.aliases[u_alias] = u
         parser = GraphvizOptsParser()
         parser.feed(opts)
         for (key, value) in parser.items():
-            self.on_install_vertex_property(u, self.m_g, key, value)
+            self.on_install_vertex_property(u, g, key, value)
         return u
 
-    def on_edge(self, line: str, u_alias: int, v_alias: int, opts: str) -> EdgeDescriptor:
-        u = self.m_aliases[u_alias]
-        v = self.m_aliases[v_alias]
-        (e, added) = self.m_g.add_edge(u, v)
+    def on_edge(self, line: str, u_alias: int, v_alias: int, g: Graph, opts: str) -> EdgeDescriptor:
+        u = self.aliases[u_alias]
+        v = self.aliases[v_alias]
+        (e, added) = g.add_edge(u, v)
         assert added
         parser = GraphvizOptsParser()
         parser.feed(opts)
         for (key, value) in parser.items():
-            self.on_install_edge_property(e, self.m_g, key, value)
+            self.on_install_edge_property(e, g, key, value)
         return e
+
 
 PATTERN_SPACE = "\\s*"
 PATTERN_VERTEX_ID = "([0-9]+)"
@@ -128,16 +126,24 @@ def read_graphviz(iterable, g: Graph, vis: ReadGraphvizVisitor = None):
             instance.
     """
     if not vis:
-        vis = ReadGraphvizVisitor(g)
+        vis = ReadGraphvizVisitor()
+    if isinstance(iterable, str):
+        iterable = iterable.splitlines()
+
     for line in iterable:
         line = line.strip()
         m_v = RE_LINE_VERTEX.match(line)
         if m_v:
-            vis.on_vertex(line, int(m_v.group(1)), m_v.group(2))
+            u_alias = m_v.group(1)
+            opts = m_v.group(2)
+            vis.on_vertex(line, u_alias, g, opts)
             continue
         m_e = RE_LINE_EDGE.match(line)
         if m_e:
-            vis.on_edge(line, int(m_e.group(1)), int(m_e.group(2)), m_e.group(3))
+            u_alias = m_e.group(1)
+            v_alias = m_e.group(2)
+            opts = m_e.group(3)
+            vis.on_edge(line, u_alias, v_alias, g, opts)
             continue
         vis.on_else(line)
 
