@@ -8,6 +8,7 @@ import sys
 
 INFINITY = sys.maxsize
 
+
 class BinaryRelation:
     """
     :py:class:`BinaryRelation` is the base class to implement
@@ -25,6 +26,7 @@ class BinaryRelation:
             ``True`` if x and y satisfy the wrapped binary relation.
         """
         raise NotImplementedError()
+
 
 class Less(BinaryRelation):
     """
@@ -44,6 +46,7 @@ class Less(BinaryRelation):
         """
         return x < y
 
+
 class GreaterThan(BinaryRelation):
     """
     :py:class:`Less` is the functor that wraps the ``>``
@@ -62,12 +65,14 @@ class GreaterThan(BinaryRelation):
         """
         return x > y
 
+
 class BinaryOperator:
     """
     :py:class:`BinaryOperator` is the base class to implement
     a functor wrapping a binary operator.
     """
     pass
+
 
 class ClosedOperator(BinaryOperator):
     def __init__(self, absorbing: object):
@@ -102,10 +107,15 @@ class ClosedOperator(BinaryOperator):
             y (object): The right operand.
 
         Returns:
-            ``self.impl(x, y)`` if ``x`` and ``y`` are not :py:attr:`self.absorbing`,
+            ``self.impl(x, y)`` if ``x`` and ``y`` are
+            not :py:attr:`self.absorbing`,
             :py:attr:`self.absorbing` otherwise.
         """
-        return self.absorbing if x == self.absorbing or y == self.absorbing else self.impl(x, y)
+        return (
+            self.absorbing if x == self.absorbing or y == self.absorbing
+            else self.impl(x, y)
+        )
+
 
 class ClosedPlus(ClosedOperator):
     """
@@ -135,6 +145,7 @@ class ClosedPlus(ClosedOperator):
         """
         return x + y
 
+
 class ClosedTime(ClosedOperator):
     """
     :py:class:`BinaryOperator` is the base class to implement
@@ -163,6 +174,7 @@ class ClosedTime(ClosedOperator):
         """
         return x * y
 
+
 class ClosedMax(ClosedOperator):
     """
     :py:class:`BinaryOperator` is the base class to implement
@@ -190,6 +202,7 @@ class ClosedMax(ClosedOperator):
             :py:attr:`self.absorbing` otherwise.
         """
         return max(x, y)
+
 
 class ClosedMin(ClosedOperator):
     """

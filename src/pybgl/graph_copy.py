@@ -6,10 +6,13 @@ from collections import defaultdict
 from .graph import Graph, EdgeDescriptor
 from .depth_first_search import depth_first_search
 from .property_map import (
-    ReadWritePropertyMap, ReadPropertyMap,
-    make_assoc_property_map, make_func_property_map
+    ReadWritePropertyMap,
+    ReadPropertyMap,
+    make_assoc_property_map,
+    make_func_property_map,
 )
 from .graph_extract import DepthFirstSearchExtractVisitor
+
 
 class DepthFirstSearchCopyVisitor(DepthFirstSearchExtractVisitor):
     """
@@ -32,17 +35,24 @@ class DepthFirstSearchCopyVisitor(DepthFirstSearchExtractVisitor):
 
         Args:
             g_dup: Pass an empty graph.
-            pmap_vrelevant: A ``ReadPropertyMap{VertexDescriptor:  bool}`` which indicates
-                for each vertex whether if it must be duped or not.
-            pmap_erelevant: A ``ReadPropertyMap{EdgeDescriptor:  bool}`` which indicates
-                for each edge whether it is relevant or not.
-            pmap_vertices: A ``ReadWritePropertyMap{VertexDescriptor:  VertexDescriptor}``
-                which maps each vertex of ``g`` to the corresponding vertex in ``g_copy``.
-                Pass an empty property map.
-            pmap_edges: A ``ReadWritePropertyMap{EdgeDescriptor:  EdgeDescriptor}``
-                which maps each edge of ``g`` with the corresponding edge in ``g_copy``.
-                Pass ``None`` if unused, otherwise, pass an empty property map.
-            pmap_vcolor: A ``ReadWritePropertyMap{VertexDescriptor:  Color}`` which maps
+            pmap_vrelevant (ReadPropertyMap):
+                A ``ReadPropertyMap{VertexDescriptor:  bool}``
+                which indicates for each vertex whether if it must be
+                duped or not.
+            pmap_erelevant (ReadPropertyMap):
+                A ``ReadPropertyMap{EdgeDescriptor:  bool}``
+                which indicates for each edge whether it is relevant or not.
+            pmap_vertices (ReadWritePropertyMap):
+                A ``ReadWritePropertyMap{VertexDescriptor: VertexDescriptor}``
+                which maps each vertex of ``g`` to the corresponding vertex in
+                ``g_copy``. Pass an empty property map.
+            pmap_edges (ReadWritePropertyMap):
+                A ``ReadWritePropertyMap{EdgeDescriptor:  EdgeDescriptor}``
+                which maps each edge of ``g`` with the corresponding edge in
+                ``g_copy``. Pass ``None`` if unused, otherwise, pass an empty
+                property map.
+            pmap_vcolor (ReadWritePropertyMap):
+                A ``ReadWritePropertyMap{VertexDescriptor:  Color}`` which maps
                 each vertex with its status in the DFS walk.
                 Pass an empty property map.
                 See :py:func:`depth_first_search` for further details.
@@ -60,12 +70,12 @@ class DepthFirstSearchCopyVisitor(DepthFirstSearchExtractVisitor):
                 Pass ``None`` if unused.
         """
         super().__init__(pmap_vrelevant, pmap_erelevant, pmap_vcolor)
-        self.m_callback_dup_vertex = callback_dup_vertex
-        self.m_callback_dup_edge = callback_dup_edge
-        self.m_g_dup = g_dup
-        self.m_pmap_vertices = pmap_vertices
-        self.m_pmap_edges = pmap_edges
-        self.m_dup_vertices = set() # Needed to keep track of pmap_vertices
+        self.callback_dup_vertex = callback_dup_vertex
+        self.callback_dup_edge = callback_dup_edge
+        self.g_dup = g_dup
+        self.pmap_vertices = pmap_vertices
+        self.pmap_edges = pmap_edges
+        self.dup_vertices = set()  # Needed to keep track of pmap_vertices
 
     def dup_vertex(self, u: int, g: Graph) -> int:
         """
@@ -75,35 +85,32 @@ class DepthFirstSearchCopyVisitor(DepthFirstSearchExtractVisitor):
             u (int): The vertex descriptor of the duplicated node.
             g (Graph): The input graph.
         """
-        u_dup = self.m_g_dup.add_vertex()
-        self.m_pmap_vertices[u] = u_dup
-        self.m_dup_vertices.add(u)
-        if self.m_callback_dup_vertex:
-            self.m_callback_dup_vertex(u, g, u_dup, self.m_g_dup)
+        u_dup = self.g_dup.add_vertex()
+        self.pmap_vertices[u] = u_dup
+        self.dup_vertices.add(u)
+        if self.callback_dup_vertex:
+            self.callback_dup_vertex(u, g, u_dup, self.g_dup)
         return u_dup
 
     def start_vertex(self, s: int, g: Graph):
-        """
-        Overloads the :py:meth:`DepthFirstSearchExtractVisitor.start_vertex` method.
-        """
+        # Overloaded method
         self.dup_vertex(s, g)
 
     def examine_relevant_edge(self, e: EdgeDescriptor, g: Graph):
-        """
-        Overloads the :py:meth:`DepthFirstSearchExtractVisitor.examine_edge` method.
-        """
+        # Overloaded method
         u = g.source(e)
         v = g.target(e)
-        u_dup = self.m_pmap_vertices[u]
+        u_dup = self.pmap_vertices[u]
         v_dup = (
-            self.m_pmap_vertices[v] if v in self.m_dup_vertices
+            self.pmap_vertices[v] if v in self.dup_vertices
             else self.dup_vertex(v, g)
         )
-        (e_dup, _) = self.m_g_dup.add_edge(u_dup, v_dup)
-        if self.m_pmap_edges:
-            self.m_pmap_edges[e] = e_dup
-        if self.m_callback_dup_edge:
-            self.m_callback_dup_edge(e, g, e_dup, self.m_g_dup)
+        (e_dup, _) = self.g_dup.add_edge(u_dup, v_dup)
+        if self.pmap_edges:
+            self.pmap_edges[e] = e_dup
+        if self.callback_dup_edge:
+            self.callback_dup_edge(e, g, e_dup, self.g_dup)
+
 
 def graph_copy(
     s: int,
@@ -123,18 +130,18 @@ def graph_copy(
     Args:
         s: The VertexDescriptor of the source node.
         g: A Graph instance.
-        pmap_vrelevant: A ReadPropertyMap{VertexDescriptor:  bool} which indicates
-            for each vertex whether if it must be duped or not.
-            Only used if vis == None.
-        pmap_erelevant: A ReadPropertyMap{EdgeDescriptor:  bool} which indicates
+        pmap_vrelevant (ReadPropertyMap):
+            A ``ReadPropertyMap{VertexDescriptor: bool}``
+            which indicates for each vertex whether if it must be duped
+            or not. Only relevant if ``vis == None``.
+        pmap_erelevant (ReadPropertyMap):
+            A ``ReadPropertyMap{EdgeDescriptor: bool}`` which indicates
             for each edge whether if it must be duped or not.
-            Only used if vis == None.
-        callback_dup_vertex: Callback(u, g, u_dup, g_dup).
-            Pass None if irrelevant.
-        callback_dup_edge: Callback(e, g, e_dup, g_dup).
-            Pass None if irrelevant.
-        vis: Pass a custom DepthFirstSearchExtractVisitor or None.
-            This visitor must overload super()'s methods.
+            Only used if ``vis == None``.
+        callback_dup_vertex (callable): A ``Callback(u, g, u_dup, g_dup)``.
+            Pass ``None`` if irrelevant.
+        callback_dup_edge (callable): A ``Callback(e, g, e_dup, g_dup)``.
+            Pass ``None`` if irrelevant.
     """
     # Prepare the needed mappings.
     map_vcolor = defaultdict(int)
@@ -167,6 +174,5 @@ def graph_copy(
     # Copy g to g_copy according to pmap_erelevant using a DFS from s.
     depth_first_search(
         s, g, pmap_vcolor, vis,
-        if_push = lambda e, g: pmap_erelevant[e] and pmap_vrelevant[g.target(e)]
+        if_push=lambda e, g: pmap_erelevant[e] and pmap_vrelevant[g.target(e)]
     )
-

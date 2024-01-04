@@ -14,6 +14,7 @@ from .incidence_node_automaton import (
     IncidenceNodeAutomaton, EdgeDescriptor
 )
 
+
 class DefaultRevuzMinimizeVisitor:
     def merging_states(
         self,
@@ -25,7 +26,8 @@ class DefaultRevuzMinimizeVisitor:
         Method invoked when two states are about to be merged.
 
         Args:
-            q1 (int): The first merged state (about to become the merged state).
+            q1 (int): The first merged state (about to become
+                the merged state).
             q2 (int): The second merged state (about to be removed).
             g (IncidenceNodeAutomaton): The processed automaton.
         """
@@ -63,11 +65,13 @@ class DefaultRevuzMinimizeVisitor:
         their transitions.
 
         Args:
-            q1 (int): The first merged state (about to become the merged state).
+            q1 (int): The first merged state (about to become
+                the merged state).
             q2 (int): The second merged state (about to be removed).
             g (IncidenceNodeAutomaton): The processed automaton.
         """
         pass
+
 
 def revuz_height(
     g,
@@ -79,7 +83,8 @@ def revuz_height(
     The leaves have a height equal to ``0``.
 
     Args:
-        g (IncidenceNodeAutomaton): The input automaton. It MUST be acyclic.
+        g (IncidenceNodeAutomaton): The input automaton.
+            It MUST be acyclic.
         pmap_vheight (ReadWritePropertyMap): A
             ``ReadWritePropertyMap{VertexDescriptor: int}`` which maps
             each vertex with its height.
@@ -99,8 +104,8 @@ def revuz_height(
     while vertices_to_process:
         next_vertices_to_process = set()
         for v in vertices_to_process:
-            # pmap_vheight[v] = max(pmap_vheight[v], h). Note that max is not needed
-            # according to the traversal order.
+            # pmap_vheight[v] = max(pmap_vheight[v], h).
+            # Note that max is not needed according to the traversal order.
             pmap_vheight[v] = h
             for e in g.in_edges(v):
                 u = g.source(e)
@@ -108,6 +113,7 @@ def revuz_height(
         vertices_to_process = next_vertices_to_process
         h += 1
     return h - 1
+
 
 def revuz_minimize(
     g,
@@ -117,7 +123,8 @@ def revuz_minimize(
     vis: DefaultRevuzMinimizeVisitor = None
 ) -> int:
     """
-    Minimizes an acyclic automaton using the `Revuz algorithm <https://www.sciencedirect.com/science/article/pii/0304397592901423>`.
+    Minimizes an acyclic automaton using the `Revuz algorithm
+    <https://www.sciencedirect.com/science/article/pii/0304397592901423>`.
 
     Args:
         g (NodeAutomaton or Automaton): The automaton. It MUST be acyclic.
@@ -125,7 +132,8 @@ def revuz_minimize(
             that maps each vertex with its symbol.
             If labeling is purely edge-based, pass ``None``.
             If ``g`` is an :py:class:`Automaton`, you may pass ``None``.
-        pmap_elabel (ReadPropertyMap): A ``ReadWritePropertyMap{EdgeDescriptor:  Label}``.
+        pmap_elabel (ReadPropertyMap): A
+            ``ReadWritePropertyMap{EdgeDescriptor:  Label}``.
             If labeling is purely vertex-based, pass ``None``.
             If g is a :py:class:`NodeAutomaton`, you may pass ``None``.
         leaves: The leaves of the IncidenceNodeAutomaton.
@@ -141,7 +149,7 @@ def revuz_minimize(
     # iff all its successors have already been processed.
     map_vheight = defaultdict(int)
     pmap_vheight = make_assoc_property_map(map_vheight)
-    hmax = revuz_height(g, pmap_vheight)
+    _ = revuz_height(g, pmap_vheight)  # Init pmap_vheight
 
     # Mappings
     if not pmap_vlabel and isinstance(g, IncidenceNodeAutomaton):
@@ -150,7 +158,9 @@ def revuz_minimize(
         if isinstance(g, IncidenceAutomaton):
             pmap_elabel = make_func_property_map(g.label)
         elif isinstance(g, IncidenceNodeAutomaton):
-            pmap_elabel = make_func_property_map(lambda e: pmap_vlabel[g.target(e)])
+            pmap_elabel = make_func_property_map(
+                lambda e: pmap_vlabel[g.target(e)]
+            )
     assert pmap_vlabel or pmap_elabel
 
     def _make_signature(q: int) -> tuple:
@@ -168,7 +178,6 @@ def revuz_minimize(
     def _move_edge(e_old: EdgeDescriptor, q: int, r: int):
         a = pmap_elabel[e_old] if pmap_elabel else None
         g.remove_edge(e_old)
-        e_merge = None
 # Due to determinism, merging parents transitions should never be required.
 #
 #        for e in g.out_edges(q):
@@ -213,7 +222,8 @@ def revuz_minimize(
         for mergeable_states in map_aggregates.values():
             if len(mergeable_states) < 2:
                 continue
-            mergeable_states = sorted(mergeable_states) # Sort to get deterministic behavior
+            # Sort states to get deterministic behavior
+            mergeable_states = sorted(mergeable_states)
             q1 = mergeable_states[0]
             for q2 in mergeable_states[1:]:
                 vis.merging_states(q1, q2, g)

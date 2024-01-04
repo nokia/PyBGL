@@ -6,6 +6,7 @@
 
 from collections import defaultdict
 
+
 class PropertyMap:
     """
     The :py:class:`PropertyMap` expose the ``[]`` on top of an arbitrary object
@@ -63,6 +64,7 @@ class PropertyMap:
             "You are never supposed to delete a key from a PropertyMap"
         )
 
+
 class ReadPropertyMap(PropertyMap):
     """
     The :py:class:`ReadPropertyMap` is the base class for any
@@ -106,7 +108,10 @@ class ReadPropertyMap(PropertyMap):
             :py:class:`RuntimeError` as a :py:class:`ReadPropertyMap`
             is read-only.
         """
-        raise RuntimeError("Setting a value in a ReadPropertyMap is not allowed.")
+        raise RuntimeError(
+            "Setting a value in a ReadPropertyMap is not allowed."
+        )
+
 
 class FuncPropertyMap(ReadPropertyMap):
     """
@@ -124,13 +129,12 @@ class FuncPropertyMap(ReadPropertyMap):
             f (callable): A function which takes a key in parameter and
                 return the corresponding value.
         """
-        self.m_f = f
+        self.f = f
 
     def __getitem__(self, k: object) -> object:
-        """
-        Overloads the :py:meth:`ReadPropertyMap.__getitem__` method.
-        """
-        return self.m_f(k)
+        # Overloaded method
+        return self.f(k)
+
 
 def make_func_property_map(f: callable) -> FuncPropertyMap:
     """
@@ -150,6 +154,7 @@ def make_func_property_map(f: callable) -> FuncPropertyMap:
     """
     return FuncPropertyMap(f)
 
+
 class IdentityPropertyMap(ReadPropertyMap):
     """
     The :py:class:`IdentityPropertyMap` is a :py:class:`ReadPropertyMap` which
@@ -164,10 +169,9 @@ class IdentityPropertyMap(ReadPropertyMap):
         pass
 
     def __getitem__(self, k: object) -> object:
-        """
-        Overloads the :py:meth:`ReadPropertyMap.__getitem__` method.
-        """
+        # Overloaded method
         return k
+
 
 def identity_property_map():
     """
@@ -179,6 +183,7 @@ def identity_property_map():
         10
     """
     return IdentityPropertyMap()
+
 
 class ConstantPropertyMap(ReadPropertyMap):
     """
@@ -195,16 +200,16 @@ class ConstantPropertyMap(ReadPropertyMap):
             value (object): The only value that is returned by this
                 :py:class:`ConstantPropertyMap` instance.
         """
-        self.m_value = value
+        self.value = value
 
     def __getitem__(self, k: object) -> object:
-        """
-        Overloads the :py:meth:`ReadPropertyMap.__getitem__` method.
-        """
-        return self.m_value
+        # Overloaded method
+        return self.value
+
 
 def make_constant_property_map(value) -> ConstantPropertyMap:
     return ConstantPropertyMap(value)
+
 
 class ReadWritePropertyMap(PropertyMap):
     """
@@ -225,25 +230,21 @@ class ReadWritePropertyMap(PropertyMap):
         )
 
     def __getitem__(self, k: object) -> object:
-        """
-        Overloads the :py:meth:`ReadPropertyMap.__getitem__` method.
-        """
+        # Overloaded method
         raise NotImplementedError(
             "The ReadWritePropertyMap class is a virtual pure. "
             "You must inherit ReadWritePropertyMap and overload "
             "the __getitem__ and __setitem__ methods."
         )
-
 
     def __setitem__(self, k: object, v: object):
-        """
-        Overloads the :py:meth:`ReadPropertyMap.__setitem__` method.
-        """
+        # Overloaded method
         raise NotImplementedError(
             "The ReadWritePropertyMap class is a virtual pure. "
             "You must inherit ReadWritePropertyMap and overload "
             "the __getitem__ and __setitem__ methods."
         )
+
 
 class AssocPropertyMap(ReadWritePropertyMap):
     """
@@ -261,19 +262,16 @@ class AssocPropertyMap(ReadWritePropertyMap):
         """
         if not isinstance(d, defaultdict):
             raise TypeError(f"{d} is not a defaultdict instance: {type(d)}")
-        self.m_d = d
+        self.d = d
 
     def __getitem__(self, k: object) -> object:
-        """
-        Overloads the :py:meth:`ReadWritePropertyMap.__getitem__` method.
-        """
-        return self.m_d[k]
+        # Overloaded method
+        return self.d[k]
 
     def __setitem__(self, k: object, v: object):
-        """
-        Overloads the :py:meth:`ReadWritePropertyMap.__setitem__` method.
-        """
-        self.m_d[k] = v
+        # Overloaded method
+        self.d[k] = v
+
 
 def make_assoc_property_map(d: defaultdict):
     """
@@ -299,6 +297,7 @@ def make_assoc_property_map(d: defaultdict):
     """
     return AssocPropertyMap(d)
 
+
 def get(pmap: PropertyMap, k: object) -> object:
     """
     Retrieves the value related to a key from a property map.
@@ -312,6 +311,7 @@ def get(pmap: PropertyMap, k: object) -> object:
         property map.
     """
     return pmap[k]
+
 
 def put(pmap: ReadWritePropertyMap, k: object, v: object):
     """

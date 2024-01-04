@@ -9,6 +9,7 @@ from .graph import Graph, EdgeDescriptor
 from .graph_traversal import WHITE, GRAY, BLACK
 from .property_map import ReadWritePropertyMap, make_assoc_property_map
 
+
 class DefaultBreadthFirstSearchVisitor:
     """
     The :py:class:`DefaultBreadthFirstSearchVisitor` class is the base class
@@ -125,6 +126,7 @@ class DefaultBreadthFirstSearchVisitor:
         """
         pass
 
+
 def breadth_first_search_graph(
     g: Graph,
     sources: iter = None,
@@ -134,26 +136,28 @@ def breadth_first_search_graph(
     if_push: callable = None
 ):
     """
-    Non-recursive implementation of the
-    `Breadth First Search <https://en.wikipedia.org/wiki/Breadth-first_search>`__
+    Non-recursive implementation of the `Breadth First Search
+    <https://en.wikipedia.org/wiki/Breadth-first_search>`__
     algorithm, from multiple sources.
 
-    Based on `Boost breadth_first_search <https://www.boost.org/doc/libs/1_62_0/libs/graph/doc/breadth_first_search.html>`__,
+    Based on `Boost breadth_first_search
+    <https://www.boost.org/doc/libs/1_62_0/libs/graph/doc/breadth_first_search.html>`__,
     by Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek.
 
     Args:
         g (Graph): The graph being explored.
         sources (iter): An iterable over the source vertices.
             `Example:` ``g.vertices()``.
-        pmap_vcolor (ReadWritePropertyMap): A property map that maps each vertex
-            with its current color (:py:data:`WHITE`, :py:data:`GRAY`
-            or :py:data:`BLACK`)
+        pmap_vcolor (ReadWritePropertyMap): A property map that maps
+            each vertex with its current color (:py:data:`WHITE`,
+            :py:data:`GRAY` or :py:data:`BLACK`)
         vis (DefaultBreadthFirstSearchVisitor): An optional visitor.
         if_push (callable): A `callback(e, g) -> bool` where ``e`` is
             an arc of ``g`` that returns ``True`` if and only if the arc
             ``e`` is relevant.
             This is a legacy parameter. You should rather consider
-            to filter the irrelevant arcs using the :py:class:`GraphView` class.
+            to filter the irrelevant arcs using the :py:class:`GraphView`
+            class.
     """
     if pmap_vcolor is None:
         map_vcolor = defaultdict(int)
@@ -192,6 +196,7 @@ def breadth_first_search_graph(
         pmap_vcolor[u] = BLACK
         vis.finish_vertex(u, g)
 
+
 def breadth_first_search(
     s: int,
     g: Graph,
@@ -201,25 +206,27 @@ def breadth_first_search(
     if_push: callable = None
 ):
     """
-    Non-recursive implementation of the
-    `Breadth First Search <https://en.wikipedia.org/wiki/Breadth-first_search>`__,
+    Non-recursive implementation of the `Breadth First Search
+    <https://en.wikipedia.org/wiki/Breadth-first_search>`__,
     algorithm from a single source.
 
-    Based on `Boost breadth_first_search <https://www.boost.org/doc/libs/1_62_0/libs/graph/doc/breadth_first_search.html>`__
+    Based on `Boost breadth_first_search
+    <https://www.boost.org/doc/libs/1_62_0/libs/graph/doc/breadth_first_search.html>`__
     by Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek.
 
     Args:
         g (Graph): The graph being explored.
         s (int): The vertex descriptor of the source.
-        pmap_vcolor (ReadWritePropertyMap): A property map that maps each vertex
-            with its current color (:py:data:`WHITE`, :py:data:`GRAY`
-            or :py:data:`BLACK`)
+        pmap_vcolor (ReadWritePropertyMap): A property map that maps
+            each vertex with its current color (:py:data:`WHITE`,
+            :py:data:`GRAY` or :py:data:`BLACK`)
         vis (DefaultBreadthFirstSearchVisitor): An optional visitor.
         if_push (callable): A `callback(e, g) -> bool` where ``e`` is the
             an arc of ``g`` that returns ``True`` if and only if the arc
             ``e`` is relevant.
             This is a legacy parameter. You should rather consider
-            to filter the irrelevant arcs using the :py:class:`GraphView` class.
+            to filter the irrelevant arcs using the
+            :py:class:`GraphView` class.
     """
     if pmap_vcolor is None:
         map_vcolor = defaultdict(int)

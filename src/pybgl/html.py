@@ -16,6 +16,7 @@ def html(s: str):
     # or chart = charts.plot(...)
     display(chart)
 
+
 def beside(
     contents1: str,
     contents2: str,
@@ -27,8 +28,10 @@ def beside(
     Exports two HTML contents so that they are displayed beside.
 
     Args:
-        contents1 (str): A string containing the content displayed on the right.
-        contents2 (str): A string containing the content displayed on the left.
+        contents1 (str): A string containing the content displayed
+            on the right.
+        contents2 (str): A string containing the content displayed
+            on the left.
         title (str): A string containing the title of the figure.
         title1 (str): A string containing the caption of the left content.
         title2 (str): A string containing the caption of the right content.

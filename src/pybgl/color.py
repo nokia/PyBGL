@@ -7,59 +7,71 @@
 """
 This module provides utilities related to colors, handy to convert HTML color
 (HSV, HSL...) to the corresponding `Graphviz color <https://graphviz.org/>`__.
-This module is complementary to `colorsys <https://docs.python.org/2/library/colorsys.html>`__.
+This module is complementary to
+`colorsys <https://docs.python.org/2/library/colorsys.html>`__.
 """
 
-def hsv_to_hsl(h: float, s: float, v: float) -> tuple:
+
+def hsv_to_hsl(hue: float, saturation: float, value: float) -> tuple:
     """
     Computes an
-    `HSV to HSL color conversion <https://en.wikipedia.org/wiki/HSL_and_HSV#Interconversion>`__.
+    `HSV to HSL color conversion
+    <https://en.wikipedia.org/wiki/HSL_and_HSV#Interconversion>`__.
 
     Args:
-        h (float): the hue, in [0.0, 1.0].
-        s (float): the saturation, in [0.0, 1.0].
-        v (float): the value, [0.0, 1.0].
+        hue (float): The hue, in [0.0, 1.0].
+        saturation (float): The saturation, in [0.0, 1.0].
+        value (float): The value, [0.0, 1.0].
 
     Returns:
         The corresponding HSL normalized tuple.
     """
-    l = v * (1 - s / 2)
-    s = 0 if l == 0 or l == 1 else (v - l) / min(l, 1 - l)
-    return (h, s, l)
+    lightness = value * (1 - saturation / 2)
+    saturation = (
+        0 if lightness == 0 or lightness == 1
+        else (value - lightness) / min(lightness, 1 - lightness)
+    )
+    return (hue, saturation, lightness)
 
-def hsl_to_hsv(h: float, s: float, l: float) -> tuple:
+
+def hsl_to_hsv(hue: float, saturation: float, lightness: float) -> tuple:
     """
     Computes an
-    `HSL to HSV color conversion <https://en.wikipedia.org/wiki/HSL_and_HSV#Interconversion>`__.
+    `HSL to HSV color conversion
+    <https://en.wikipedia.org/wiki/HSL_and_HSV#Interconversion>`__.
 
     Args:
-        h (float): the hue, in [0.0, 1.0].
-        s (float): the saturation, in [0.0, 1.0].
-        l (float): the light, [0.0, 1.0].
+        hue (float): The hue, in [0.0, 1.0].
+        saturation (float): The saturation, in [0.0, 1.0].
+        lightness (float): The lightness, [0.0, 1.0].
 
     Returns:
-        The corresponding HSv normalized tuple.
+        The corresponding HSV normalized tuple.
     """
-    v = l + s * min(l, 1 - l)
-    s = 0 if v == 0 else 2 * (1 - l/v)
-    return (h, s, v)
+    value = lightness + saturation * min(lightness, 1 - lightness)
+    saturation = (
+        0 if value == 0
+        else 2 * (1 - lightness / value)
+    )
+    return (hue, saturation, value)
 
-def normalize_color_tuple(h: int, s: int, x: int) -> tuple:
+
+def normalize_color_tuple(hue: int, saturation: int, x: int) -> tuple:
     """
     Normalizes an HSV or HSL tuple.
 
     Args:
-        h (int): The hue, in {0, ..., 360}.
-        s (int): The saturation, in {0, ..., 100}.
-        x (int): The value or the light, {0, ..., 100}.
+        hue (int): The hue, in {0, ..., 360}.
+        saturation (int): The saturation, in {0, ..., 100}.
+        x (int): The value or the lightness, {0, ..., 100}.
 
     Returns:
         The corresponding normalized tuple.
     """
-    return (h / 360, s / 100, x / 100)
+    return (hue / 360, saturation / 100, x / 100)
 
-#TODO rename to html_color_to_graphviz
-def html_to_graphviz(color: str) -> str:
+
+def html_color_to_graphviz(color: str) -> str:
     """
     HTML to Graphviz color conversion.
 
@@ -68,20 +80,22 @@ def html_to_graphviz(color: str) -> str:
             ``"hsl(173, 71%, 56%)"``.
 
     Returns:
-        The corresponding graphviz color. This is exactly ``color`` if it does not
-        start with hsl.
+        The corresponding graphviz color. This is exactly
+        ``color`` if it does not start with hsl.
     """
     if color.startswith("hsl"):
         j = color.find("(")
         k = color.rfind(")")
-        (h, s, l) = [
-            int(val.replace("%", ""))
-            for val in color[j+1:k].split(",")
+        (hue, saturation, lightness) = [
+            int(x.replace("%", ""))
+            for x in color[j + 1: k].split(",")
         ]
-        (h, s, v) = hsl_to_hsv(*normalize_color_tuple(h, s, l))
+        (hue, saturation, value) = hsl_to_hsv(
+            *normalize_color_tuple(hue, saturation, lightness)
+        )
         return ", ".join([
             str(x)
-            for x in (h, s, v)
+            for x in (hue, saturation, value)
         ])
     else:
         return color

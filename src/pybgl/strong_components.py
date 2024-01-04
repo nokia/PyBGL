@@ -4,47 +4,59 @@
 # This file is part of the pybgl project.
 # https://github.com/nokia/pybgl
 
-import sys
 from collections import defaultdict, deque
 from .algebra import INFINITY
-from .depth_first_search import DefaultDepthFirstSearchVisitor, depth_first_search_graph
+from .depth_first_search import (
+    DefaultDepthFirstSearchVisitor,
+    depth_first_search_graph,
+)
 from .graph import DirectedGraph
-from .graph_traversal import WHITE
-from .property_map import ReadWritePropertyMap, make_assoc_property_map
+from .property_map import (
+    ReadWritePropertyMap,
+    make_assoc_property_map,
+)
+
 
 class TarjanVisitor(DefaultDepthFirstSearchVisitor):
-    def __init__(self,
-        pmap_component,
-        pmap_root,
-        pmap_discover_time,
-        stack
+    def __init__(
+        self,
+        pmap_component: ReadWritePropertyMap,
+        pmap_root: ReadWritePropertyMap,
+        pmap_discover_time: ReadWritePropertyMap,
+        stack: deque
     ):
-        self.m_total = 0  # Number of strongly connected components
-        self.m_pmap_component = pmap_component  # Map vertex with its component id
-        self.m_pmap_root = pmap_root  # Map vertex with its root vertex
-        self.m_pmap_discover_time = pmap_discover_time  # Map vertex with its iteration number
-        self.m_stack = stack  # Stack of visited vertices
-        self.m_dfs_time = 0  # Iteration number
-
-    @property
-    def total(self) -> int:
         """
-        Retrieves the total number of strongly connected components.
+        Constructor.
 
-        Returns:
-            The total number of strongly connected components.
+        Args:
+            pmap_component (ReadWritePropertyMap):
+                Map vertex with its component id
+                Pass an empty property map.
+            pmap_root (ReadWritePropertyMap):
+                Map vertex with its root vertex
+                Pass an empty property map.
+            pmap_discover_time (ReadWritePropertyMap):
+                Map vertex with its iteration number
+                Pass an empty property map.
+            stack (deque): Stack of visited vertices.
+                Pass an empty stack.
         """
-        return self.m_total
+        # Number of strongly connected components
+        self.total = 0
+        self.pmap_component = pmap_component
+        self.pmap_root = pmap_root
+        self.pmap_discover_time = pmap_discover_time
+        self.stack = stack
+        # Iteration number
+        self.dfs_time = 0
 
     def discover_vertex(self, u: int, g: DirectedGraph):
-        """
-        Overloads the :py:meth:`DefaultDepthFirstSearchVisitor.discover_vertex` method.
-        """
-        self.m_pmap_root[u] = u
-        self.m_pmap_component[u] = INFINITY
-        self.m_pmap_discover_time[u] = self.m_dfs_time
-        self.m_dfs_time += 1
-        self.m_stack.appendleft(u)
+        # Overloaded method
+        self.pmap_root[u] = u
+        self.pmap_component[u] = INFINITY
+        self.pmap_discover_time[u] = self.dfs_time
+        self.dfs_time += 1
+        self.stack.appendleft(u)
 
     def discover_min(self, u: int, v: int) -> int:
         """
@@ -59,39 +71,42 @@ class TarjanVisitor(DefaultDepthFirstSearchVisitor):
             ``v`` otherwise.
         """
         return (
-            u if self.m_pmap_discover_time[u] < self.m_pmap_discover_time[v]
+            u if self.pmap_discover_time[u] < self.pmap_discover_time[v]
             else v
         )
 
     def finish_vertex(self, u: int, g: DirectedGraph):
-        """
-        Overloads the :py:meth:`DefaultDepthFirstSearchVisitor.finish_vertex` method.
-        """
+        # Overloaded method
         for e in g.out_edges(u):
             v = g.target(e)
-            if self.m_pmap_component[v] == INFINITY:
+            if self.pmap_component[v] == INFINITY:
                 # u is attached to the "lowest" root among the root of u and v
-                self.m_pmap_root[u] = self.discover_min(
-                    self.m_pmap_root[u],
-                    self.m_pmap_root[v]
+                self.pmap_root[u] = self.discover_min(
+                    self.pmap_root[u],
+                    self.pmap_root[v]
                 )
 
-        if self.m_pmap_root[u] == u:
+        if self.pmap_root[u] == u:
             # The vertices stacked since u belong to the same component of u.
             while True:
-                v = self.m_stack.popleft()
-                self.m_pmap_component[v] = self.total
-                self.m_pmap_root[v] = u
+                v = self.stack.popleft()
+                self.pmap_component[v] = self.total
+                self.pmap_root[v] = u
                 if u == v:
                     break
-            self.m_total += 1
+            self.total += 1
 
-def strong_components(g: DirectedGraph, pmap_component: ReadWritePropertyMap) -> int:
+
+def strong_components(
+    g: DirectedGraph,
+    pmap_component: ReadWritePropertyMap
+) -> int:
     """
     Tarjan algorithm, used to discover in ``O(|V|+|E|)`` strongly connected
     component in an arbitrary directed graph.
 
-    Based on the `boost implementation <http://www.boost.org/doc/libs/1_64_0/boost/graph/strong_components.hpp>`__
+    Based on the `boost implementation
+    <http://www.boost.org/doc/libs/1_64_0/boost/graph/strong_components.hpp>`__
     by Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
 
     Key ideas: Consider an arbitrary directed graph:
@@ -101,16 +116,16 @@ def strong_components(g: DirectedGraph, pmap_component: ReadWritePropertyMap) ->
       vertex such as this lattice orders the component ID.
     - If the graph is traversed using a DFS, once a vertex is finished, we can
       assign to it a component.
-    - The ID assigned to a vertex is the number of strongly connected components
-      discovered so far.
+    - The ID assigned to a vertex is the number of strongly connected
+      components discovered so far.
     - The deeper is a component, the higher will be its identifier. The lattice
       orders the component IDs according to ``>=``.
 
     Args:
         g (DirectedGraph): The input graph.
-        pmap_component (ReadWritePropertyMap): The output property map that maps
-            each vertex with its component ID (the vertices having the same
-            component ID fall in the same strongly connected component).
+        pmap_component (ReadWritePropertyMap): The output property map that
+            maps each vertex with its component ID (the vertices having the
+            same component ID fall in the same strongly connected component).
     """
     map_vcolor = defaultdict(int)
     map_root = defaultdict(int)

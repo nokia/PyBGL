@@ -6,15 +6,17 @@
 
 from .automaton import Automaton
 from .parallel_breadth_first_search import (
-    ParallelBreadthFirstSearchVisitor, parallel_breadth_first_search
+    ParallelBreadthFirstSearchVisitor,
+    parallel_breadth_first_search,
 )
-from .suffix_trie import make_suffix_trie
+
 
 class ContradictionException(RuntimeError):
     """
     Exception raised when an automaton cannot be included in another one.
     """
     pass
+
 
 class DeterministicInclusionVisitor(ParallelBreadthFirstSearchVisitor):
     """
@@ -33,9 +35,11 @@ class DeterministicInclusionVisitor(ParallelBreadthFirstSearchVisitor):
 
         Args:
             q1 (int): A state of ``g1``.
-            g1 (Automaton): The automaton corresponding to left operand of the inclusion.
+            g1 (Automaton): The automaton corresponding to left operand of
+                the inclusion.
             q2 (int): A state of ``g2``.
-            g2 (Automaton): The automaton corresponding to right operand of the inclusion.
+            g2 (Automaton): The automaton corresponding to right operand of
+                the inclusion.
         """
         f1 = g1.is_final(q1)
         f2 = g2.is_final(q2)
@@ -52,23 +56,29 @@ class DeterministicInclusionVisitor(ParallelBreadthFirstSearchVisitor):
 
         Args:
             s1 (int): A initial state of ``g1``.
-            g1 (Automaton): The automaton corresponding to left operand of the inclusion.
+            g1 (Automaton): The automaton corresponding to left operand of
+                the inclusion.
             s2 (int): A initial of ``g2``.
-            g2 (Automaton): The automaton corresponding to right operand of the inclusion.
+            g2 (Automaton): The automaton corresponding to right operand
+                of the inclusion.
         """
         self.update(s1, g1, s2, g2)
 
     def discover_vertex(self, q1: int, g1: Automaton, q2: int, g2: Automaton):
         """
-        Method invoked when discovering the first time a ``(q1, q2)`` pair of states.
+        Method invoked when discovering the first time a ``(q1, q2)``
+        pair of states.
 
         Args:
             q1 (int): A state of ``g1``.
-            g1 (Automaton): The automaton corresponding to left operand of the inclusion.
+            g1 (Automaton): The automaton corresponding to left operand
+                of the inclusion.
             q2 (int): A state of ``g2``.
-            g2 (Automaton): The automaton corresponding to right operand of the inclusion.
+            g2 (Automaton): The automaton corresponding to right operand
+                of the inclusion.
         """
         self.update(q1, g1, q2, g2)
+
 
 def deterministic_inclusion(
     g1: Automaton,

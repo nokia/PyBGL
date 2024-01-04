@@ -6,8 +6,12 @@
 
 from collections import defaultdict
 from .graph import Graph, EdgeDescriptor
-from .depth_first_search import WHITE, DefaultDepthFirstSearchVisitor, depth_first_search
+from .depth_first_search import (
+    DefaultDepthFirstSearchVisitor,
+    depth_first_search
+)
 from .property_map import make_assoc_property_map
+
 
 def cut(s: int, g: Graph, in_cut: callable) -> set:
     """
@@ -25,9 +29,11 @@ def cut(s: int, g: Graph, in_cut: callable) -> set:
     class LeavesVisitor(DefaultDepthFirstSearchVisitor):
         def __init__(self, leaves: set):
             self.leaves = leaves
+
         def examine_edge(self, e: EdgeDescriptor, g: Graph):
             u = g.source(e)
             self.leaves.discard(u)
+
         def discover_vertex(self, u: int, g: Graph):
             self.leaves.add(u)
 
@@ -35,6 +41,7 @@ def cut(s: int, g: Graph, in_cut: callable) -> set:
         def __init__(self, in_cut, cutting_edges: set):
             self.in_cut = in_cut
             self.cutting_edges = cutting_edges
+
         def __call__(self, e: EdgeDescriptor, g: Graph) -> bool:
             is_cutting_edge = self.in_cut(e, g)
             if is_cutting_edge:
@@ -46,9 +53,9 @@ def cut(s: int, g: Graph, in_cut: callable) -> set:
     map_vcolor = defaultdict(int)
     depth_first_search(
         s, g,
-        pmap_vcolor = make_assoc_property_map(map_vcolor),
-        vis = LeavesVisitor(leaves),
-        if_push = IfPush(in_cut, cutting_edges)
+        pmap_vcolor=make_assoc_property_map(map_vcolor),
+        vis=LeavesVisitor(leaves),
+        if_push=IfPush(in_cut, cutting_edges)
     )
     return {
         g.target(e)

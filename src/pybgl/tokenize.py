@@ -51,6 +51,7 @@ class TokenizeVisitor:
         """
         pass
 
+
 def tokenize(tokenizer, s: str, vis: TokenizeVisitor = None):
     """
     Regexp-based string tokenizer. Useful to parse string

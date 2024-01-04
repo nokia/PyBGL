@@ -17,15 +17,13 @@
 # relative to the documentation root, use os.path.abspath to make it
 # absolute, like shown here.
 #
-import os
-import sys
 import pybgl
 
 # -- General configuration ---------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
-#
-# needs_sphinx = "1.0"
+
+needs_sphinx = "1.4"
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named "sphinx.ext.*") or your custom ones.
@@ -33,20 +31,28 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.viewcode",
-    "sphinx_mdinclude", # https://pypi.org/project/sphinx_mdinclude/
+    "sphinx_mdinclude",  # https://pypi.org/project/sphinx_mdinclude/
     "sphinx.ext.napoleon",
     "sphinx.ext.githubpages",
 ]
 
-# See https://github.com/JamesALeedham/Sphinx-Autosummary-Recursion/blob/master/docs/conf.py
-autosummary_generate = True        # Turn on sphinx.ext.autosummary
-autoclass_content = "both"         # Add __init__ doc (ie. params) to class summaries
-html_show_sourcelink = False       # Pass False to remove 'view source code' of the rst.
-autodoc_inherit_docstrings = True  # If no docstring, inherit from base class
-set_type_checking_flag = True      # Enable 'expensive' imports for sphinx_autodoc_typehints
-nbsphinx_allow_errors = True       # Continue through Jupyter errors
-#autodoc_typehints = "description" # Sphinx-native method. Not as good as sphinx_autodoc_typehints
-add_module_names = False           # Remove namespaces from class/method signatures
+# https://github.com/JamesALeedham/Sphinx-Autosummary-Recursion/blob/master/docs/conf.py
+# Turn on sphinx.ext.autosummary
+autosummary_generate = True
+# Add __init__ doc (ie. params) to class summaries
+autoclass_content = "both"
+# Pass False to remove 'view source code' of the rst.
+html_show_sourcelink = False
+# If no docstring, inherit from base class
+autodoc_inherit_docstrings = True
+# Enable 'expensive' imports for sphinx_autodoc_typehints
+set_type_checking_flag = True
+# Continue through Jupyter errors
+nbsphinx_allow_errors = True
+# Sphinx-native method. Not as good as sphinx_autodoc_typehints
+# autodoc_typehints = "description"
+# Remove namespaces from class/method signatures
+add_module_names = False
 
 
 # Add any paths that contain templates here, relative to this directory.
@@ -67,7 +73,11 @@ doc_title = project + " documentation"
 module_name = "pybgl"
 copyright = "2023, Nokia"
 author = "Marc-Olivier Buob"
-description = "PyBGL is a pure python3 graph library inspired from the BGL (Boost Graph Library). It gathers algorithms from the graph theory, language theory and dynamic programming background."
+description = (
+    "PyBGL is a pure python3 graph library inspired from the BGL "
+    "(Boost Graph Library). It gathers algorithms from the graph "
+    "theory, language theory and dynamic programming background."
+)
 category = ""
 
 # The version info for the project you're documenting, acts as replacement
@@ -206,6 +216,3 @@ texinfo_documents = [
         category
     ),
 ]
-
-
-

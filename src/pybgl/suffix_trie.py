@@ -8,6 +8,7 @@ from itertools import chain
 from .property_map import make_func_property_map
 from .trie import BOTTOM, Trie
 
+
 def slices(n, max_len: int = None) -> iter:
     """
     Makes an iterator that lists every possible slices between ``0`` and ``n``
@@ -26,13 +27,17 @@ def slices(n, max_len: int = None) -> iter:
         The corresponding iterator.
     """
     return chain(
-        ((0, 0), ), # Empty word
+        ((0, 0), ),  # Empty word
         (
             (i, j)
             for i in range(n)
-            for j in range(i + 1, min(n, i + max_len) + 1 if max_len else n + 1)
+            for j in range(
+                i + 1,
+                min(n, i + max_len) + 1 if max_len else n + 1
+            )
         )
     )
+
 
 def factors(s: str, max_len: int = None) -> iter:
     """
@@ -54,27 +59,27 @@ def factors(s: str, max_len: int = None) -> iter:
     n = len(s)
     return (s[i:j] for (i, j) in slices(n, max_len))
 
+
 def make_suffix_trie(w: str = "", max_len: int = None, g: Trie = None) -> Trie:
     """
-    Makes a :py:class:`Trie` instance that gathers all the factors of a given word.
+    Makes a :py:class:`Trie` instance that gathers all the factors
+    of a given word.
 
     Args:
         w (str): The input word.
-        max_len (int): The maximal length of the factors stored in the returned Trie.
+        max_len (int): The maximal length of the factors stored in
+            the returned :py:class:`Trie` instance.
             Pass ``None`` if not needed.
-        g (Trie): A reference output Trie.
+        g (Trie): A reference output :py:class:`Trie` instance.
             Pass ``None`` if not needed.
 
     Returns:
         The corresponding trie.
     """
     if g is None:
-        g = Trie()
+        g = Trie(pmap_vfinal=make_func_property_map(lambda q: q != BOTTOM))
     if g.num_vertices() == 0:
         g.add_vertex()
-
-    # TODO do this in SuffixTrie.__init__ the internal property map of Automaton
-    g.m_pmap_vfinal = make_func_property_map(lambda q: q != BOTTOM)
 
     # Naive implementation (slow)
     # g.insert("")

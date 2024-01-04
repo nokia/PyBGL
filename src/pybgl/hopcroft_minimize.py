@@ -9,10 +9,12 @@ from functools import reduce
 from .property_map import make_assoc_property_map
 from .incidence_automaton import IncidenceAutomaton
 
+
 def hopcroft_agglomerate_states(g: IncidenceAutomaton) -> set:
     """
     Initialization step of the
-    `Hopcroft minimization algorithm <https://fr.wikipedia.org/wiki/Algorithme_de_Hopcroft_de_minimisation_d%27un_automate_fini>`__.
+    `Hopcroft minimization algorithm
+    <https://fr.wikipedia.org/wiki/Algorithme_de_Hopcroft_de_minimisation_d%27un_automate_fini>`__.
 
     Args:
         g (IncidenceAutomaton): The input automaton.
@@ -59,7 +61,8 @@ def hopcroft_agglomerate_states(g: IncidenceAutomaton) -> set:
             aggregated_states = new_aggregated_states
     return aggregated_states
 
-def hopcroft_minimize(g :IncidenceAutomaton) -> IncidenceAutomaton:
+
+def hopcroft_minimize(g: IncidenceAutomaton) -> IncidenceAutomaton:
     """
     Runs the Hopcroft minimization algorithm.
 

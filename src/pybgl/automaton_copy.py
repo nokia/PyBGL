@@ -9,13 +9,16 @@ from collections import defaultdict
 from .automaton import Automaton, EdgeDescriptor
 from .depth_first_search import depth_first_search
 from .property_map import (
-    ReadWritePropertyMap, ReadPropertyMap,
-    make_assoc_property_map, make_func_property_map
+    ReadWritePropertyMap,
+    ReadPropertyMap,
+    make_assoc_property_map,
+    make_func_property_map,
 )
 from .graph_copy import DepthFirstSearchCopyVisitor
 
+
 # NOTE: This almost the same than graph_copy, but we have to manage
-# here the signature of add_edge, which differs :(
+# here the signature of add_edge, which differs :(
 
 class AutomatonCopyVisitor(DepthFirstSearchCopyVisitor):
     """
@@ -39,16 +42,17 @@ class AutomatonCopyVisitor(DepthFirstSearchCopyVisitor):
         u = g.source(e)
         v = g.target(e)
         a = g.label(e)
-        u_dup = self.m_pmap_vertices[u]
+        u_dup = self.pmap_vertices[u]
         v_dup = (
-            self.m_pmap_vertices[v] if v in self.m_dup_vertices else
+            self.pmap_vertices[v] if v in self.dup_vertices else
             self.dup_vertex(v, g)
         )
-        (e_dup, _) = self.m_g_dup.add_edge(u_dup, v_dup, a)
-        if self.m_pmap_edges:
-            self.m_pmap_edges[e] = e_dup
-        if self.m_callback_dup_edge:
-            self.m_callback_dup_edge(e, g, e_dup, self.m_g_dup)
+        (e_dup, _) = self.g_dup.add_edge(u_dup, v_dup, a)
+        if self.pmap_edges:
+            self.pmap_edges[e] = e_dup
+        if self.callback_dup_edge:
+            self.callback_dup_edge(e, g, e_dup, self.g_dup)
+
 
 def automaton_copy(
     s: int,
@@ -59,7 +63,7 @@ def automaton_copy(
     pmap_vertices: ReadWritePropertyMap = None,
     pmap_edges: ReadWritePropertyMap = None,
     callback_dup_vertex: callable = None,
-    callback_dup_edge: callable  = None
+    callback_dup_edge: callable = None
 ):
     """
     Copies a sub-graph from an Automaton according to an edge-based filtering
@@ -112,5 +116,5 @@ def automaton_copy(
     # Copy g to g_copy according to pmap_erelevant using a DFS from s.
     depth_first_search(
         s, g, pmap_vcolor, vis,
-        if_push = lambda e, g: pmap_erelevant[e] and pmap_vrelevant[g.target(e)]
+        if_push=lambda e, g: pmap_erelevant[e] and pmap_vrelevant[g.target(e)]
     )

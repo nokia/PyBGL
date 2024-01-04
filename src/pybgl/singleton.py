@@ -15,7 +15,8 @@ class Singleton(type):
     >>> x is y
     True
 
-    Based on this `thread <https://stackoverflow.com/questions/6760685/creating-a-singleton-in-python>`__.
+    Based on this `thread
+    <https://stackoverflow.com/questions/6760685/creating-a-singleton-in-python>`__.
     """
 
     s_instances = dict()
@@ -33,5 +34,8 @@ class Singleton(type):
             The singleton corresponding to ``cls``.
         """
         if cls not in cls.s_instances:
-            cls.s_instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+            cls.s_instances[cls] = super(Singleton, cls).__call__(
+                *args,
+                **kwargs
+            )
         return cls.s_instances[cls]

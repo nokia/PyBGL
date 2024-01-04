@@ -4,10 +4,10 @@
 # This file is part of the pybgl project.
 # https://github.com/nokia/pybgl
 
-def levenshtein_distance_naive(x :str, y :str) -> int:
+def levenshtein_distance_naive(x: str, y: str) -> int:
     """
-    Inefficient implementation of the
-    `Levenshtein distance <https://en.wikipedia.org/wiki/Levenshtein_distance>`__
+    Inefficient implementation of the `Levenshtein distance
+    <https://en.wikipedia.org/wiki/Levenshtein_distance>`__
     (no memoization).
     Prefer the :py:func:`levenshtein_distance` function.
 
@@ -16,8 +16,8 @@ def levenshtein_distance_naive(x :str, y :str) -> int:
         y (str): The right operand.
 
     Returns:
-        The minimal number of insertion/deletion/substitution operations needed to
-        transform `x` into `y`.
+        The minimal number of insertion/deletion/substitution
+        operations needed to transform `x` into `y`.
     """
     x_1 = x[1:]
     y_1 = y[1:]
@@ -32,10 +32,11 @@ def levenshtein_distance_naive(x :str, y :str) -> int:
         )
     )
 
+
 class LevenshteinDistance:
     """
-    The :py:class:`LevenshteinDistance` class is used to implement the memoization
-    used by the :py:func:`levenshtein_distance` function.
+    The :py:class:`LevenshteinDistance` class is used to implement
+    the memoization used by the :py:func:`levenshtein_distance` function.
     """
     def __init__(self, x: str, y: str):
         """
@@ -51,15 +52,17 @@ class LevenshteinDistance:
 
     def compute(self, i: int = 0, j: int = 0) -> int:
         """
-        Computes the `Levenshtein distance <https://en.wikipedia.org/wiki/Levenshtein_distance>`__, with memoization.
+        Computes the `Levenshtein distance
+        <https://en.wikipedia.org/wiki/Levenshtein_distance>`__,
+        with memoization.
 
         Args:
             i (int): The current index in ``self.x``.
             j (int): The current index in ``self.y``.
 
         Returns:
-            The minimal number of insertion/deletion/substitution operations needed to
-            transform ``x`` into ``y``.
+            The minimal number of insertion/deletion/substitution
+            operations needed to transform ``x`` into ``y``.
         """
         ret = self.memoize.get((i, j))
         if ret is None:
@@ -75,10 +78,11 @@ class LevenshteinDistance:
             )
         return ret
 
+
 def levenshtein_distance(x: str, y: str) -> int:
     """
-    Computes the
-    `Levenshtein distance <https://en.wikipedia.org/wiki/Levenshtein_distance>`__,
+    Computes the `Levenshtein distance
+    <https://en.wikipedia.org/wiki/Levenshtein_distance>`__,
     with memoization.
 
     Args:
@@ -86,7 +90,7 @@ def levenshtein_distance(x: str, y: str) -> int:
         y (str): The right operand.
 
     Returns:
-        The minimal number of insertion/deletion/substitution operations needed to
-        transform `x` into `y`.
+        The minimal number of insertion/deletion/substitution
+        operations needed to transform `x` into `y`.
     """
     return LevenshteinDistance(x, y).compute(0, 0)

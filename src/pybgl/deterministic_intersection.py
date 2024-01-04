@@ -6,16 +6,21 @@
 
 from .automaton import BOTTOM, Automaton, EdgeDescriptor
 from .parallel_breadth_first_search import (
-    ParallelBreadthFirstSearchVisitor, parallel_breadth_first_search
+    ParallelBreadthFirstSearchVisitor,
+    parallel_breadth_first_search,
 )
 from .product_mixin import ProductMixin
 
-class DeterministicIntersectionVisitor(ParallelBreadthFirstSearchVisitor, ProductMixin):
+
+class DeterministicIntersectionVisitor(
+    ParallelBreadthFirstSearchVisitor,
+    ProductMixin
+):
     """
     The :py:class:`DeterministicIntersectionVisitor` class is used
     to implement the :py:func:`deterministic_intersection` function.
     """
-    def __init__(self, g12 :Automaton):
+    def __init__(self, g12: Automaton):
         """
         Constructor.
 
@@ -34,17 +39,21 @@ class DeterministicIntersectionVisitor(ParallelBreadthFirstSearchVisitor, Produc
         a: str
     ):
         """
-        Method invoked when examining a pair of transitions for the first time.
+        Method invoked when examining a pair of transitions for the
+        first time.
 
         Args:
             e1 (int): A transition of ``g1``.
-            g1 (Automaton): The automaton corresponding to left operand of the intersection.
+            g1 (Automaton): The automaton corresponding to left operand
+                of the intersection.
             e2 (int): A transition of ``g2``.
-            g2 (Automaton): The automaton corresponding to right operand of the intersection.
+            g2 (Automaton): The automaton corresponding to right operand
+                of the intersection.
             a (str): The symbol that labels ``e1`` and ``e2``.
         """
         if g1.target(e1) is not BOTTOM and g2.target(e2) is not BOTTOM:
             self.add_product_edge(e1, g1, e2, g2)
+
 
 def deterministic_intersection(
     g1: Automaton,
@@ -53,7 +62,8 @@ def deterministic_intersection(
     vis: DeterministicIntersectionVisitor = None
 ):
     """
-    Computes the deterministic intersection of two deterministic finite automata.
+    Computes the deterministic intersection of two deterministic
+    finite automata.
 
     Args:
         g1 (Automaton): The left operand of the deterministic intersection.
@@ -67,12 +77,13 @@ def deterministic_intersection(
     if not vis:
         vis = DeterministicIntersectionVisitor(g12)
     parallel_breadth_first_search(
-        g1, g2, vis = vis,
-        if_push = lambda e1, g1, e2, g2: (
-            e1 is not None and g1.target(e1) and
-            e2 is not None and g2.target(e2)
+        g1, g2,
+        vis=vis,
+        if_push=lambda e1, g1, e2, g2: (
+            e1 is not None
+            and g1.target(e1)
+            and e2 is not None
+            and g2.target(e2)
         )
     )
     return g12
-
-

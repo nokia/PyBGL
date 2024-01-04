@@ -9,6 +9,7 @@ from .parallel_breadth_first_search import (
     ParallelBreadthFirstSearchVisitor, parallel_breadth_first_search
 )
 
+
 class TrieMatchingVisitor(ParallelBreadthFirstSearchVisitor):
     """
     The :py:class:`TrieMatchingVisitor` is used to implement
@@ -33,23 +34,18 @@ class TrieMatchingVisitor(ParallelBreadthFirstSearchVisitor):
         self.counters[i] += 1
 
     def start_vertex(self, s1: int, g1: Trie, s2: int, g2: Trie):
-        """
-        Overloads the
-        :py:meth:`ParallelBreadthFirstSearchVisitor.start_vertex` method.
-        """
+        # Overloaded method
         self.update(s1, g1, s2, g2)
 
     def discover_vertex(self, s1: int, g1: Trie, s2: int, g2: Trie):
-        """
-        Overloads the
-        :py:meth:`ParallelBreadthFirstSearchVisitor.discover_vertex` method.
-        """
+        # Overloaded method
         self.update(s1, g1, s2, g2)
+
 
 def trie_matching(
     g1: Trie,
     g2: Trie,
-    vis: TrieMatchingVisitor= None
+    vis: TrieMatchingVisitor = None
 ) -> list:
     """
     Checks how two :py:class:`Trie` instances overlap.

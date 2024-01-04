@@ -6,12 +6,15 @@
 
 import heapq
 
+
 class Comparable(object):
     """
     Wrapper used to define a custom pre-order for a given object.
 
     This class is inspired from ``functools.cmp_to_key`` and
-    `this discussion <https://stackoverflow.com/questions/8875706/heapq-with-custom-compare-predicate>`__. The objects to be sorted are wrapped in an instance
+    `this discussion
+    <https://stackoverflow.com/questions/8875706/heapq-with-custom-compare-predicate>`__.
+    The objects to be sorted are wrapped in an instance
     that implements the ``<`` operator called by the sorting function.
     """
     def __init__(self, obj: object, preorder: callable = None):
@@ -122,9 +125,11 @@ class Comparable(object):
         """
         return "Comparable(%r)" % self.obj
 
+
 def compare_to_key(preorder: callable):
     """
-    Convert a preorder to a key callback (used e.g. by sort functions in python).
+    Convert a preorder to a key callback
+    (used, e.g., by the :py:func:`sorted` function).
 
     Example:
         >>> key = compare_to_key(lambda a, b: a >= b)
@@ -134,6 +139,7 @@ def compare_to_key(preorder: callable):
             over the space of Elements.
     """
     return lambda x: Comparable(x, preorder)
+
 
 class Heap:
     """
@@ -154,9 +160,10 @@ class Heap:
             Heap([4, 3, 2, 2, 1])
 
         Args:
-            elements (iter): The elements used to initialize this `Heap`.
-            to_comparable (callable): A `callable` used to define the preorder used to sort
-                elements pushed in this `Heap`.
+            elements (iter): The elements used to initialize this
+                :py:class:`Heap` instance.
+            to_comparable (callable): A `callable` used to define the preorder
+                used to sort elements pushed in this :py:class:`Heap` instance.
         """
         self.to_comparable = (
             to_comparable if to_comparable is not None
@@ -164,7 +171,8 @@ class Heap:
         )
         self.index = 0
         if elements:
-            # We could use this heapsort as defined in this link, but sorted() is stable
+            # We could use this heapsort as defined in this link, but
+            # sorted() is stable.
             # https://docs.python.org/3/library/heapq.html
             self._data = list(
                 (self.to_comparable(element), i, element)
@@ -172,8 +180,8 @@ class Heap:
             )
             # Note that self._data is not sorted.
             # https://stackoverflow.com/questions/1046683/does-pythons-heapify-not-play-well-with-list-comprehension-and-slicing
-            heapq.heapify(self._data) # Or self._data = sorted(self._data)
-            self.index = len(self._data) # Tie-break on insertion order.
+            heapq.heapify(self._data)  # Or self._data = sorted(self._data)
+            self.index = len(self._data)  # Tie-break on insertion order.
         else:
             self._data = list()
 
@@ -184,7 +192,14 @@ class Heap:
         Args:
             element (object): The object to be pushed.
         """
-        heapq.heappush(self._data, (self.to_comparable(element), self.index, element))
+        heapq.heappush(
+            self._data,
+            (
+                self.to_comparable(element),
+                self.index,
+                element
+            )
+        )
         self.index += 1
 
     def decrease_key(self, element: object):

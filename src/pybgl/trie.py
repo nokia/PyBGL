@@ -6,24 +6,31 @@
 
 from collections import defaultdict
 from .automaton import *
+# from .automaton import (
+#     BOTTOM,
+#     Automaton,
+#     EdgeDescriptor,
+#     automaton_insert_string,
+# )
 from .parallel_breadth_first_search import (
-    WHITE, ParallelBreadthFirstSearchVisitor, parallel_breadth_first_search
+    ParallelBreadthFirstSearchVisitor,
+    parallel_breadth_first_search
 )
 from .property_map import make_assoc_property_map
 
+
 class Trie(Automaton):
     """
-    A `trie <https://en.wikipedia.org/wiki/Trie>`__ is, also called digital tree or
-    prefix tree, is a type of k-ary search tree, a tree data structure used for
-    locating specific keys from within a set.
+    A `trie <https://en.wikipedia.org/wiki/Trie>`__ is, also called
+    digital tree or prefix tree, is a type of k-ary search tree, a
+    tree data structure used for locating specific keys from within a set.
 
     The :py:class:`Trie` specializes the :py:class:`Automaton` class for trees.
     """
     def __init__(self, *args, **kwargs):
-        """
-        Constructor. Overloads :py:meth:`Automaton.__init__`.
-        """
-        super().__init__(num_vertices = 1, *args)
+        # Overloaded constructor
+        num_vertices = kwargs.pop("num_vertices", 1)
+        super().__init__(*args, num_vertices=num_vertices, **kwargs)
 
     def insert(self, x: object):
         """
@@ -37,12 +44,11 @@ class Trie(Automaton):
             trie_deterministic_fusion(self, x)
 
     def num_edges(self) -> int:
-        """
-        Overloads :py:meth:`Automaton.num_edges`.
-        """
+        # Overloaded method
         # Optimization
-        n = num_vertices(self)
+        n = self.num_vertices()
         return n - 1 if n else 0
+
 
 class TrieDeterministicFusion(ParallelBreadthFirstSearchVisitor):
     """
@@ -56,13 +62,10 @@ class TrieDeterministicFusion(ParallelBreadthFirstSearchVisitor):
         self.map_q2_q1 = dict()
 
     def start_vertex(self, q01: int, g1: Trie, q02: int, g2: Trie):
-        """
-        Overloads the
-        :py:meth:`ParallelBreadthFirstSearchVisitor.start_vertex` method.
-        """
+        # Overloaded method
         self.map_q2_q1[q02] = q01
-        if is_final(q02, g2):
-            set_final(q01, g1)
+        if g2.is_final(q02):
+            g1.set_final(q01)
 
     def examine_edge(
         self,
@@ -72,25 +75,25 @@ class TrieDeterministicFusion(ParallelBreadthFirstSearchVisitor):
         g2: Trie,
         a: str
     ):
-        """
-        Overloads the
-        :py:meth:`ParallelBreadthFirstSearchVisitor.examine_edge` method.
-        """
-        r2 = target(e2, g2) if e2 else BOTTOM
-        if e1 is None or target(e1, g1) is BOTTOM:
+        # Overloaded method
+        r2 = g2.target(e2) if e2 else BOTTOM
+        if e1 is None or g1.target(e1) is BOTTOM:
             q1 = None
-            if e1 is None: # new arc, disconnect from the original g1
-                q1 = self.map_q2_q1[source(e2, g2)]
-            elif target(e1, g1) is BOTTOM: # new arc, connected to the original g1
-                q1 = source(e1, g1)
+            if e1 is None:
+                # New arc, disconnected from the original g1
+                q1 = self.map_q2_q1[g2.source(e2)]
+            elif g1.target(e1) is BOTTOM:
+                # New arc, connected to the original g1
+                q1 = g1.source(e1)
             assert q1 is not None
-            r1 = add_vertex(g1)
+            r1 = g1.add_vertex()
             self.map_q2_q1[r2] = r1
-            add_edge(q1, r1, a, g1)
+            g1.add_edge(q1, r1, a)
         else:
-            r1 = target(e1, g1)
-        if r2 is not BOTTOM and is_final(r2, g2):
-            set_final(r1, g1)
+            r1 = g1.target(e1)
+        if r2 is not BOTTOM and g2.is_final(r2):
+            g1.set_final(r1)
+
 
 def trie_deterministic_fusion(g1: Trie, g2: Trie):
     """
@@ -104,7 +107,7 @@ def trie_deterministic_fusion(g1: Trie, g2: Trie):
     """
     parallel_breadth_first_search(
         g1, g2,
-        vis = TrieDeterministicFusion(),
-        if_push = lambda e1, g1, e2, g2: e2 is not None,
-        pmap_vcolor = make_assoc_property_map(defaultdict(int))
+        vis=TrieDeterministicFusion(),
+        if_push=lambda e1, g1, e2, g2: e2 is not None,
+        pmap_vcolor=make_assoc_property_map(defaultdict(int))
     )

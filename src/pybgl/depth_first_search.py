@@ -9,6 +9,7 @@ from .graph import Graph, EdgeDescriptor
 from .graph_traversal import WHITE, GRAY, BLACK
 from .property_map import ReadWritePropertyMap, make_assoc_property_map
 
+
 class DefaultDepthFirstSearchVisitor:
     """
     The :py:class:`DefaultDepthFirstSearchVisitor` class is the base class
@@ -28,7 +29,8 @@ class DefaultDepthFirstSearchVisitor:
 
     def start_vertex(self, s: int, g: Graph):
         """
-        Method invoked on the source vertex once before the start of the search.
+        Method invoked on the source vertex once before the start of
+        the search.
 
         Args:
             s (int): The source vertex.
@@ -101,6 +103,7 @@ class DefaultDepthFirstSearchVisitor:
         """
         pass
 
+
 def depth_first_search(
     s: int,
     g: Graph,
@@ -114,21 +117,23 @@ def depth_first_search(
     `Depth First Search <https://en.wikipedia.org/wiki/Depth-first_search>`__
     algorithm, from a single source.
 
-    Based on `depth_first_search.hpp <https://www.boost.org/doc/libs/1_67_0/libs/graph/doc/depth_first_search.html>`__,
+    Based on `depth_first_search.hpp
+    <https://www.boost.org/doc/libs/1_67_0/libs/graph/doc/depth_first_search.html>`__,
     by Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
 
     Args:
         s (int): The vertex descriptor of the source vertex.
         g (Graph): The graph being explored.
-        pmap_vcolor (ReadWritePropertyMap): A property map that maps each vertex
-            with its current color (:py:data:`WHITE`, :py:data:`GRAY`
+        pmap_vcolor (ReadWritePropertyMap): A property map that maps each
+            vertex with its current color (:py:data:`WHITE`, :py:data:`GRAY`
             or :py:data:`BLACK`)
         vis (DefaultBreadthFirstSearchVisitor): An optional visitor.
         if_push (callable): A `callback(e, g) -> bool` where ``e`` is
             an arc of ``g`` that returns ``True`` if and only if the arc
             ``e`` is relevant.
             This is a legacy parameter. You should rather consider
-            to filter the irrelevant arcs using the :py:class:`GraphView` class.
+            to filter the irrelevant arcs using the :py:class:`GraphView`
+            class.
     """
     if pmap_vcolor is None:
         map_vcolor = defaultdict(int)
@@ -159,7 +164,8 @@ def depth_first_search(
 
             # (color[v] == WHITE) means that v has not yet been visited.
             if color_v == WHITE:
-                # u must be re-examined later, its i-th out-edge has been visited.
+                # u must be re-examined later, its i-th out-edge
+                # has been visited.
                 vis.tree_edge(e, g)
                 i += 1
                 stack.append((u, i, n))
@@ -182,6 +188,7 @@ def depth_first_search(
         pmap_vcolor[u] = BLACK
         vis.finish_vertex(u, g)
 
+
 # N.B: The following function is also named depth_first_search in boost.
 def depth_first_search_graph(
     g: Graph,
@@ -195,21 +202,23 @@ def depth_first_search_graph(
     `Depth First Search <https://en.wikipedia.org/wiki/Depth-first_search>`__
     algorithm, from multiple sources.
 
-    Based on `depth_first_search.hpp <https://www.boost.org/doc/libs/1_67_0/libs/graph/doc/depth_first_search.html>`__,
+    Based on `depth_first_search.hpp
+    <https://www.boost.org/doc/libs/1_67_0/libs/graph/doc/depth_first_search.html>`__,
     by Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
 
     Args:
         g (Graph): The graph being explored.
         sources (iter): An iterable over the sources, e.g., ``g.vertices()``.
-        pmap_vcolor (ReadWritePropertyMap): A property map that maps each vertex
-            with its current color (:py:data:`WHITE`, :py:data:`GRAY`
-            or :py:data:`BLACK`)
+        pmap_vcolor (ReadWritePropertyMap): A property map that maps
+            each vertex with its current color (:py:data:`WHITE`,
+            :py:data:`GRAY` or :py:data:`BLACK`)
         vis (DefaultBreadthFirstSearchVisitor): An optional visitor.
         if_push (callable): A `callback(e, g) -> bool` where ``e`` is the
             an arc of ``g`` that returns ``True`` if and only if the arc
             ``e`` is relevant.
             This is a legacy parameter. You should rather consider
-            to filter the irrelevant arcs using the :py:class:`GraphView` class.
+            to filter the irrelevant arcs using the :py:class:`GraphView`
+            class.
     """
     if pmap_vcolor is None:
         map_vcolor = defaultdict(int)

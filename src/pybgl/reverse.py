@@ -6,6 +6,7 @@
 
 from .incidence_graph import IncidenceGraph
 
+
 def reverse_graph(g: IncidenceGraph):
     """
     Flips each arc involved in a graph.
@@ -24,6 +25,7 @@ def reverse_graph(g: IncidenceGraph):
     assert g.in_edges
     swap(g, "source", "target")
     swap(g, "in_edges", "out_edges")
+
 
 def reverse_dict(d: dict) -> dict:
     """

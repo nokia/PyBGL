@@ -7,9 +7,10 @@
 from collections import defaultdict
 from .graph import Graph
 from .incidence_automaton import IncidenceAutomaton
-from .depth_first_search  import depth_first_search_graph
+from .depth_first_search import depth_first_search_graph
 from .property_map import make_assoc_property_map
 from .reverse import reverse_graph
+
 
 def find_reachable_vertices(g: Graph, sources: set) -> set:
     """
@@ -25,6 +26,7 @@ def find_reachable_vertices(g: Graph, sources: set) -> set:
     pmap_vcolor = make_assoc_property_map(map_vcolor)
     depth_first_search_graph(g, sources, pmap_vcolor=pmap_vcolor)
     return set(map_vcolor.keys())
+
 
 def prune_incidence_automaton(g: IncidenceAutomaton):
     """

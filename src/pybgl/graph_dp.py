@@ -8,22 +8,24 @@ from copy import copy
 from .graph import Graph
 from .graphviz import GraphvizStyle, enrich_kwargs, graphviz_type, to_dot
 
+
 JSON_GRAPH_FORMAT = """{
-    "graph_type" : "%(graph_type)s",
-    "vertices" : %(vertices)s,
-    "edges" : %(edges)s
+    "graph_type": "%(graph_type)s",
+    "vertices": %(vertices)s,
+    "edges": %(edges)s
 }"""
 
 JSON_NODE_FORMAT = """{
-            "id" : %(id)s%(sep)s
+            "id": %(id)s%(sep)s
             %(attributes)s
         }"""
 
 JSON_EDGE_FORMAT = """{
-            "source" : %(source)s,
-            "target" : %(target)s%(sep)s
+            "source": %(source)s,
+            "target": %(target)s%(sep)s
             %(attributes)s
         }"""
+
 
 class GraphDp:
     """
@@ -45,20 +47,22 @@ class GraphDp:
 
         Args:
             g (Graph): The wrapped graph.
-            dpv (dict): Per-vertex style. It maps a vertex Graphviz attribute with the
-                corresponding vertex-based :py:class:`ReadPropertyMap` instance.
-            dpe (dict): Per-edge style. It maps a edge Graphviz attribute with the
-                corresponding edge-based :py:class:`ReadPropertyMap` instance.
+            dpv (dict): Per-vertex style. It maps a vertex Graphviz
+                attribute with the corresponding vertex-based
+                :py:class:`ReadPropertyMap` instance.
+            dpe (dict): Per-edge style. It maps a edge Graphviz attribute
+                with the corresponding edge-based :py:class:`ReadPropertyMap`
+                instance.
             dg (dict): Graph attributes.
-            dv (dict): Default vertex style. It maps a vertex Graphviz attribute
-                with the corresponding value.
-            de (dict): Default edge style. It maps a edge Graphviz attribute
-                with the corresponding value.
+            dv (dict): Default vertex style. It maps a vertex Graphviz
+                attribute with the corresponding value.
+            de (dict): Default edge style. It maps a edge Graphviz
+                attribute with the corresponding value.
             extra_style (list): Extra style (splines, etc).
         """
         self.g = g
-        self.dpv = dpv if dpv else dict() # Vertex attributes
-        self.dpe = dpe if dpe else dict() # Edge attributes
+        self.dpv = dpv if dpv else dict()  # Vertex attributes
+        self.dpe = dpe if dpe else dict()  # Edge attributes
         gs = GraphvizStyle()
         self.dg = dg if dg else copy(gs.graph)
         self.dv = dv if dv else copy(gs.node)
@@ -82,7 +86,8 @@ class GraphDp:
 
     def to_dot(self, **kwargs) -> str:
         """
-        Exports this :py:class:`GraphDp` instance to the corresponding GraphViz string.
+        Exports this :py:class:`GraphDp` instance to the corresponding
+        GraphViz string.
 
         Returns:
             The corresponding GraphViz string.
@@ -91,14 +96,15 @@ class GraphDp:
         kwargs = enrich_kwargs(self.dpe, "dpe", **kwargs)
         kwargs = enrich_kwargs(self.dg, "dg", **kwargs)
         kwargs = enrich_kwargs(self.dv, "dv", **kwargs)
-        kwargs = enrich_kwargs(self.de,  "de",  **kwargs)
+        kwargs = enrich_kwargs(self.de, "de", **kwargs)
         kwargs = enrich_kwargs(self.extra_style, "extra_style", **kwargs)
         return to_dot(self.g, **kwargs)
 
     # TODO GraphView
     def to_json(self, vs: iter = None, es: iter = None) -> str:
         """
-        Exports the GraphViz rendering of this :py:class:`GraphDp` instance to JSON.
+        Exports the GraphViz rendering of this :py:class:`GraphDp`
+        instance to JSON.
 
         Args:
             vs (iter): A subset of vertices of ``self.g``.
@@ -109,33 +115,32 @@ class GraphDp:
         Returns:
             The corresponding JSON string.
         """
-
         if vs is None:
             vs = self.g.vertices()
         if es is None:
             es = self.g.edges()
 
         return JSON_GRAPH_FORMAT % {
-            "graph_type" : graphviz_type(self.g),
-            "vertices" : "[\n        %s\n    ]" % ", ".join([
+            "graph_type": graphviz_type(self.g),
+            "vertices": "[\n        %s\n    ]" % ", ".join([
                     JSON_NODE_FORMAT % {
-                        "id" : u,
-                        "attributes" : ",\n            ".join([
-                            "\"%s\" : \"%s\"" % (k, pmap[u])
+                        "id": u,
+                        "attributes": ",\n            ".join([
+                            "\"%s\": \"%s\"" % (k, pmap[u])
                             for k, pmap in self.dpv.items()
                         ]),
-                        "sep" : "," if self.dpv else "",
+                        "sep": "," if self.dpv else "",
                     } for u in vs
                 ]),
-            "edges" : "[\n        %s\n    ]" % ", ".join([
+            "edges": "[\n        %s\n    ]" % ", ".join([
                     JSON_EDGE_FORMAT % {
-                        "source" : self.g.source(e),
-                        "target" : self.g.target(e),
-                        "attributes" : ",\n            ".join([
-                            "\"%s\" : \"%s\"" % (k, pmap[e])
+                        "source": self.g.source(e),
+                        "target": self.g.target(e),
+                        "attributes": ",\n            ".join([
+                            "\"%s\": \"%s\"" % (k, pmap[e])
                             for k, pmap in self.dpe.items()
                         ]),
-                        "sep" : "," if self.dpe else "",
+                        "sep": "," if self.dpe else "",
                     } for e in es
                 ]
             )

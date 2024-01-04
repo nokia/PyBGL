@@ -9,6 +9,7 @@ from .automaton import BOTTOM, Automaton, EdgeDescriptor
 from .graph_traversal import WHITE, GRAY, BLACK
 from .property_map import ReadWritePropertyMap, make_assoc_property_map
 
+
 class ParallelBreadthFirstSearchVisitor:
     """
     The :py:class:`ParallelBreadthFirstSearchVisitor` class is the base class
@@ -33,7 +34,8 @@ class ParallelBreadthFirstSearchVisitor:
 
     def examine_vertex(self, q1: int, g1: Automaton, q2: int, g2: Automaton):
         """
-        Method invoked for each pair of vertices as it is removed from the queue.
+        Method invoked for each pair of vertices as it is removed from
+        the queue.
 
         Args:
             q1 (int): The vertex descriptor of ``g1`` if any,
@@ -47,7 +49,8 @@ class ParallelBreadthFirstSearchVisitor:
 
     def discover_vertex(self, q1: int, g1: Automaton, q2: int, g2: Automaton):
         """
-        Method invoked the first time the algorithm encounters ``(q1, q2)`` pair.
+        Method invoked the first time the algorithm encounters
+        ``(q1, q2)`` pair.
 
         Args:
             q1 (int): The vertex descriptor of ``g1`` if any,
@@ -61,8 +64,9 @@ class ParallelBreadthFirstSearchVisitor:
 
     def finish_vertex(self, q1: int, g1: Automaton, q2: int, g2: Automaton):
         """
-        Method invoked after all of the out-transitions of ``q1`` and ``q2`` have been
-        examined and all of the adjacent vertices have been discovered.
+        Method invoked after all of the out-transitions of ``q1`` and
+        ``q2`` have been examined and all of the adjacent vertices have
+        been discovered.
 
         Args:
             q1 (int): The vertex descriptor of ``g1`` if any,
@@ -74,7 +78,14 @@ class ParallelBreadthFirstSearchVisitor:
         """
         pass
 
-    def examine_symbol(self, q1: int, g1: Automaton, q2: int, g2: Automaton, a: str):
+    def examine_symbol(
+        self,
+        q1: int,
+        g1: Automaton,
+        q2: int,
+        g2: Automaton,
+        a: str
+    ):
         """
         Method invoked when discovering a symbol ``a`` when examining
         the ``(q1, q2)`` pair.
@@ -194,35 +205,38 @@ class ParallelBreadthFirstSearchVisitor:
         """
         pass
 
+
 def parallel_breadth_first_search(
     g1: Automaton,
     g2: Automaton,
-    source_pairs = None,
+    source_pairs: iter = None,
     pmap_vcolor: ReadWritePropertyMap = None,
     vis: ParallelBreadthFirstSearchVisitor = None,
     if_push: callable = None
 ):
     """
-    Non-recursive implementation of Depth First Search algorithm, from multiple sources.
-    Based on `Boost breadth_first_search <https://www.boost.org/doc/libs/1_62_0/libs/graph/doc/breadth_first_search.html>`__,
+    Non-recursive implementation of Depth First Search algorithm, from
+    multiple sources. Based on `Boost breadth_first_search
+    <https://www.boost.org/doc/libs/1_62_0/libs/graph/doc/breadth_first_search.html>`__,
     by Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek.
 
     Args:
         g1 (Automaton): The first automaton.
         g2 (Automaton): The second automaton.
-        source_pairs (iter): An iterable over the pairs of source sattes.
+        source_pairs (iter): An iterable over the pairs of source states.
             `Example:` ``[(g1.initial(), g2.initial())]``.
-        pmap_vcolor (ReadWritePropertyMap): A property map that maps each vertex
-            with its current color (:py:data:`WHITE`, :py:data:`GRAY`
+        pmap_vcolor (ReadWritePropertyMap): A property map that maps each
+            vertex with its current color (:py:data:`WHITE`, :py:data:`GRAY`
             or :py:data:`BLACK`)
         vis (ParallelBreadthFirstSearchVisitor): An optional visitor.
-        if_push (callable): A `callback(e1, g1, e2, g2) -> bool` where ``e1`` is
-            an arc of ``g`` that returns ``True`` if and only if the pair
-            ``(e1, e2)`` is relevant.
+        if_push (callable): A `callback(e1, g1, e2, g2) -> bool`
+            where ``e1`` is an arc of ``g`` that returns ``True`` if and
+            only if the pair ``(e1, e2)`` is relevant.
     """
     def get_edge(q, r, a, g):
         assert q is not None
-        # It may be useful to consider (q, BOTTOM, a), see parallel_walk algorithm and tree_edge
+        # It may be useful to consider (q, BOTTOM, a), see the parallel_walk
+        # algorithm and tree_edge
         # assert r is not None
         return (
             EdgeDescriptor(q, r, a) if q is not None and r == g.delta(q, a)

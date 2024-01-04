@@ -252,7 +252,5 @@ class GraphView:
         return self.g.to_dot(
             vs=[u for u in self.vertices()],
             es=[e for e in self.edges()],
-            source=lambda e, g: self.source(e),
-            target=lambda e, g: self.target(e),
             *cls, **kwargs
         )

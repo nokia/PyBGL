@@ -4,15 +4,22 @@
 # This file is part of the pybgl project.
 # https://github.com/nokia/pybgl
 
-import copy, re, string
+import copy
+import re
+import string
 from collections import deque
 from .nfa import *
+# from .nfa import Nfa
 from .shunting_yard_postfix import (
     MAP_OPERATORS_RE, DefaultShuntingYardVisitor,
     shunting_yard_postfix, tokenizer_re
 )
 
-#-------------------------------------------------------------
+
+DEFAULT_ALPHABET = string.printable
+
+
+# -------------------------------------------------------------
 # AST to NFA operations
 #
 # Thomson algorithm creates several NFA with a single initial
@@ -32,7 +39,7 @@ from .shunting_yard_postfix import (
 #   {n,m} n-m repetitions
 #   [x]   bracket expression
 #   \x    escape sequence
-#-------------------------------------------------------------
+# -------------------------------------------------------------
 
 def literal(a: str) -> Nfa:
     """
@@ -52,6 +59,7 @@ def literal(a: str) -> Nfa:
     nfa.add_edge(0, 1, a)
     nfa.set_final(1)
     return (nfa, 0, 1)
+
 
 def insert_automaton(g1: Nfa, g2: Nfa, map21: dict = None) -> dict:
     """
@@ -87,6 +95,7 @@ def insert_automaton(g1: Nfa, g2: Nfa, map21: dict = None) -> dict:
         g1.add_edge(q1, r1, a)
     return map21
 
+
 def concatenation(
     nfa1: Nfa,
     q01: int,
@@ -111,7 +120,8 @@ def concatenation(
     Returns:
         A ``(nfa, q0, f)`` tuple, where:
         ``nfa`` is a NFA made of single initial state and a single final state
-        that recognizes the language ``{s1 + s2 for s1 in L(g1) for s2 in L(g2)}``
+        that recognizes the language
+        ``{s1 + s2 for s1 in L(g1) for s2 in L(g2)}``
         where ``L`` returns the language of an automaton;
         ``q0`` is its initial state;
         ``f`` is its initial state.
@@ -121,6 +131,7 @@ def concatenation(
     nfa1.set_initials({q01})
     nfa1.set_final(f1, False)
     return (nfa1, q01, map21[f2])
+
 
 def alternation(
     nfa1: Nfa,
@@ -164,6 +175,7 @@ def alternation(
     nfa1.set_final(f, True)
     return (nfa1, q0, f)
 
+
 def zero_or_one(nfa: Nfa, q0: int, f: int) -> tuple:
     """
     Builds a NFA that implements the ``?`` regular expression operator
@@ -186,6 +198,7 @@ def zero_or_one(nfa: Nfa, q0: int, f: int) -> tuple:
     eps = nfa.epsilon
     nfa.add_edge(q0, f, eps)
     return (nfa, q0, f)
+
 
 def zero_or_more(nfa: Nfa, q0: int, f: int) -> tuple:
     """
@@ -216,6 +229,7 @@ def zero_or_more(nfa: Nfa, q0: int, f: int) -> tuple:
     nfa.set_final(new_f, True)
     return (nfa, new_q0, new_f)
 
+
 def one_or_more(nfa: Nfa, q0: int, f: int) -> tuple:
     """
     Builds a NFA that implements the ``+`` regular expression operator
@@ -244,6 +258,7 @@ def one_or_more(nfa: Nfa, q0: int, f: int) -> tuple:
     nfa.set_final(new_f, True)
     return (nfa, new_q0, new_f)
 
+
 def repetition(nfa: Nfa, q0: int, f: int, m: int) -> tuple:
     """
     Builds the NFA that implements the ``{m}`` regular expression operator
@@ -269,7 +284,6 @@ def repetition(nfa: Nfa, q0: int, f: int, m: int) -> tuple:
         nfa.set_final(0)
         (nfa, q0, f) = (nfa, 0, 0)
     elif m > 1:
-        eps = nfa.epsilon
         ori = copy.deepcopy(nfa)
         q0_ori = q0
         f_ori = f
@@ -277,6 +291,7 @@ def repetition(nfa: Nfa, q0: int, f: int, m: int) -> tuple:
             nfa.set_final(f, False)
             (nfa, q0, f) = concatenation(nfa, q0, f, ori, q0_ori, f_ori)
     return (nfa, q0, f)
+
 
 def repetition_range(nfa: Nfa, q0: int, f: int, m: int, n: int) -> tuple:
     """
@@ -295,8 +310,10 @@ def repetition_range(nfa: Nfa, q0: int, f: int, m: int, n: int) -> tuple:
         ``q0`` is its initial state;
         ``f`` is its initial state.
     """
-    assert n is None or m <= n, "The lower bound {m} must be less than the upper bound {n}"
-    if   (m, n) == (0, 1):
+    assert n is None or m <= n, (
+        f"The lower bound {m} must be less than the upper bound {n}"
+    )
+    if (m, n) == (0, 1):
         return zero_or_one(nfa, q0, f)
     elif (m, n) == (0, None):
         return zero_or_more(nfa, q0, f)
@@ -324,6 +341,7 @@ def repetition_range(nfa: Nfa, q0: int, f: int, m: int, n: int) -> tuple:
                 nfa.add_edge(pred_f, f, eps)
         return (nfa, q0, f)
 
+
 def bracket(chars: iter) -> tuple:
     """
     Builds a NFA that recognizes a set of words made of exactly one
@@ -344,9 +362,10 @@ def bracket(chars: iter) -> tuple:
         nfa.add_edge(0, 1, a)
     return (nfa, 0, 1)
 
-#-------------------------------------------------------------
+
+# -------------------------------------------------------------
 # Internal parsers
-#-------------------------------------------------------------
+# -------------------------------------------------------------
 
 def parse_repetition(s: str) -> tuple:
     """
@@ -383,7 +402,6 @@ def parse_repetition(s: str) -> tuple:
             raise ValueError(f"Invalid n = {n} (m = {m})")
     return (m, n)
 
-DEFAULT_ALPHABET = string.printable
 
 def parse_bracket(s: str, whole_alphabet: iter = None) -> set:
     """
@@ -426,7 +444,9 @@ def parse_bracket(s: str, whole_alphabet: iter = None) -> set:
             m = ord(last_non_hat)
             n = ord(s[i + 1])
             if m > n:
-                raise ValueError(f"Invalid end of interval in s = {s} at index m = {m}")
+                raise ValueError(
+                    f"Invalid end of interval in s = {s} at index m = {m}"
+                )
             for c in range(m, n + 1):
                 accepted.add(chr(c))
             i += 1
@@ -440,6 +460,7 @@ def parse_bracket(s: str, whole_alphabet: iter = None) -> set:
         i += 1
     return accepted if not reverse else set(whole_alphabet) - accepted
 
+
 MAP_ESCAPED_BRACKET = {
     r"\d":  "[0-9]",
     r"\D":  "[^0-9]",
@@ -450,6 +471,7 @@ MAP_ESCAPED_BRACKET = {
     r"\W":  "[^0-9A-Za-z]",
 }
 
+
 MAP_ESCAPED_SPECIAL = {
     r"\a":  "\a",
     r"\b":  "\b",
@@ -459,6 +481,7 @@ MAP_ESCAPED_SPECIAL = {
     r"\t":  "\t",
     r"\v":  "\v",
 }
+
 
 def parse_escaped(s: str, whole_alphabet: iter = None) -> set:
     """
@@ -493,14 +516,16 @@ def parse_escaped(s: str, whole_alphabet: iter = None) -> set:
             raise ValueError(f"Escape sequence {s} not supported")
     raise ValueError(f"Invalid escape sequence {s}")
 
-#-------------------------------------------------------------
+
+# -------------------------------------------------------------
 # Thompson algorithm
-#-------------------------------------------------------------
+# -------------------------------------------------------------
 
 def thompson_compile_nfa(expression: str, whole_alphabet: iter = None) -> Nfa:
     """
     Compiles a NFA from a regular expression using the
-    `Thompson transformation <https://en.wikipedia.org/wiki/Thompson%27s_construction>`__.
+    `Thompson transformation
+    <https://en.wikipedia.org/wiki/Thompson%27s_construction>`__.
 
     Args:
         expression (str): A regular expression.
@@ -528,25 +553,23 @@ def thompson_compile_nfa(expression: str, whole_alphabet: iter = None) -> Nfa:
             self.nfas = deque()
 
         def on_push_output(self, a):
-            """
-            Overloads the :py:class:`DefaultShuntingYardVisitor` class.
-            """
+            # Overloaded method
             if a in {".", "|"}:
                 (nfa2, q02, f2) = self.nfas.pop()
                 (nfa1, q01, f1) = self.nfas.pop()
                 f = (
-                    concatenation if a == "." else
-                    alternation   if a == "|" else
-                    None
+                    concatenation if a == "."
+                    else alternation if a == "|"
+                    else None
                 )
                 (nfa1, q01, f1) = f(nfa1, q01, f1, nfa2, q02, f2)
             elif a in {"?", "*", "+"}:
                 (nfa1, q01, f1) = self.nfas.pop()
                 f = (
-                    zero_or_one  if a == "?" else
-                    zero_or_more if a == "*" else
-                    one_or_more  if a == "+" else
-                    None
+                    zero_or_one if a == "?"
+                    else zero_or_more if a == "*"
+                    else one_or_more if a == "+"
+                    else None
                 )
                 (nfa1, q01, f1) = f(nfa1, q01, f1)
             elif a[0] == "{":

@@ -6,11 +6,14 @@
 
 from collections import deque
 from .graph import Graph, EdgeDescriptor
-from .property_map import ReadWritePropertyMap
 
-WHITE = 0 # If you use AssociativePropertyMap you are encouraged to wrap a defaultdict(int)
+
+# If you use AssociativePropertyMap you are encouraged to wrap
+# a defaultdict(int)
+WHITE = 0
 GRAY = 1
 BLACK = 2
+
 
 class DefaultTreeTraversalVisitor:
     def discover_vertex(self, u: int, g: Graph):
@@ -35,7 +38,8 @@ class DefaultTreeTraversalVisitor:
 
     def start_vertex(self, s: int, g: Graph):
         """
-        Method invoked on the source vertex once before the start of the search.
+        Method invoked on the source vertex once before the start of
+        the search.
 
         Args:
             s (int): The source vertex.
@@ -55,7 +59,12 @@ class DefaultTreeTraversalVisitor:
         """
         pass
 
-def dfs_tree(s: int, g: Graph, vis: DefaultTreeTraversalVisitor = None):
+
+def dfs_tree(
+    s: int,
+    g: Graph,
+    vis: DefaultTreeTraversalVisitor = None
+):
     """
     Simplified implementation Depth First Search algorithm for trees
     See also :py:func:`depth_first_search`.
@@ -78,7 +87,12 @@ def dfs_tree(s: int, g: Graph, vis: DefaultTreeTraversalVisitor = None):
             stack.append(v)
         vis.finish_vertex(u, g)
 
-def bfs_tree(s: int, g: Graph, vis: DefaultTreeTraversalVisitor):
+
+def bfs_tree(
+    s: int,
+    g: Graph,
+    vis: DefaultTreeTraversalVisitor = None
+):
     """
     Simplified implementation Breadth First Search algorithm for trees
     See also :py:func:`breadth_first_search`.

@@ -6,8 +6,8 @@
 
 def damerau_levenshtein_distance_naive(x: str, y: str) -> int:
     """
-    Inefficient implementation of the
-    `Damerau Levenshtein distance <https://en.wikipedia.org/wiki/Damerau–Levenshtein_distance>`__
+    Inefficient implementation of the `Damerau Levenshtein distance
+    <https://en.wikipedia.org/wiki/Damerau–Levenshtein_distance>`__
     (no memoization).
     Prefer the :py:func:`damerau_levenshtein_distance` function.
 
@@ -16,8 +16,8 @@ def damerau_levenshtein_distance_naive(x: str, y: str) -> int:
         y (str): The right operand.
 
     Returns:
-        The minimal number of insertion/deletion/substitution/swap operations needed to
-        transform `x` into `y`.
+        The minimal number of insertion/deletion/substitution/swap
+        operations needed to transform `x` into `y`.
     """
     x_1 = x[1:]
     y_1 = y[1:]
@@ -41,10 +41,12 @@ def damerau_levenshtein_distance_naive(x: str, y: str) -> int:
         )
     )
 
+
 class DamerauLevenshteinDistance:
     """
-    The :py:class:`DamerauLevenshteinDistance` class is used to implement the memoization
-    used by the :py:func:`damerau_levenshtein_distance_naive` function.
+    The :py:class:`DamerauLevenshteinDistance` class is used to implement
+    the memoization used by the :py:func:`damerau_levenshtein_distance_naive`
+    function.
     """
     def __init__(self, x: str, y: str):
         """
@@ -60,8 +62,8 @@ class DamerauLevenshteinDistance:
 
     def compute(self, i: int = 0, j: int = 0) -> int:
         """
-        Computes the
-        `Damerau Levenshtein distance <https://en.wikipedia.org/wiki/Damerau–Levenshtein_distance>`__,
+        Computes the `Damerau Levenshtein distance
+        <https://en.wikipedia.org/wiki/Damerau–Levenshtein_distance>`__,
         with memoization.
 
         Args:
@@ -69,8 +71,8 @@ class DamerauLevenshteinDistance:
             j (int): The current index in ``self.y``.
 
         Returns:
-            The minimal number of insertion/deletion/substitution/swap operations needed to
-            transform ``x`` into ``y``.
+            The minimal number of insertion/deletion/substitution/swap
+            operations needed to transform ``x`` into ``y``.
         """
 
         ret = self.memoize.get((i, j))
@@ -95,10 +97,11 @@ class DamerauLevenshteinDistance:
             )
         return ret
 
+
 def damerau_levenshtein_distance(x: str, y: str) -> int:
     """
-    Computes the
-    `Damerau Levenshtein distance <https://en.wikipedia.org/wiki/Damerau–Levenshtein_distance>`__,
+    Computes the `Damerau Levenshtein distance
+    <https://en.wikipedia.org/wiki/Damerau–Levenshtein_distance>`__,
     with memoization.
 
     Args:
@@ -106,7 +109,7 @@ def damerau_levenshtein_distance(x: str, y: str) -> int:
         y (str): The right operand.
 
     Returns:
-        The minimal number of insertion/deletion/substitution/swap operations needed to
-        transform `x` into `y`.
+        The minimal number of insertion/deletion/substitution/swap
+        operations needed to transform `x` into `y`.
     """
     return DamerauLevenshteinDistance(x, y).compute(0, 0)

@@ -6,6 +6,7 @@
 
 from .graphviz_impl import *
 
+
 def __len_gen__(gen: iter) -> int:
     """
     Retrieves the length of an iterable (e.g., a generator).
@@ -25,12 +26,14 @@ def __len_gen__(gen: iter) -> int:
         The length of the input iterable.
     """
     n = 0
-    for x in gen: n += 1
+    for x in gen:
+        n += 1
     return n
 
-#-------------------------------------------------------------------
+
+# -------------------------------------------------------------------
 # EdgeDescriptor
-#-------------------------------------------------------------------
+# -------------------------------------------------------------------
 
 class EdgeDescriptor:
     def __init__(self, u: int, v: int, distinguisher: int):
@@ -47,9 +50,9 @@ class EdgeDescriptor:
             n (int): The distinguisher (if several edge may exist from
                 ``u`` to ``v``).
         """
-        self.m_source = u
-        self.m_target = v
-        self.m_distinguisher = distinguisher
+        self.source = u
+        self.target = v
+        self.distinguisher = distinguisher
 
     def __str__(self) -> str:
         """
@@ -59,7 +62,7 @@ class EdgeDescriptor:
         Returns:
             The corresponding string representation.
         """
-        return "(%s -> %s)" % (self.m_source, self.m_target)
+        return "(%s -> %s)" % (self.source, self.target)
 
     def __repr__(self) -> str:
         """
@@ -78,7 +81,7 @@ class EdgeDescriptor:
         Returns:
             The corresponding hash.
         """
-        return hash((self.m_source, self.m_target, self.m_distinguisher))
+        return hash((self.source, self.target, self.distinguisher))
 
     def __eq__(self, e) -> bool:
         """
@@ -93,16 +96,16 @@ class EdgeDescriptor:
             ``False`` otherwise
         """
         return (
-            e != None
-            and self.m_source == e.m_source
-            and self.m_target == e.m_target
-            and self.m_distinguisher == e.m_distinguisher
+            e is not None
+            and self.source == e.source
+            and self.target == e.target
+            and self.distinguisher == e.distinguisher
         )
 
     def __lt__(self, e) -> bool:
         """
-        Checks whether this py:class:`EdgeDescriptor` instance strictly preceeds
-        another one.
+        Checks whether this py:class:`EdgeDescriptor` instance strictly
+        preceeds another one.
 
         Args:
             e (EdgeDescriptor): The other py:class:`EdgeDescriptor` instance.
@@ -112,13 +115,21 @@ class EdgeDescriptor:
             ``False`` otherwise
         """
         return (
-            (self.m_source, self.m_target, self.m_distinguisher)
-             < (e.m_source,    e.m_target,    e.m_distinguisher)
+            (
+                self.source,
+                self.target,
+                self.distinguisher
+            ) < (
+                e.source,
+                e.target,
+                e.distinguisher
+            )
         )
 
-#-------------------------------------------------------------------
+
+# -------------------------------------------------------------------
 # Generic graph
-#-------------------------------------------------------------------
+# -------------------------------------------------------------------
 
 class Graph:
     """
@@ -130,26 +141,16 @@ class Graph:
         Constructor.
 
         Args:
-            directed (bool): Pass ``True`` if the graph is directed, ``False`` otherwise.
+            directed (bool): Pass ``True`` if the graph is directed,
+                ``False`` otherwise.
             num_vertices (int): Pass the (initial) number of vertices.
         """
         assert isinstance(directed, bool)
-        self.m_directed = directed # TODO this should be a class attribute
-        self.m_id = 0 # Last used vertex descriptor
-        self.m_adjacencies = dict()
+        self.directed = directed
+        self.last_vertex_id = 0
+        self.adjacencies = dict()
         for u in range(num_vertices):
             self.add_vertex()
-
-    @property
-    def directed(self) -> bool:
-        """
-        Determines whether this graph is directed or not.
-
-        Returns:
-            ``True`` if and only if this :py:class:`Graph` instance is directed,
-            ``False`` otherwise
-        """
-        return self.m_directed
 
     def add_vertex(self) -> int:
         """
@@ -158,14 +159,15 @@ class Graph:
         Returns:
             The vertex descriptor of the added vertex.
         """
-        u = self.m_id
-        self.m_adjacencies[u] = dict()
-        self.m_id += 1
+        u = self.last_vertex_id
+        self.adjacencies[u] = dict()
+        self.last_vertex_id += 1
         return u
 
     def num_vertices(self) -> int:
         """
-        Counts the number of vertices involved in this :py:class:`Graph` instance.
+        Counts the number of vertices involved in this
+        :py:class:`Graph` instance.
 
         Returns:
             The number of vertices.
@@ -183,38 +185,28 @@ class Graph:
             `KeyError` if ``u`` does not exist.
         """
         # Remove in-edges
-        for e in [e for e in edges(self)]:
-            if u == target(e, self):
-                remove_edge(e, self)
+        for e in [e for e in self.edges()]:
+            if u == self.target(e):
+                self.remove_edge(e)
 
         # Remove out-edges
         for e in [e for e in self.out_edges(u)]:
-            remove_edge(e, self)
+            self.remove_edge(e)
 
         # Remove u
         del self.adjacencies[u]
 
     def vertices(self) -> iter:
         """
-        Gets an iterator over the vertices involved in this :py:class:`Graph` instance.
+        Gets an iterator over the vertices involved in this
+        :py:class:`Graph` instance.
 
         Returns:
             An iterator over the vertices.
         """
         return self.adjacencies.keys()
 
-    @property
-    def adjacencies(self) -> dict:
-        """
-        Accessor to the internal adjacency sparse matrix used in
-        this :py:class:`Graph` instance.
-
-        Returns:
-            The graph adjacencies.
-        """
-        return self.m_adjacencies
-
-    def add_edge(self, u: int, v: int) -> tuple: # (EdgeDescriptor, bool)
+    def add_edge(self, u: int, v: int) -> tuple:
         """
         Adds an edge to this :py:class:`Graph` instance.
 
@@ -223,8 +215,9 @@ class Graph:
             v (int): The vertex descriptor of target vertex of the new edge.
 
         Returns:
-            A tuple ``(e, success)`` where ``e`` is an :py:class:`EdgeDescriptor`
-            compliant with this :py:class:`Graph` class and ``success == True``
+            A tuple ``(e, success)`` where ``e`` is an
+            :py:class:`EdgeDescriptor` compliant with this
+            :py:class:`Graph` class and ``success == True``
             if successful, ``(None, False)`` otherwise.
         """
         u_adjs = self.adjacencies[u]
@@ -245,17 +238,18 @@ class Graph:
         Args:
             e (EdgeDescriptor): The edge descriptor of the edge to be removed.
         """
-        u = e.m_source
-        v = e.m_target
-        n = e.m_distinguisher
+        u = e.source
+        v = e.target
+        n = e.distinguisher
         adjs_u = self.adjacencies[u]
         s = adjs_u[v]
         if n in s:
             s.remove(n)
             if s == set():
                 del adjs_u[v]
-                # We keep the empty dictionary to allow to create out-arcs for u.
-                #if not bool(adjs_u):
+                # We keep the empty dictionary to allow to create
+                # out-arcs for u.
+                # if not bool(adjs_u):
                 #    del self.adjacencies[u]
 
     def num_edges(self) -> int:
@@ -315,7 +309,9 @@ class Graph:
         # iterator, e.g:
         #
         #   (e for e in self.edges() if self.target(e) == u)
-        return NotImplementedError("in_edges must be implemented in the child class")
+        return NotImplementedError(
+            "in_edges must be implemented in the child class"
+        )
 
     def in_degree(self, u: int) -> int:
         """
@@ -332,7 +328,8 @@ class Graph:
 
     def edges(self) -> iter:
         """
-        Gets an iterator over the edges involved in this :py:class:`Graph` instance.
+        Gets an iterator over the edges involved in this
+        :py:class:`Graph` instance.
 
         Returns:
             An iterator over the edges.
@@ -357,7 +354,11 @@ class Graph:
             ``(None, False)`` otherwise.
         """
         ret = (None, False)
-        candidates_edges = {e for e in self.out_edges(u) if self.target(e) == v}
+        candidates_edges = {
+            e
+            for e in self.out_edges(u)
+            if self.target(e) == v
+        }
         if len(candidates_edges) == 1:
             ret = (candidates_edges.pop(), True)
         return ret
@@ -398,7 +399,8 @@ class Graph:
 
     def source(self, e: EdgeDescriptor) -> int:
         """
-        Retrieves the source vertex of an arc in this :py:class:`Graph` instance.
+        Retrieves the source vertex of an arc in this
+        :py:class:`Graph` instance.
 
         Args:
             e (EdgeDescriptor): The considered arc.
@@ -406,11 +408,12 @@ class Graph:
         Returns:
             The vertex descriptor of the source of ``e``.
         """
-        return e.m_source
+        return e.source
 
     def target(self, e: EdgeDescriptor) -> int:
         """
-        Retrieves the target vertex of an arc in this :py:class:`Graph` instance.
+        Retrieves the target vertex of an arc in this
+        :py:class:`Graph` instance.
 
         Args:
             e (EdgeDescriptor): The considered arc.
@@ -418,7 +421,8 @@ class Graph:
         Returns:
             The vertex descriptor of the target of ``e``.
         """
-        return e.m_target
+        return e.target
+
 
 def source(e: EdgeDescriptor, g: Graph) -> int:
     """
@@ -433,6 +437,7 @@ def source(e: EdgeDescriptor, g: Graph) -> int:
     """
     return g.source(e)
 
+
 def target(e: EdgeDescriptor, g: Graph) -> int:
     """
     Retrieves the target vertex of an arc in this :py:class:`Graph` instance.
@@ -445,6 +450,7 @@ def target(e: EdgeDescriptor, g: Graph) -> int:
         The vertex descriptor of the target of ``e``.
     """
     return g.target(e)
+
 
 def is_directed(g) -> bool:
     """
@@ -459,9 +465,10 @@ def is_directed(g) -> bool:
     """
     return g.directed
 
-#-------------------------------------------------------------------
+
+# -------------------------------------------------------------------
 # Directed graph
-#-------------------------------------------------------------------
+# -------------------------------------------------------------------
 
 class DirectedGraph(Graph):
     """
@@ -473,14 +480,14 @@ class DirectedGraph(Graph):
         Constructor.
 
         Args:
-            directed (bool): Pass ``True`` if the graph is directed, ``False`` otherwise.
             num_vertices (int): Pass the (initial) number of vertices.
         """
         super().__init__(True, num_vertices)
 
-#-------------------------------------------------------------------
+
+# -------------------------------------------------------------------
 # Undirected graph
-#-------------------------------------------------------------------
+# -------------------------------------------------------------------
 
 class UndirectedGraph(Graph):
     """
@@ -495,7 +502,6 @@ class UndirectedGraph(Graph):
         Constructor.
 
         Args:
-            directed (bool): Pass ``True`` if the graph is directed, ``False`` otherwise.
             num_vertices (int): Pass the (initial) number of vertices.
         """
         super().__init__(False, num_vertices)
@@ -509,17 +515,18 @@ class UndirectedGraph(Graph):
             v (int): The vertex descriptor of source of the new edge.
 
         Returns:
-            A tuple ``(e, success)`` where ``e`` is an :py:class:`EdgeDescriptor`
+            A tuple ``(e, success)`` where ``e`` is an
+            :py:class:`EdgeDescriptor`
             compliant with this :py:class:`Graph` class and ``success == True``
             if successful, ``(None, False)`` otherwise.
         """
         (u, v) = (min(u, v), max(u, v))
         (e, added) = super().add_edge(u, v)
         if added:
-            n = e.m_distinguisher
-            if u not in self.m_adjacencies[v].keys():
-                self.m_adjacencies[v][u] = set()
-            self.m_adjacencies[v][u].add(n)
+            n = e.distinguisher
+            if u not in self.adjacencies[v].keys():
+                self.adjacencies[v][u] = set()
+            self.adjacencies[v][u].add(n)
         return (e, added)
 
     def out_edges(self, u: int) -> iter:
@@ -553,8 +560,8 @@ class UndirectedGraph(Graph):
         v = self.target(e)
         if u != v:
             # Remove the reverse adjacency
-            n = e.m_distinguisher
-            self.m_adjacencies[v][u].remove(n)
+            n = e.distinguisher
+            self.adjacencies[v][u].remove(n)
 
     def in_edges(self, u: int) -> iter:
         """
@@ -571,7 +578,8 @@ class UndirectedGraph(Graph):
 
     def edges(self) -> iter:
         """
-        Gets an iterator over the edges involved in this :py:class:`Graph` instance.
+        Gets an iterator over the edges involved in this
+        :py:class:`Graph` instance.
 
         Returns:
             An iterator over the edges.
@@ -583,9 +591,10 @@ class UndirectedGraph(Graph):
             for n in s if u <= v
         )
 
-#-------------------------------------------------------------------
+
+# -------------------------------------------------------------------
 # Common methods
-#-------------------------------------------------------------------
+# -------------------------------------------------------------------
 
 def vertices(g: Graph) -> iter:
     """
@@ -599,6 +608,7 @@ def vertices(g: Graph) -> iter:
     """
     return g.vertices()
 
+
 def num_vertices(g: Graph) -> int:
     """
     Counts the number of vertices involved of a graph ``g``.
@@ -610,6 +620,7 @@ def num_vertices(g: Graph) -> int:
         The number of vertices in ``g``.
     """
     return g.num_vertices()
+
 
 def has_vertex(g: Graph) -> bool:
     """
@@ -624,6 +635,7 @@ def has_vertex(g: Graph) -> bool:
     """
     return g.has_vertex()
 
+
 def add_vertex(g: Graph) -> int:
     """
     Adds a vertex to a graph ``g``
@@ -635,6 +647,7 @@ def add_vertex(g: Graph) -> int:
         The vertex descriptor of the added vertex.
     """
     return g.add_vertex()
+
 
 def remove_vertex(u: int, g: Graph):
     """
@@ -649,6 +662,7 @@ def remove_vertex(u: int, g: Graph):
     """
     g.remove_vertex(u)
 
+
 def edges(g: Graph):
     """
     Gets an iterator over the edges involved of a graph ``g``.
@@ -660,6 +674,7 @@ def edges(g: Graph):
         An iterator over the vertices of ``g``.
     """
     return g.edges()
+
 
 def num_edges(g: Graph) -> int:
     """
@@ -673,6 +688,7 @@ def num_edges(g: Graph) -> int:
     """
     return g.num_edges()
 
+
 def has_edge(g: Graph) -> bool:
     """
     Checks if a graph ``g`` instance contains at least one edge.
@@ -682,6 +698,7 @@ def has_edge(g: Graph) -> bool:
         ``False`` otherwise.
     """
     return g.has_edge()
+
 
 def add_edge(u: int, v: int, g: Graph) -> EdgeDescriptor:
     """
@@ -700,6 +717,7 @@ def add_edge(u: int, v: int, g: Graph) -> EdgeDescriptor:
 
     return g.add_edge(u, v)
 
+
 def remove_edge(e: EdgeDescriptor, g: Graph):
     """
     Removes an edge from  a graph ``g``.
@@ -709,6 +727,7 @@ def remove_edge(e: EdgeDescriptor, g: Graph):
         g (Graph): The considered graph.
     """
     g.remove_edge(e)
+
 
 def in_edges(u: int, g: Graph) -> iter:
     """
@@ -724,6 +743,7 @@ def in_edges(u: int, g: Graph) -> iter:
     """
     return g.in_edges(u)
 
+
 def in_degree(u: int, g: Graph) -> int:
     """
     Gets the out-degree (the number of in-edges) of a vertex ``u``
@@ -737,6 +757,7 @@ def in_degree(u: int, g: Graph) -> int:
         The in-degree of ``u``
     """
     return g.in_degree(u)
+
 
 def out_edges(u: int, g: Graph) -> iter:
     """
@@ -752,6 +773,7 @@ def out_edges(u: int, g: Graph) -> iter:
     """
     return g.out_edges(u)
 
+
 def out_degree(u: int, g: Graph) -> int:
     """
     Gets the out-degree (the number of out-edges) of a vertex ``u``
@@ -765,6 +787,7 @@ def out_degree(u: int, g: Graph) -> int:
         The out-degree of ``u``
     """
     return __len_gen__(g.out_edges(u))
+
 
 def edge(u: int, v: int, g: Graph) -> tuple:
     """

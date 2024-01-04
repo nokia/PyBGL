@@ -10,10 +10,12 @@ from .property_map import (
     ReadWritePropertyMap, make_assoc_property_map, make_func_property_map
 )
 
+
 class NodeAutomaton(Automaton):
     """
     The :py:class:`NodeAutomaton` implements a
-    `Deterministic Finite Automaton <https://en.wikipedia.org/wiki/Deterministic_finite_automaton>`__.
+    `Deterministic Finite Automaton
+    <https://en.wikipedia.org/wiki/Deterministic_finite_automaton>`__.
     whose symbols are installed on the states instead of the transitions.
     This is a particular case of DFA, whose transitions targetting a same given
     target are all labeled by the same symbol.
@@ -22,7 +24,7 @@ class NodeAutomaton(Automaton):
         self,
         num_vertices: int = 0,
         q0: int = 0,
-        pmap_vfinal = None,
+        pmap_vfinal: ReadWritePropertyMap = None,
         pmap_vsymbol: ReadWritePropertyMap = None
     ):
         """
@@ -70,13 +72,16 @@ class NodeAutomaton(Automaton):
         Adds a transition to this :py:class:`NodeAutomaton` instance.
 
         Args:
-            q (int): The vertex descriptor of source state of the new transition.
-            r (int): The vertex descriptor of target state of the new transition.
+            q (int): The vertex descriptor of source state of the
+                new transition.
+            r (int): The vertex descriptor of target state of the
+                new transition.
             a (str): The label of the new transition.
 
         Returns:
-            A tuple ``(e, success)`` where ``e`` is an :py:class:`EdgeDescriptor`
-            compliant with this :py:class:`Automaton` class and ``success == True``
+            A tuple ``(e, success)`` where ``e`` is an
+            :py:class:`EdgeDescriptor` compliant with this
+            :py:class:`Automaton` class and ``success == True``
             if successful, ``(None, False)`` otherwise.
         """
         assert q is not None
@@ -148,12 +153,13 @@ class NodeAutomaton(Automaton):
         Removes a transition from this :py:class:`NodeAutomaton` instance.
 
         Args:
-            e (EdgeDescriptor): The edge descriptor of the transition to be removed.
+            e (EdgeDescriptor): The edge descriptor of the transition
+                to be removed.
         """
         q = self.source(e)
         r = self.target(e)
         a = self.symbol(r)
-        adj_q = self.m_adjacencies.get(q)
+        adj_q = self.adjacencies.get(q)
         if adj_q:
             if a in adj_q:
                 del adj_q[a]
@@ -258,7 +264,7 @@ def make_node_automaton(
     pmap_vlabel: ReadPropertyMap,
     q0n: int = 0,
     pmap_vfinal: ReadPropertyMap = None,
-    NodeAutomatonClass = NodeAutomaton
+    NodeAutomatonClass=NodeAutomaton
 ) -> NodeAutomaton:
     """
     Makes an automaton of type `NodeAutomatonClass`
@@ -286,7 +292,9 @@ def make_node_automaton(
     Example:
 
         >>> from collections import defaultdict
-        >>> from pybgl import Automaton, make_assoc_property_map, make_node_automaton
+        >>> from pybgl import (
+        ...    Automaton, make_assoc_property_map, make_node_automaton
+        ... )
         >>> transitions = [("root", "sink"), ("root", "sink")]
         >>> map_vlabel = defaultdict(bool, {"root": "a", "sink": "b"})
         >>> map_vfinal = defaultdict(bool, {"root": False, "sink": True})

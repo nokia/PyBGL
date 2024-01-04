@@ -9,9 +9,10 @@ import re
 from .singleton import Singleton
 from .tokenize import TokenizeVisitor, tokenize
 
-#------------------------------------------------------------------
+
+# ------------------------------------------------------------------
 # Graphviz style
-#------------------------------------------------------------------
+# ------------------------------------------------------------------
 
 class GraphvizStyle(metaclass=Singleton):
     """
@@ -22,7 +23,9 @@ class GraphvizStyle(metaclass=Singleton):
     It is useful if you want graph adapted e.g. for dark themes.
 
     Example:
-        >>> from pybgl.graph import DirectedGraph, GraphvizStyle, ipynb_display_graph
+        >>> from pybgl.graph import (
+        ...     DirectedGraph, GraphvizStyle, ipynb_display_graph
+        ... )
         >>> GraphvizStyle.set_fg_color("grey")
         >>> GraphvizStyle.set_bg_color("transparent")
         >>> display_graph = ipynb_display_graph
@@ -45,7 +48,7 @@ class GraphvizStyle(metaclass=Singleton):
         "color": "black",
         "fontcolor": "black",
     }
-    extra_style = list() # splines, etc
+    extra_style = list()  # splines, etc
 
     @staticmethod
     def set_fg_color(color: str):
@@ -58,9 +61,9 @@ class GraphvizStyle(metaclass=Singleton):
         """
         GraphvizStyle.graph["fontcolor"] = color
         GraphvizStyle.node["color"] = color
-        GraphvizStyle.node["fontcolor"]  = color
+        GraphvizStyle.node["fontcolor"] = color
         GraphvizStyle.edge["color"] = color
-        GraphvizStyle.edge["fontcolor"]  = color
+        GraphvizStyle.edge["fontcolor"] = color
 
     @staticmethod
     def set_bg_color(color):
@@ -108,10 +111,11 @@ class GraphvizStyle(metaclass=Singleton):
             ] + GraphvizStyle.extra_style
         )
 
-#------------------------------------------------------------------
+
+# ------------------------------------------------------------------
 # Graphviz write utilities
 # See also Graph.to_dot() and GraphDp.to_dot()
-#------------------------------------------------------------------
+# ------------------------------------------------------------------
 
 GRAPHVIZ_SUPPORTED_HTML_TAGS = {
     "b", "/b", "br", "br/", "font", "/font", "hr", "/hr", "i", "/i",
@@ -135,17 +139,18 @@ GRAPHVIZ_HTML_TOKENIZER = re.compile(
 # graphviz does not support HTML entity (e.g. "&amp;") and that is why we
 # rely on the HTML code (e.g. "&#38;").
 GRAPHVIZ_MAP_CHAR_ESCAPED = {
-    '&': "&#38;",  # &amp;
-    "<": "&#60;",  # &lt;
-    ">": "&#62;",  # &gt;
+    '&': "&#38;",   # &amp;
+    "<": "&#60;",   # &lt;
+    ">": "&#62;",   # &gt;
     "\n": "\\n",
     "\t": "\\t",
     "\r": "\\r",
-    "[": "&#91;",  # "&lbrack;"
-    "]": "&#93;",  # "&rbrack;"
-    "{": "&#123;", # "&lbrace;"
-    "}": "&#125;", # "&rbrace;"
+    "[": "&#91;",   # "&lbrack;"
+    "]": "&#93;",   # "&rbrack;"
+    "{": "&#123;",  # "&lbrace;"
+    "}": "&#125;",  # "&rbrace;"
 }
+
 
 def graphviz_escape_char(a: str) -> str:
     """
@@ -162,6 +167,7 @@ def graphviz_escape_char(a: str) -> str:
         escaped = "\\x%02x;" % ord(a)
     return escaped if escaped is not None else a
 
+
 class EscapeHtmlTokenizeVisitor(TokenizeVisitor):
     """
     Internal class used by the :py:func:`graphviz_escape_html` function.
@@ -175,6 +181,7 @@ class EscapeHtmlTokenizeVisitor(TokenizeVisitor):
 
     def on_matched(self, matched: str, start: int, end: int, s: str):
         self.out += matched
+
 
 def graphviz_escape_html(s: str) -> str:
     """
@@ -190,10 +197,11 @@ def graphviz_escape_html(s: str) -> str:
     tokenize(GRAPHVIZ_HTML_TOKENIZER, s, vis)
     return vis.out
 
-#------------------------------------------------------------------
+
+# ------------------------------------------------------------------
 # Graphviz export
 # See also Graph.to_dot() and GraphDp.to_dot()
-#------------------------------------------------------------------
+# ------------------------------------------------------------------
 
 # TODO factorize with attributes_to_dot
 def graphviz_properties_to_str(x: object, dpx: dict) -> str:
@@ -212,11 +220,12 @@ def graphviz_properties_to_str(x: object, dpx: dict) -> str:
         The resulting Graphviz string.
     """
     return "[%s]" % "; ".join([
-        "%s=\"%s\"" % (k, pmap[x]) if k != "label" else
-        "%s=<%s>"   % (k, graphviz_escape_html(str(pmap[x])))
+        f"{k}=\"{pmap[x]}\"" if k != "label"
+        else f"{k}=<{graphviz_escape_html(str(pmap[x]))}>"
         for (k, pmap) in dpx.items()
         if pmap[x] is not None
     ]) if dpx else ""
+
 
 def default_graphviz_style() -> str:
     """
@@ -227,6 +236,7 @@ def default_graphviz_style() -> str:
         The corresponding Graphviz string.
     """
     return str(GraphvizStyle())
+
 
 def vertex_to_graphviz(
     u: int,
@@ -250,10 +260,12 @@ def vertex_to_graphviz(
     Returns:
         The corresponding Graphviz string.
     """
-    if not vertex_to_str: vertex_to_str = str
+    if not vertex_to_str:
+        vertex_to_str = str
     return " ".join([vertex_to_str(u), graphviz_properties_to_str(u, dpv)])
 
-def graphviz_arc(g, is_directed: bool = None) -> str:
+
+def graphviz_arc(g) -> str:
     """
     Returns the appropriate string for directed/undirected edge declarations
     in Graphviz.
@@ -262,11 +274,11 @@ def graphviz_arc(g, is_directed: bool = None) -> str:
         ``"->"`` if the graph is directed,
         ``"--"`` otherwise.
     """
-    if is_directed is None:
-        is_directed = lambda g: g.is_directed()
+    is_directed = g.directed
     return "->" if is_directed else "--"
 
-def graphviz_type(g, is_directed: bool = None) -> str:
+
+def graphviz_type(g) -> str:
     """
     Returns the appropriate string for directed/undirected graph declarations
     in Graphviz.
@@ -275,27 +287,25 @@ def graphviz_type(g, is_directed: bool = None) -> str:
         ``"digraph"`` if the graph is directed,
         ``"graph"`` otherwise.
     """
-    if is_directed is None:
-        is_directed = lambda g: g.is_directed()
+    is_directed = g.directed
     return "digraph" if is_directed else "graph"
+
 
 def graphviz_dx_to_dot(prefix: str, dx: dict) -> str:
     assert prefix in {"graph", "node", "edge"}
     return "%s [%s]" % (
         prefix,
         "; ".join([
-            "%s=\"%s\"" % (k, v)
+            f"{k}=\"{v}\""
             for (k, v) in dx.items()
         ])
     ) if dx else ""
+
 
 def edge_to_graphviz(
     e,
     g,
     dpe: dict = None,
-    source: callable = None,  # TODO to remove
-    target: callable = None,  # TODO to remove
-    is_directed: bool = None,
     vertex_to_str: callable = None
 ) -> str:
     """
@@ -314,24 +324,20 @@ def edge_to_graphviz(
     Returns:
         The corresponding Graphviz string.
     """
-    if source is None:
-        source = lambda e, g: g.source(e)
-    if target is None:
-        target = lambda e, g: g.target(e)
-    if is_directed is None:
-        is_directed = lambda g: g.is_directed()
     if vertex_to_str is None:
         vertex_to_str = str
     return " ".join([
-        vertex_to_str(source(e, g)),
-        graphviz_arc(g, is_directed),
-        vertex_to_str(target(e, g)),
+        vertex_to_str(g.source(e)),
+        graphviz_arc(g),
+        vertex_to_str(g.target(e)),
         graphviz_properties_to_str(e, dpe)
     ])
 
+
 def enrich_kwargs(default_d: dict, key: str, **kwargs) -> dict:
     """
-    Add a key value pair in a dictionnary involved in the values of ``**kwargs``.
+    Add a key value pair in a dictionnary involved in the values
+    of ``**kwargs``.
     This function is commonly used in the methods that inherit
     the :py:class:`Graph.to_dot` method to complete the Graphviz style.
     See for example the the :py:class:`Automaton.to_dot` method.
@@ -345,12 +351,13 @@ def enrich_kwargs(default_d: dict, key: str, **kwargs) -> dict:
         The updated ``**kwargs``.
     """
     if default_d:
-        if not key in kwargs:
+        if key not in kwargs:
             kwargs[key] = dict()
         for (k, v) in default_d.items():
             if k not in kwargs[key].keys():
                 kwargs[key][k] = v
     return kwargs
+
 
 # TODO GraphView
 def to_dot(
@@ -358,15 +365,12 @@ def to_dot(
     vs: iter = None,
     es: iter = None,
     dg: dict = None,
-    extra_style: str  = None,
+    extra_style: str = None,
     dv: dict = None,
     de: dict = None,
     dpv: dict = None,
     dpe: dict = None,
     graphviz_style: str = None,
-    source: callable = None,
-    target: callable = None,
-    is_directed: bool = None,
     vertex_to_str: callable = None
 ) -> str:
     """
@@ -382,8 +386,9 @@ def to_dot(
         es (iter): A subset of edges of ``g``.
             If you pass ``None``, iterates over all the edges.
             Use rather :py:class:`GraphView`.
-        dpv (dict): Per-vertex style. It maps a vertex Graphviz attribute with the
-            corresponding vertex-based :py:class:`ReadPropertyMap` instance.
+        dpv (dict): Per-vertex style. It maps a vertex Graphviz
+            attribute with the corresponding vertex-based
+            :py:class:`ReadPropertyMap` instance.
         dpe (dict): Per-edge style. It maps a edge Graphviz attribute with the
             corresponding edge-based :py:class:`ReadPropertyMap` instance.
         dg (dict): Graph attributes.
@@ -392,13 +397,6 @@ def to_dot(
         de (dict): Default edge style. It maps a edge Graphviz attribute
             with the corresponding value.
         graphviz_style (list): Extra style (splines, etc).
-        source (callable): Callback used to extract the vertex descriptor
-            corresponding to the source of an edge descriptor.
-        target (callable): Callback used to extract the vertex descriptor
-            corresponding to the target of an edge descriptor.
-        is_directed (bool): Pass ``True`` if ``g`` is directed,
-            ``False`` otherwise. You may pass ``None`` to let the function
-            detect what is the appropriate value.
         vertex_to_str (callable): A function used to convert a vertex
             descriptor to the corresponding Graphviz vertex identifier.
             This is useful if the vertex descriptor is more sophisticated
@@ -411,34 +409,31 @@ def to_dot(
         vs = (u for u in g.vertices())
     if es is None:
         es = (e for e in g.edges())
-    if source is None:
-        source = lambda e, g: g.source(e)
-    if target is None:
-        target = lambda e, g: g.target(e)
-    if is_directed is None:
-        is_directed = g.directed
     if graphviz_style is None:
         graphviz_style = default_graphviz_style()
-    if vertex_to_str  is None:
+    if vertex_to_str is None:
         vertex_to_str = str
 
     dg = graphviz_dx_to_dot("graph", dg)
     dv = graphviz_dx_to_dot("node", dv)
     de = graphviz_dx_to_dot("edge", de)
     instructions = (
-          ([graphviz_style] if graphviz_style else [])
+        ([graphviz_style] if graphviz_style else [])
         + ([dg] if dg else [])
         + ([dv] if dv else [])
         + ([de] if de else [])
         + ([extra_style] if extra_style else [])
         + [vertex_to_graphviz(u, g, dpv, vertex_to_str) for u in vs]
         + [
-            edge_to_graphviz(e, g, dpe, source, target, is_directed, vertex_to_str)
+            edge_to_graphviz(e, g, dpe, vertex_to_str)
             for e in es
         ]
     )
 
     return "%(type)s G {%(instructions)s}" % {
-        "type":  "digraph" if is_directed else "graph",
-        "instructions":  "\n  %s;\n" % ";\n  ".join(instructions) if instructions else ""
+        "type":  graphviz_type(g),
+        "instructions": (
+            "\n  %s;\n" % ";\n  ".join(instructions) if instructions
+            else ""
+        )
     }

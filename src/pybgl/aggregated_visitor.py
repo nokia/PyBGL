@@ -16,7 +16,7 @@ class AggregatedVisitor:
         Args:
             visitors (list): A list of visitors exposing the same callbacks.
         """
-        self.m_visitors = visitors if visitors else list()
+        self.visitors = visitors if visitors else list()
 
     def __getattr__(self, method_name: str):
         """
@@ -28,7 +28,7 @@ class AggregatedVisitor:
                 method implemented in each nested visitor.
         """
         def wrapper(*args, **kwargs):
-            for vis in self.m_visitors:
+            for vis in self.visitors:
                 getattr(vis, method_name)(*args)
         return wrapper
 
@@ -55,10 +55,10 @@ class AggregatedVisitor:
         """
         return {
             AggregatedVisitor.type_to_key(vis)
-            for vis in self.m_visitors
+            for vis in self.visitors
         }
 
-    def get(self, key: str, ret_if_not_found = None) -> object:
+    def get(self, key: str, ret_if_not_found=None) -> object:
         """
         Retrieves a visitor identified by a given key from
         this :py:class:`AggregatedVisitor` instance.
@@ -70,13 +70,16 @@ class AggregatedVisitor:
         Returns:
             The corresponding visitor if found, ``None`` otherwise.
         """
-        for vis in self.m_visitors:
+        for vis in self.visitors:
             if AggregatedVisitor.type_to_key(vis) == key:
                 return vis
         print(
             "AggregatedVisitor: key %s not found: valid keys are: %s" % (
                 key,
-                {"%s" % AggregatedVisitor.type_to_key(vis) for vis in self.m_visitors}
+                {
+                    str(AggregatedVisitor.type_to_key(vis))
+                    for vis in self.visitors
+                }
             )
         )
         return ret_if_not_found

@@ -5,14 +5,18 @@
 # https://github.com/nokia/pybgl
 
 from collections import defaultdict
-from .graph import __len_gen__
 from .property_map import ReadPropertyMap
-from .incidence_automaton import in_degree, in_edges # Forward import
 from .node_automaton import *
+# from .node_automaton import (
+#     EdgeDescriptor,
+#     NodeAutomaton,
+#     make_node_automaton
+# )
+
 
 class IncidenceNodeAutomaton(NodeAutomaton):
     # TODO **kwargs
-    def __init__(self, *args, pmap_vsymbol :ReadPropertyMap = None, **kwargs):
+    def __init__(self, *args, pmap_vsymbol: ReadPropertyMap = None, **kwargs):
         """
         Constructor.
 
@@ -20,57 +24,26 @@ class IncidenceNodeAutomaton(NodeAutomaton):
             pmap_vsymbol (ReadPropertyMap): A property map which maps
                 each state with its corresponding symbol.
         """
-        self.predecessors = defaultdict(set) # predecessors[r] = {q}
-        super().__init__(*args, pmap_vsymbol=pmap_vsymbol) # UGLY
+        self.predecessors = defaultdict(set)  # predecessors[r] = {q}
+        super().__init__(*args, pmap_vsymbol=pmap_vsymbol)  # UGLY
 
     # TODO: Factorize with IncidenceAutomaton
     def add_edge(self, q: int, r: int) -> tuple:
-        """
-        Adds a transition to this :py:class:`IncidenceAutomaton` instance.
-        Overloads the :py:meth:`Automaton.add_edge` method.
-
-        Args:
-            q (int): The vertex descriptor of source state of the new transition.
-            r (int): The vertex descriptor of target state of the new transition.
-
-        Returns:
-            A tuple ``(e, success)`` where ``e`` is an :py:class:`EdgeDescriptor`
-            compliant with this :py:class:`IncidenceAutomaton` class and ``success == True``
-            if successful, ``(None, False)`` otherwise.
-        """
+        # Overloaded method
         (e, added) = super().add_edge(q, r)
         if added:
             self.predecessors[r].add(q)
         return (e, added)
 
     def in_edges(self, r: int):
-        """
-        Gets an iterator over the in-edges of a vertex ``r``
-        involved in this :py:class:`IncidenceAutomaton` instance.
-        Overwrites the :py:class:`Graph.in_edges` method.
-
-        Args:
-            r (int): The target state.
-
-        Returns:
-            An iterator over the in-edges of ``r``.
-        """
+        # Overloaded method
         return (
             EdgeDescriptor(q, r, self.symbol(r))
             for q in self.predecessors.get(r, set())
         )
 
     def remove_vertex(self, q: int):
-        """
-        Removes a vertex from this :py:class:`IncidenceAutomaton` instance.
-        Overloads the :py:class:`Graph.remove_vertex` method.
-
-        Args:
-            u (int): The vertex descriptor of the vertex to be removed.
-
-        Raises:
-            `KeyError` if ``u`` does not exist.
-        """
+        # Overloaded method
         # Note: we could rely on remove_edge for each in/out-edge, but the
         # following implementation is faster.
 
@@ -92,13 +65,7 @@ class IncidenceNodeAutomaton(NodeAutomaton):
             del self.adjacencies[q]
 
     def remove_edge(self, e: EdgeDescriptor):
-        """
-        Removes an edge from this :py:class:`IncidenceAutomaton` instance.
-        Overloads the :py:class:`Graph.remove_edge` method.
-
-        Args:
-            e (EdgeDescriptor): The edge descriptor of the edge to be removed.
-        """
+        # Overloaded method
         super().remove_edge(e)
         q = self.source(e)
         r = self.target(e)
@@ -135,7 +102,10 @@ def make_incidence_node_automaton(
     Example:
 
         >>> from collections import defaultdict
-        >>> from pybgl import Automaton, make_assoc_property_map, make_incidence_node_automaton
+        >>> from pybgl import (
+        ...    Automaton, make_assoc_property_map,
+        ...    make_incidence_node_automaton
+        ... )
         >>> transitions = [("root", "sink"), ("root", "sink")]
         >>> map_vlabel = defaultdict(bool, {"root": "a", "sink": "b"})
         >>> map_vfinal = defaultdict(bool, {"root": False, "sink": True})

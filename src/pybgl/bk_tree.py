@@ -4,11 +4,11 @@
 # This file is part of the pybgl project.
 # https://github.com/nokia/pybgl
 
-import sys
 from collections import deque
 from .automaton import *
 from .algebra import INFINITY
 from .levenshtein_distance import levenshtein_distance
+
 
 class BKTree(Automaton):
     """
@@ -52,7 +52,8 @@ class BKTree(Automaton):
 
     def element(self, u: int) -> str:
         """
-        Retrieves the element assigned to a node of this :py:class:`BKTree` instance.
+        Retrieves the element assigned to a node of this
+        :py:class:`BKTree` instance.
 
         Args:
             u (int): The vertex descriptor of the considered node.
@@ -127,7 +128,7 @@ class BKTree(Automaton):
                 (w_best, d_best) = (w_u, d_u)
             for e in self.out_edges(u):
                 d_uv = self.label(e)
-                if abs(d_uv - d_u) <= d_best: # Cut-off criterion
+                if abs(d_uv - d_u) <= d_best:  # Cut-off criterion
                     v = self.target(e)
                     to_process.appendleft(v)
         return (w_best, d_best) if w_best is not None else None
@@ -144,6 +145,7 @@ class BKTree(Automaton):
         kwargs = enrich_kwargs(dpv, "dpv", **kwargs)
         return super().to_dot(**kwargs)
 
+
 def add_vertex(w: str, t: BKTree) -> int:
     """
     Adds a vertex to a :py:class:`BKTree` instance.
@@ -155,9 +157,11 @@ def add_vertex(w: str, t: BKTree) -> int:
     Returns:
         The corresponding vertex descriptor.
     """
+    # TODO: To remove
     return t.add_vertex(w)
 
-def bk_tree_insert(w: str, t: BKTree, u = None) -> int:
+
+def bk_tree_insert(w: str, t: BKTree, u: int = None) -> int:
     """
     Inserts an element in a :py:class:`BKTree` instance from
     a given node.
@@ -172,6 +176,7 @@ def bk_tree_insert(w: str, t: BKTree, u = None) -> int:
         The vertex descriptor of the word mapped to ``w``.
     """
     return t.insert(w, u)
+
 
 def make_bk_tree(elements: iter, distance: callable = None) -> BKTree:
     """

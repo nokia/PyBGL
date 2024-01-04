@@ -9,12 +9,13 @@ from .nfa import Nfa
 from .thompson_compile_nfa import thompson_compile_nfa
 from .moore_determination import moore_determination
 
+
 def compile_nfa(regexp: str) -> Nfa:
     """
-    Builds a
-    `Non-deterministic Finite Automaton <https://en.wikipedia.org/wiki/Nondeterministic_finite_automaton>`__
-    from a
-    `regular expression <https://en.wikipedia.org/wiki/Regular_expression>`__.
+    Builds a `Non-deterministic Finite Automaton
+    <https://en.wikipedia.org/wiki/Nondeterministic_finite_automaton>`__
+    from a `regular expression
+    <https://en.wikipedia.org/wiki/Regular_expression>`__.
 
     Args:
         regexp (str): A regular expression.
@@ -25,12 +26,13 @@ def compile_nfa(regexp: str) -> Nfa:
     (nfa, q0, f) = thompson_compile_nfa(regexp)
     return nfa
 
+
 def compile_dfa(regexp: str, complete: bool = False) -> Automaton:
     """
-    Builds a
-    `Deterministic Finite Automaton <https://en.wikipedia.org/wiki/Deterministic_finite_automaton>`__.
-    from a
-    `regular expression <https://en.wikipedia.org/wiki/Regular_expression>`__.
+    Builds a `Deterministic Finite Automaton
+    <https://en.wikipedia.org/wiki/Deterministic_finite_automaton>`__.
+    from a `regular expression
+    <https://en.wikipedia.org/wiki/Regular_expression>`__.
 
     Args:
         regexp (str): A regular expression.

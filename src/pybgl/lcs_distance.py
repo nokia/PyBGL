@@ -6,7 +6,9 @@
 
 def lcs_distance_naive(x: str, y: str) -> int:
     """
-    Inefficient implementation of the `LCS (Longest Common Substring) distance <https://en.wikipedia.org/wiki/Longest_common_subsequence>`__
+    Inefficient implementation of the
+    `LCS (Longest Common Substring) distance
+    <https://en.wikipedia.org/wiki/Longest_common_subsequence>`__
     (no memoization).
 
     Args:
@@ -29,6 +31,7 @@ def lcs_distance_naive(x: str, y: str) -> int:
         )
     )
 
+
 class LcsDistance:
     """
     The :py:class:`LcsDistance` class is used to implement the memoization
@@ -48,7 +51,9 @@ class LcsDistance:
 
     def compute(self, i: int = 0, j: int = 0) -> int:
         """
-        Computes the `LCS (Longest Common Substring) distance <https://en.wikipedia.org/wiki/Longest_common_subsequence>`__, with memoization.
+        Computes the `LCS (Longest Common Substring) distance
+        <https://en.wikipedia.org/wiki/Longest_common_subsequence>`__,
+        with memoization.
 
         Args:
             i (int): The current index in ``self.x``.
@@ -71,16 +76,19 @@ class LcsDistance:
             )
         return ret
 
+
 def lcs_distance(x: str, y: str) -> int:
     """
-    Computes the `LCS (Longest Common Substring) distance <https://en.wikipedia.org/wiki/Longest_common_subsequence>`__, with memoization.
+    Computes the `LCS (Longest Common Substring) distance
+    <https://en.wikipedia.org/wiki/Longest_common_subsequence>`__,
+    with memoization.
 
     Args:
         x (str): The left operand.
         y (str): The right operand.
 
     Returns:
-        The minimal number of insertion/deletion substitution operations needed to
-        transform ``x`` into ``y``.
+        The minimal number of insertion/deletion substitution operations
+        needed to transform ``x`` into ``y``.
     """
     return LcsDistance(x, y).compute(0, 0)

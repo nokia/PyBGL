@@ -4,15 +4,25 @@
 # This file is part of the pybgl project.
 # https://github.com/nokia/pybgl
 
+from collections import defaultdict
 from .automaton import *
-from .property_map import ReadWritePropertyMap
+# from .automaton import BOTTOM, DirectedGraph, EdgeDescriptor
+from .graphviz import enrich_kwargs
+from .property_map import (
+    ReadWritePropertyMap,
+    make_assoc_property_map,
+    make_func_property_map
+)
+
 
 EPSILON = "\u03b5"
+
 
 class Nfa(DirectedGraph):
     """
     The :py:class:`Nfa` implements a
-    `Non-deterministic Finite Automaton <https://en.wikipedia.org/wiki/Nondeterministic_finite_automaton>`__.
+    `Non-deterministic Finite Automaton
+    <https://en.wikipedia.org/wiki/Nondeterministic_finite_automaton>`__.
     """
     def __init__(
         self,
@@ -127,21 +137,24 @@ class Nfa(DirectedGraph):
         Adds a transition to this :py:class:`Nfa` instance.
 
         Args:
-            q (int): The vertex descriptor of source state of the new transition.
-            r (int): The vertex descriptor of target state of the new transition.
+            q (int): The vertex descriptor of source state of the
+                new transition.
+            r (int): The vertex descriptor of target state of the
+                new transition.
             a (str): The symbol labeling this transition.
 
         Returns:
-            A tuple ``(e, success)`` where ``e`` is an :py:class:`EdgeDescriptor`
-            compliant with this :py:class:`Nfa` class and ``success == True``
-            if successful, ``(None, False)`` otherwise.
+            A tuple ``(e, success)`` where ``e`` is an
+            :py:class:`EdgeDescriptor` compliant with this :py:class:`Nfa`
+            class and ``success == True`` if successful,
+            ``(None, False)`` otherwise.
         """
         arn = self.adjacencies.get(q)
         if arn is None:
-            arn = self.m_adjacencies[q] = dict()
+            arn = self.adjacencies[q] = dict()
         rn = arn.get(a)
         if rn is None:
-            rn = self.m_adjacencies[q][a] = dict()
+            rn = self.adjacencies[q][a] = dict()
         s = rn.get(r)
         if s is None:
             s = rn[r] = set()
@@ -154,13 +167,14 @@ class Nfa(DirectedGraph):
         Removes a transition from this :py:class:`Nfa` instance.
 
         Args:
-            e (EdgeDescriptor): The edge descriptor of the transition to be removed.
+            e (EdgeDescriptor): The edge descriptor of the transition
+                to be removed.
         """
         q = self.source(e)
         r = self.target(e)
-        (a, n) = e.m_distinguisher
+        (a, n) = e.distinguisher
         try:
-            del self.m_adjacencies[q][a][r]
+            del self.adjacencies[q][a][r]
         except KeyError:
             pass
 
@@ -270,7 +284,7 @@ class Nfa(DirectedGraph):
         Returns:
             The symbol assigned to the considered transition.
         """
-        (a, n) = e.m_distinguisher
+        (a, n) = e.distinguisher
         return a
 
     def set_final(self, q: int, is_final: bool = True):
@@ -346,8 +360,8 @@ class Nfa(DirectedGraph):
     def delta_word(self, w) -> set:
         """
         Transition function, allowing to move from an initial state
-        to the state reached by consuming each character of a word ``w``, if any.
-        See also :py:meth:`Nfa.delta`.
+        to the state reached by consuming each character of a word ``w``,
+        if any. See also the :py:meth:`Nfa.delta` method.
 
         Args:
             w (str): The word.
@@ -386,6 +400,7 @@ class Nfa(DirectedGraph):
         """
         return self.label(e) == self.epsilon
 
+
 def epsilon(nfa: Nfa) -> str:
     """
     Retrieves the symbol representing the empty word.
@@ -397,6 +412,7 @@ def epsilon(nfa: Nfa) -> str:
         The symbol representing the empty word.
     """
     return nfa.epsilon
+
 
 def is_epsilon_transition(e: EdgeDescriptor, nfa: Nfa) -> bool:
     """
@@ -412,6 +428,7 @@ def is_epsilon_transition(e: EdgeDescriptor, nfa: Nfa) -> bool:
     """
     return nfa.is_epsilon_transition(e)
 
+
 def initials(nfa: Nfa) -> iter:
     """
     Retrieves the initial states of a NFA.
@@ -424,6 +441,7 @@ def initials(nfa: Nfa) -> iter:
     """
     return (q for q in nfa.initials)
 
+
 def set_initials(q0s: iter, nfa: Nfa):
     """
     Sets the initial states of a NFA.
@@ -433,6 +451,7 @@ def set_initials(q0s: iter, nfa: Nfa):
         nfa (Nfa): A non-deterministic automaton.
     """
     nfa.set_initials(q0s)
+
 
 def delta_word(w: str, nfa: Nfa) -> set:
     """

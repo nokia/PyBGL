@@ -6,20 +6,29 @@
 
 from collections import defaultdict
 
-# NB: pybgl.graph.edge and pybgl.graph.add_edge are overloaded by this file because
-# they don't have the same signature.
+# NB: pybgl.graph.edge and pybgl.graph.add_edge are overloaded by
+# this file because they don't have the same signature.
 from .graph import *
-from .property_map import ReadPropertyMap, make_assoc_property_map, make_func_property_map
+# from .graph import DirectedGraph, EdgeDescriptor
+from .graphviz import enrich_kwargs
+from .property_map import (
+    ReadPropertyMap,
+    make_assoc_property_map,
+    make_func_property_map,
+)
+
 
 BOTTOM = None
+
 
 class Automaton(DirectedGraph):
     """
     The :py:class:`Automaton` implements a
-    `Deterministic Finite Automaton <https://en.wikipedia.org/wiki/Deterministic_finite_automaton>`__.
+    `Deterministic Finite Automaton
+    <https://en.wikipedia.org/wiki/Deterministic_finite_automaton>`__.
     """
     # Convention: EdgeDescriptor(q, r, a)
-    # Convention: self.m_adjacencies[q][a] == r
+    # Convention: self.adjacencies[q][a] == r
     def __init__(
         self,
         num_vertices: int = 0,
@@ -38,12 +47,12 @@ class Automaton(DirectedGraph):
                 ``None`` otherwise.
         """
         super().__init__(num_vertices)
-        self.m_q0 = q0
+        self.q0 = q0
         if not pmap_vfinal:
-            self.m_map_vfinal = defaultdict(bool)
-            self.m_pmap_vfinal = make_assoc_property_map(self.m_map_vfinal)
+            self.map_vfinal = defaultdict(bool)
+            self.pmap_vfinal = make_assoc_property_map(self.map_vfinal)
         else:
-            self.m_pmap_vfinal = pmap_vfinal
+            self.pmap_vfinal = pmap_vfinal
 
     def delta(self, q: int, a: str) -> int:
         """
@@ -59,27 +68,30 @@ class Automaton(DirectedGraph):
         Returns:
             The reached state (if any), :py:data:`BOTTOM` otherwise.
         """
-        return self.m_adjacencies.get(q, dict()).get(a, BOTTOM)
+        return self.adjacencies.get(q, dict()).get(a, BOTTOM)
 
     def add_edge(self, q: int, r: int, a: str) -> tuple:
         """
         Adds a transition to this :py:class:`Automaton` instance.
 
         Args:
-            q (int): The vertex descriptor of source state of the new transition.
-            r (int): The vertex descriptor of target state of the new transition.
+            q (int): The vertex descriptor of source state of the
+                new transition.
+            r (int): The vertex descriptor of target state of the
+                new transition.
             a (str): The label of the new transition.
 
         Returns:
-            A tuple ``(e, success)`` where ``e`` is an :py:class:`EdgeDescriptor`
-            compliant with this :py:class:`Automaton` class and ``success == True``
+            A tuple ``(e, success)`` where ``e`` is an
+            :py:class:`EdgeDescriptor` compliant with this
+            :py:class:`Automaton` class and ``success == True``
             if successful, ``(None, False)`` otherwise.
         """
         assert q is not None
         assert r is not None
         if self.delta(q, a):
             return (None, False)
-        self.m_adjacencies[q][a] = r
+        self.adjacencies[q][a] = r
         return (EdgeDescriptor(q, r, a), True)
 
     def edge(self, q: int, r: int, a: str) -> tuple:
@@ -97,7 +109,13 @@ class Automaton(DirectedGraph):
             ``(None, False)`` otherwise.
         """
         assert q is not BOTTOM
-        return (EdgeDescriptor(q, r, a), True) if q is not None and r == self.delta(q, a) else (None, False)
+        return (
+            (EdgeDescriptor(q, r, a), True) if (
+                q is not None
+                and r == self.delta(q, a)
+            )
+            else (None, False)
+        )
 
     def in_edges(self, q: int):
         """
@@ -130,7 +148,7 @@ class Automaton(DirectedGraph):
         """
         return (
             EdgeDescriptor(q, r, a)
-            for (a, r) in self.m_adjacencies.get(q, dict()).items()
+            for (a, r) in self.adjacencies.get(q, dict()).items()
         )
 
     def remove_edge(self, e: EdgeDescriptor):
@@ -138,11 +156,12 @@ class Automaton(DirectedGraph):
         Removes a transition from this :py:class:`Automaton` instance.
 
         Args:
-            e (EdgeDescriptor): The edge descriptor of the transition to be removed.
+            e (EdgeDescriptor): The edge descriptor of the
+                transition to be removed.
         """
         q = self.source(e)
         a = self.label(e)
-        adj_q = self.m_adjacencies.get(q)
+        adj_q = self.adjacencies.get(q)
         if adj_q:
             if a in adj_q.keys():
                 del adj_q[a]
@@ -160,7 +179,7 @@ class Automaton(DirectedGraph):
         """
         return {
             a
-            for a in self.m_adjacencies.get(q, dict()).keys()
+            for a in self.adjacencies.get(q, dict()).keys()
         } if q is not None else set()
 
     def alphabet(self) -> set:
@@ -174,7 +193,7 @@ class Automaton(DirectedGraph):
         return {
             a
             for q in self.vertices()
-            for a in self.m_adjacencies.get(q, dict()).keys()
+            for a in self.adjacencies.get(q, dict()).keys()
         }
 
     def edges(self) -> iter:
@@ -187,7 +206,7 @@ class Automaton(DirectedGraph):
         """
         return (
             EdgeDescriptor(q, r, a)
-            for (q, adj_q) in self.m_adjacencies.items()
+            for (q, adj_q) in self.adjacencies.items()
             for (a, r) in adj_q.items()
         )
 
@@ -202,9 +221,9 @@ class Automaton(DirectedGraph):
                 new initial state, ``False`` otherwise.
         """
         if is_initial:
-            self.m_q0 = q
-        elif self.m_q0 == q:
-            self.m_q0 = None
+            self.q0 = q
+        elif self.q0 == q:
+            self.q0 = None
 
     def initial(self) -> int:
         """
@@ -215,7 +234,7 @@ class Automaton(DirectedGraph):
             The vertex descriptor of the initial state if set,
             ``None`` otherwise.
         """
-        return self.m_q0
+        return self.q0
 
     def is_initial(self, q: int) -> bool:
         """
@@ -229,7 +248,7 @@ class Automaton(DirectedGraph):
             ``True`` if ``q`` is the initial state,
             ``None`` otherwise.
         """
-        return self.m_q0 == q
+        return self.q0 == q
 
     def label(self, e: EdgeDescriptor) -> str:
         """
@@ -243,7 +262,7 @@ class Automaton(DirectedGraph):
         Returns:
             The symbol assigned to the considered transition.
         """
-        return e.m_distinguisher
+        return e.distinguisher
 
     def set_final(self, q: int, is_final: bool = True):
         """
@@ -255,7 +274,7 @@ class Automaton(DirectedGraph):
             is_final (bool): Pass ``True`` if ``q`` must be the
                 new final state, ``False`` otherwise.
         """
-        self.m_pmap_vfinal[q] = is_final
+        self.pmap_vfinal[q] = is_final
 
     def is_final(self, q: int) -> bool:
         """
@@ -269,7 +288,7 @@ class Automaton(DirectedGraph):
             ``True`` if ``q`` is a final state,
             ``None`` otherwise.
         """
-        return self.m_pmap_vfinal[q]
+        return self.pmap_vfinal[q]
 
     def finals(self) -> set:
         """
@@ -309,8 +328,8 @@ class Automaton(DirectedGraph):
     def delta_word(self, q: int, w: str) -> int:
         """
         Transition function, allowing to move from a state ``q``
-        to the state reached by consuming each character of a word ``w``, if any.
-        See also :py:meth:`Automaton.delta`.
+        to the state reached by consuming each character of a word
+        ``w``, if any. See also the :py:meth:`Automaton.delta` method.
 
         Args:
             q (int): The vertex descriptor of a state of this
@@ -321,7 +340,8 @@ class Automaton(DirectedGraph):
             The reached state (if any), :py:data:`BOTTOM` otherwise.
         """
         for a in w:
-            if q is BOTTOM: return q
+            if q is BOTTOM:
+                return q
             q = self.delta(q, a)
         return q
 
@@ -355,7 +375,8 @@ class Automaton(DirectedGraph):
     @staticmethod
     def is_deterministic() -> bool:
         """
-        Tests whether this :py:class:`Automaton` instance is deterministic or not.
+        Tests whether this :py:class:`Automaton` instance is
+        deterministic or not.
 
         Returns:
             ``True``.
@@ -419,10 +440,11 @@ class Automaton(DirectedGraph):
             q = r
         self.set_final(q)
 
-#------------------------------------------------------------------
+
+# ------------------------------------------------------------------
 # Methods wrappers. This is to reuse the same naming as in the BGL
 # but in python.
-#------------------------------------------------------------------
+# ------------------------------------------------------------------
 
 def accepts(w: str, g: Automaton) -> bool:
     """
@@ -440,6 +462,7 @@ def accepts(w: str, g: Automaton) -> bool:
         ``False`` otherwise.
     """
     return g.accepts(w)
+
 
 def accepts_debug(w: str, g: Automaton) -> bool:
     """
@@ -463,6 +486,7 @@ def accepts_debug(w: str, g: Automaton) -> bool:
         q = delta(q, a, g)
     return is_final(q, g)
 
+
 def add_edge(q: int, r: int, a: str, g: Automaton) -> tuple:
     """
     Adds a transition to an :py:class:`Automaton` instance.
@@ -481,6 +505,7 @@ def add_edge(q: int, r: int, a: str, g: Automaton) -> tuple:
     """
     return g.add_edge(q, r, a)
 
+
 def edge(q: int, r: int, a: str, g: Automaton) -> tuple:
     """
     Retrieves the edge from a state ``q`` to state ``r`` in
@@ -498,6 +523,7 @@ def edge(q: int, r: int, a: str, g: Automaton) -> tuple:
     """
     return g.edge(q, r, a)
 
+
 def sigma(q: int, g: Automaton) -> set:
     """
     Computes sub-alphabet related to a given state of a
@@ -513,6 +539,7 @@ def sigma(q: int, g: Automaton) -> set:
     """
     return g.sigma(q)
 
+
 def alphabet(g: Automaton) -> set:
     """
     Computes the (minimal) alphabet related to a
@@ -526,6 +553,7 @@ def alphabet(g: Automaton) -> set:
         The corresponding set of symbols.
     """
     return g.alphabet()
+
 
 def is_initial(q: int, g: Automaton) -> bool:
     """
@@ -543,6 +571,7 @@ def is_initial(q: int, g: Automaton) -> bool:
     """
     return g.is_initial(q)
 
+
 def initial(g: Automaton) -> int:
     """
     Returns the vertex descriptor of the initial state of a
@@ -557,6 +586,7 @@ def initial(g: Automaton) -> int:
         ``None`` otherwise.
     """
     return g.initial()
+
 
 def is_final(q: int, g: Automaton) -> bool:
     """
@@ -574,6 +604,7 @@ def is_final(q: int, g: Automaton) -> bool:
     """
     return g.is_final(q)
 
+
 def label(e: EdgeDescriptor, g: Automaton) -> str:
     """
     Retrieves the symbol assigned to a transition of a
@@ -590,6 +621,7 @@ def label(e: EdgeDescriptor, g: Automaton) -> str:
     """
     return g.label(e)
 
+
 def set_initial(q: int, g: Automaton, is_initial: bool = True):
     """
     Sets the status of a state as the initial state of a
@@ -603,6 +635,7 @@ def set_initial(q: int, g: Automaton, is_initial: bool = True):
             new initial state, ``False`` otherwise.
     """
     g.set_initial(q, is_initial)
+
 
 def set_final(q: int, g: Automaton, is_final: bool = True):
     """
@@ -618,6 +651,7 @@ def set_final(q: int, g: Automaton, is_final: bool = True):
     """
     g.set_final(q, is_final)
 
+
 def finals(g: Automaton) -> set:
     """
     Returns the vertex descriptors of the final states of a
@@ -632,6 +666,7 @@ def finals(g: Automaton) -> set:
         ``None`` otherwise.
     """
     return g.finals()
+
 
 def delta(q: int, a: str, g: Automaton) -> int:
     """
@@ -650,6 +685,7 @@ def delta(q: int, a: str, g: Automaton) -> int:
     """
     return g.delta(q, a)
 
+
 def delta_word(q: int, w: str, g: Automaton) -> int:
     """
     Transition function, allowing to move from a state ``q``
@@ -667,6 +703,7 @@ def delta_word(q: int, w: str, g: Automaton) -> int:
     """
     return g.delta_word(q, w)
 
+
 def is_finite(g) -> bool:
     """
     Tests whether an :py:class:`Automaton` instance is finite or not.
@@ -677,6 +714,7 @@ def is_finite(g) -> bool:
     """
     return g.is_finite()
 
+
 def is_deterministic(g) -> bool:
     """
     Tests whether an :py:class:`Automaton` instance is deterministic or not.
@@ -686,6 +724,7 @@ def is_deterministic(g) -> bool:
         ``True``.
     """
     return g.is_deterministic()
+
 
 def is_complete(g) -> bool:
     """
@@ -699,18 +738,20 @@ def is_complete(g) -> bool:
     """
     return g.is_complete()
 
-#--------------------------------------------------
+
+# --------------------------------------------------
 # Extra methods
-#--------------------------------------------------
+# --------------------------------------------------
 
 def is_minimal(g) -> bool:
     return NotImplementedError()
+
 
 def make_automaton(
     transitions: list,
     q0n: int = 0,
     pmap_vfinal: ReadPropertyMap = None,
-    AutomatonClass = Automaton
+    AutomatonClass=Automaton
 ):
     """
     Makes an automaton of type `AutomatonClass`
@@ -735,10 +776,15 @@ def make_automaton(
 
     Example:
         >>> from collections import defaultdict
-        >>> from pybgl import Automaton, make_assoc_property_map, make_automaton
+        >>> from pybgl import (
+        ...      Automaton, make_assoc_property_map, make_automaton
+        ... )
         >>> transitions = [("root", "sink", "a"), ("root", "sink", "b")]
         >>> map_vfinal = defaultdict(bool, {"root": False, "sink": True})
-        >>> g = make_automaton(transitions, "root", make_assoc_property_map(map_vfinal))
+        >>> g = make_automaton(
+        ...     transitions, "root",
+        ...     make_assoc_property_map(map_vfinal)
+        ... )
 
     Returns:
         The corresponding automaton.
@@ -768,6 +814,7 @@ def make_automaton(
             g.set_final(q)
     return g
 
+
 def delta_best_effort(g: Automaton, w: str) -> tuple:
     """
     Transition function, allowing to move from the initial state
@@ -783,6 +830,7 @@ def delta_best_effort(g: Automaton, w: str) -> tuple:
         The reached state in best effort.
     """
     return g.delta_best_effort(w)
+
 
 def automaton_insert_string(g: Automaton, w: str) -> int:
     """
