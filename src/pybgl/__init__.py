@@ -11,7 +11,7 @@ __maintainer__ = "Marc-Olivier Buob"
 __email__ = "marc-olivier.buob@nokia-bell-labs.com"
 __copyright__ = "Copyright (C) 2018, Nokia"
 __license__ = "BSD-3"
-__version__ = '0.10.1'  # Use single quotes for bumpversion (see setup.cfg)
+__version__ = "0.10.2"  # Use double quotes
 
 from .aggregated_visitor import AggregatedVisitor
 from .algebra import (
@@ -19,14 +19,17 @@ from .algebra import (
     BinaryRelation, Less, GreaterThan, BinaryOperator,
     ClosedOperator, ClosedPlus, ClosedTime, ClosedMin, ClosedMax
 )
-#from .automaton_copy import automaton_copy
+# from .automaton_copy import automaton_copy
 from .automaton import BOTTOM, Automaton, make_automaton
 from .bk_tree import BKTree, make_bk_tree
 from .breadth_first_search import (
     DefaultBreadthFirstSearchVisitor,
     breadth_first_search, breadth_first_search_graph
 )
-from .color import hsv_to_hsl, hsl_to_hsv, html_to_graphviz as html_color_to_graphviz
+from .color import (
+    hsv_to_hsl, hsl_to_hsv,
+    html_color_to_graphviz
+)
 from .cut import cut
 from .damerau_levenshtein_distance import damerau_levenshtein_distance
 from .depth_first_search import (
@@ -45,13 +48,18 @@ from .deterministic_union import (
 from .digital_sequence import DigitalSequence
 from .dijkstra_shortest_paths import (
     DijkstraVisitor, dijkstra_shortest_paths, dijkstra_shortest_path,
-    make_dag as make_shortest_paths_dag,
-    make_path as make_shortest_path
+    make_shortest_paths_dag,
+    make_shortest_path
 )
-#from .graph_copy import graph_copy
+# from .graph_copy import graph_copy
 from .graph_dp import GraphDp
-#from .graph_extract import graph_extract
-from .graph import EdgeDescriptor, Graph, DirectedGraph, UndirectedGraph
+# from .graph_extract import graph_extract
+from .graph import (
+    EdgeDescriptor,
+    Graph,
+    DirectedGraph,
+    UndirectedGraph,
+)
 from .graph_traversal import (
     WHITE, GRAY, BLACK,
     DefaultTreeTraversalVisitor, dfs_tree, bfs_tree

@@ -7,13 +7,16 @@
 import sys
 from collections import defaultdict
 from .algebra import BinaryRelation, BinaryOperator, Less, ClosedPlus
-from .breadth_first_search import DefaultBreadthFirstSearchVisitor
+from .aggregated_visitor import AggregatedVisitor
 from .graph import Graph, EdgeDescriptor
 from .graph_traversal import WHITE, GRAY, BLACK
 from .heap import Comparable, Heap
 from .property_map import (
-    ReadPropertyMap, ReadWritePropertyMap, make_assoc_property_map
+    ReadPropertyMap,
+    ReadWritePropertyMap,
+    make_assoc_property_map,
 )
+
 
 class DijkstraVisitor:
     """
@@ -24,7 +27,8 @@ class DijkstraVisitor:
     """
     def initialize_vertex(self, u: int, g: Graph):
         """
-        Method invoked on each vertex in the graph before the start of the algorithm.
+        Method invoked on each vertex in the graph
+        when the algorithm starts.
 
         Args:
             u (int): The initialized vertex.
@@ -49,8 +53,8 @@ class DijkstraVisitor:
 
     def examine_edge(self, e: EdgeDescriptor, g: Graph):
         """
-        Method invoked on each out-edge of a vertex immediately after it has been
-        added to set of vertices to process.
+        Method invoked on each out-edge of a vertex immediately
+        after it has been added to set of vertices to process.
 
         Args:
             e (EdgeDescriptor): The examined edge.
@@ -61,9 +65,10 @@ class DijkstraVisitor:
     def discover_vertex(self, u: int, g: Graph):
         """
         Method invoked on vertex ``v`` when an edge ``(u, v)`` is examined
-        and ``v`` is :py:data:`WHITE`. Since a vertex is colored :py:data:`GRAY`
-        when it is discovered, each reacable vertex is discovered exactly once.
-        This is also when the vertex is inserted into the priority queue.
+        and ``v`` is :py:data:`WHITE`. Since a vertex is colored
+        :py:data:`GRAY` when it is discovered, each reacable vertex is
+        discovered exactly once. This is also when the vertex is inserted
+        into the priority queue.
 
         Args:
             u (int): The discovered vertex.
@@ -95,13 +100,15 @@ class DijkstraVisitor:
 
     def finish_vertex(self, u: int, g: Graph):
         """
-        Method invoked on a vertex after all of its out edges have been examined.
+        Method invoked on a vertex after all of its out edges have
+        been examined.
 
         Args:
             u (int): The discovered vertex.
             g (Graph): The considered graph.
         """
         pass
+
 
 def dijkstra_shortest_paths_initialization(
     g: Graph,
@@ -121,6 +128,7 @@ def dijkstra_shortest_paths_initialization(
         pmap_vdist[u] = zero if u == s else infty
         vis.initialize_vertex(u, g)
 
+
 # Remark:
 # Contrary to BGL implementation, we map each vertex with its incident arc*s*
 # in the shortest path "tree". This allows to manage parallel arcs and equally
@@ -134,7 +142,7 @@ def dijkstra_shortest_paths_iteration(
     pmap_vdist: ReadWritePropertyMap,
     pmap_vcolor: ReadWritePropertyMap,
     compare: BinaryRelation = Less(),  # TODO Ignored, see Heap class.
-    combine: BinaryOperator  = ClosedPlus(),
+    combine: BinaryOperator = ClosedPlus(),
     vis: DijkstraVisitor = DijkstraVisitor()
 ):
     """
@@ -176,7 +184,9 @@ def dijkstra_shortest_paths_iteration(
     vis.finish_vertex(u, g)
     return w_su
 
+
 INFINITY = sys.maxsize
+
 
 def dijkstra_shortest_paths(
     g: Graph,
@@ -194,7 +204,8 @@ def dijkstra_shortest_paths(
     """
     Computes the shortest path in a graph from a given source node
     and according to the `(Distance, compare, combine)` semi-ring
-    using the `Dijkstra algorithm <https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm>`__.
+    using the `Dijkstra algorithm
+    <https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm>`__.
 
     Args:
         g (Graph): The input graph.
@@ -253,11 +264,14 @@ def dijkstra_shortest_paths(
     # Iteration
     if not compare:
         compare = Less()
-        heap = Heap([s], to_comparable = lambda u: pmap_vdist[u])
+        heap = Heap(
+            [s],
+            to_comparable=lambda u: pmap_vdist[u]
+        )
     else:
         heap = Heap(
             [s],
-            to_comparable = lambda u: Comparable(pmap_vdist[u], compare)
+            to_comparable=lambda u: Comparable(pmap_vdist[u], compare)
         )
 
     while heap:
@@ -268,13 +282,13 @@ def dijkstra_shortest_paths(
             compare, combine, vis
         )
 
-#--------------------------------------------------------------------
+
+# --------------------------------------------------------------------
 # Utilities to get the Shortest-Paths-DAG or an arbitary shortest
 # path towards an arbitrary node t.
-#--------------------------------------------------------------------
+# --------------------------------------------------------------------
 
-# TODO rename to make_shortest_paths_dag
-def make_dag(
+def make_shortest_paths_dag(
     g: Graph,
     s: int,
     t: int,
@@ -296,7 +310,7 @@ def make_dag(
             ``ReadPropertyMap{int:  set(int)}`` mapping each
             vertex with its set of (direct) predecessors.
         single_path (bool): Pass ``True`` to extract an arbitrary
-            single shortest path, ``False`` to extrac of all them.
+            single shortest path, ``False`` to extract of all them.
             Note that if ``single_path is True`` and if multiple
             paths exist from ``s`` to ``t``, :py:func:`make_dag`
             extracts an arbitrary shortest path instead of all of them.
@@ -305,8 +319,6 @@ def make_dag(
         The corresponding set of arcs.
     """
     kept_edges = set()
-    n_prev = -1
-    n = 0
     to_process = {t}
     done = set()
     while to_process:
@@ -319,8 +331,8 @@ def make_dag(
         to_process = predecessors - done
     return kept_edges
 
-# TODO rename to make_shortest_path
-def make_path(
+
+def make_shortest_path(
     g: Graph,
     s: int,
     t: int,
@@ -341,10 +353,10 @@ def make_path(
 
     Returns:
         A list of consecutive arcs forming a shortest path from ``s`` of ``t``.
-        If several shortest paths exist from ``s`` to ``t``, this function returns
-        an arbitrary shortest path.
+        If several shortest paths exist from ``s`` to ``t``,
+        this function returns an arbitrary shortest path.
     """
-    arcs = make_dag(g, s, t, pmap_vpreds, single_path=True)
+# USELESS |    arcs = make_dag(g, s, t, pmap_vpreds, single_path=True)
     u = t
     path = list()
     while u != s:
@@ -353,14 +365,14 @@ def make_path(
         u = g.source(e)
     return path
 
-#--------------------------------------------------------------------
-# Optimization to stop Dijkstra iteration once distance from s to t
-#--------------------------------------------------------------------
 
-from .aggregated_visitor import AggregatedVisitor
+# --------------------------------------------------------------------
+# Optimization to stop Dijkstra iteration once distance from s to t
+# --------------------------------------------------------------------
 
 class DijkstraStopException(Exception):
     pass
+
 
 class DijkstraTowardsVisitor(DijkstraVisitor):
     """
@@ -388,6 +400,7 @@ class DijkstraTowardsVisitor(DijkstraVisitor):
         if u == self.t:
             raise DijkstraStopException(self.t)
 
+
 def dijkstra_shortest_path(
     g: Graph,
     s: int,
@@ -396,7 +409,7 @@ def dijkstra_shortest_path(
     pmap_vpreds: ReadWritePropertyMap,
     pmap_vdist: ReadWritePropertyMap,
     pmap_vcolor: ReadWritePropertyMap = None,
-    compare: BinaryRelation = Less(), # TODO Ignored, see Heap class.
+    compare: BinaryRelation = Less(),  # TODO Ignored, see Heap class.
     combine: BinaryOperator = ClosedPlus(),
     zero: int = 0,
     infty: int = sys.maxsize,
@@ -444,5 +457,5 @@ def dijkstra_shortest_path(
             vis=vis
         )
     except DijkstraStopException:
-        return make_path(g, s, t, pmap_vpreds)
+        return make_shortest_path(g, s, t, pmap_vpreds)
     return None

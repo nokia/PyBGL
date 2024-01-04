@@ -2,9 +2,10 @@
 # -*- coding: utf-8 -*-
 
 from collections import defaultdict
+from pprint import pformat
 from pybgl import (
     INFINITY,
-    Graph, DirectedGraph, EdgeDescriptor, UndirectedGraph,
+    Graph, DirectedGraph, EdgeDescriptor,
     ReadPropertyMap,
     ReadWritePropertyMap,
     DijkstraVisitor,
@@ -12,7 +13,9 @@ from pybgl import (
     dijkstra_shortest_paths,
     in_ipynb, ipynb_display_graph,
     make_assoc_property_map,
-    make_func_property_map
+    make_func_property_map,
+    make_shortest_path,
+    make_shortest_paths_dag,
 )
 
 
@@ -53,28 +56,33 @@ LINKS = [
 ]
 
 
-def make_graph(
+def make_weighted_graph(
     links: list,
     pmap_eweight: ReadWritePropertyMap,
-    directed: bool = True,
-    build_reverse_edge: bool = True
-):
-    def add_node(un, g, d):
-        u = d.get(un)
-        if u is None:
-            u = g.add_vertex()
-            d[un] = u
-        return u
-
-    g = DirectedGraph() if directed else UndirectedGraph()
-    d = dict()
+    G: object = DirectedGraph,
+    build_reverse_edge: bool = False
+) -> object:
+    vertex_names = sorted(
+        list(
+            {un for (un, vn, w) in links} |
+            {vn for (un, vn, w) in links}
+        )
+    )
+    map_vertices = {
+        un: u
+        for (u, un) in enumerate(vertex_names)
+    }
+    g = G(len(vertex_names))
     for (un, vn, w) in links:
-        u = add_node(un, g, d)
-        v = add_node(vn, g, d)
+        u = map_vertices[un]
+        v = map_vertices[vn]
+
+        # Forward
         (e, added) = g.add_edge(u, v)
         assert added
         pmap_eweight[e] = w
 
+        # Backward
         if build_reverse_edge:
             (e, added) = g.add_edge(v, u)
             assert added
@@ -212,10 +220,10 @@ def test_directed_graph(links: list = None):
         links = LINKS
     map_eweight = defaultdict()
     pmap_eweight = make_assoc_property_map(map_eweight)
-    g = make_graph(
+    g = make_weighted_graph(
         links,
         pmap_eweight,
-        directed=True,
+        DirectedGraph,
         build_reverse_edge=False
     )
 
@@ -294,7 +302,9 @@ def test_directed_symmetric_graph(links: list = None):
         links = LINKS
     map_eweight = defaultdict()
     pmap_eweight = make_assoc_property_map(map_eweight)
-    g = make_graph(LINKS, pmap_eweight, directed=True, build_reverse_edge=True)
+    g = make_weighted_graph(
+        links, pmap_eweight, DirectedGraph, build_reverse_edge=True
+    )
 
     map_vpreds = defaultdict(set)
     map_vdist = defaultdict()
@@ -339,7 +349,7 @@ def test_dijkstra_shortest_path(links: list = None):
     # Prepare graph
     map_eweight = defaultdict(int)
     pmap_eweight = make_assoc_property_map(map_eweight)
-    g = make_graph(links, pmap_eweight, build_reverse_edge=False)
+    g = make_weighted_graph(links, pmap_eweight, build_reverse_edge=False)
 
     # Dijkstra, stopped when vertex 9 is reached
     map_vpreds = defaultdict(set)
@@ -380,7 +390,7 @@ def test_dijkstra_shortest_paths_bandwidth():
         (1, 3, 30),
         (3, 0, 10),
     ]
-    g = make_graph(links, pmap_eweight, build_reverse_edge=False)
+    g = make_weighted_graph(links, pmap_eweight, build_reverse_edge=False)
 
     map_vpreds = defaultdict(set)
     map_vdist = defaultdict(int)
@@ -403,3 +413,67 @@ def test_dijkstra_shortest_paths_bandwidth():
         2: 80,
         3: 30
     }, map_vdist
+
+
+def dijkstra(g, s, pmap_eweight, pmap_vpreds) -> dict:
+    map_vdist = defaultdict()
+    dijkstra_shortest_paths(
+        g, s,
+        pmap_eweight,
+        pmap_vpreds,
+        make_assoc_property_map(map_vdist),
+    )
+
+
+def edge(u: int, v: int, g) -> EdgeDescriptor:
+    (e, ok) = g.edge(u, v)
+    assert ok, f"Can't find edge ({u}, {v})"
+    return e
+
+
+def test_make_shortest_path():
+    links = LINKS
+    map_eweight = defaultdict(int)
+    pmap_eweight = make_assoc_property_map(map_eweight)
+    g = make_weighted_graph(links, pmap_eweight, DirectedGraph)
+
+    s = 0
+    map_vpreds = defaultdict(set)
+    dijkstra(g, s, pmap_eweight, make_assoc_property_map(map_vpreds))
+
+    t = 8
+    path = make_shortest_path(g, s, t, map_vpreds)
+    expected_path = [edge(0, 5, g), edge(5, 6, g), edge(6, 8, g)]
+    assert path == expected_path, pformat(locals())
+
+
+def test_make_shortest_paths_dag():
+    links = [
+        (0, 1, 5),
+        (1, 3, 15),
+        (0, 2, 10),
+        (2, 3, 10),
+        (3, 4, 1),
+        (0, 4, 100),
+    ]
+
+    map_eweight = defaultdict(int)
+    pmap_eweight = make_assoc_property_map(map_eweight)
+    g = make_weighted_graph(links, pmap_eweight, DirectedGraph)
+
+    s = 0
+    map_vpreds = defaultdict(set)
+    dijkstra(g, s, pmap_eweight, make_assoc_property_map(map_vpreds))
+
+    t = 4
+    dag = make_shortest_paths_dag(g, s, t, map_vpreds)
+    assert dag == {
+        # First shortest path
+        edge(0, 1, g),
+        edge(1, 3, g),
+        edge(3, 4, g),
+        # Second shortest path
+        edge(0, 2, g),
+        edge(2, 3, g),
+        edge(3, 4, g),
+    }, pformat(locals())
