@@ -78,11 +78,10 @@ poetry run sphinx-build -b html docs/ docs/_build
 poetry config pypi-token.pypi pypi-xxxxxxxxxxxx
 ```
 
-* Install `poetry-bumpversion` for future version upgrades.
+* Install `bumpversion`:
 
 ```bash
-poetry install --with dev
-poetry self add poetry-bumpversion
+apt install bumpversion
 ```
 
 ### New release
@@ -97,8 +96,7 @@ git commit -m "Updated README.md"
 * Increase the version number using `poetry-bumpversion`:
 
 ```bash
-poetry version patch --dry-run  # Possible values: major / minor / patch
-poetry version patch            # If this is fine
+bumpversion patch  # Possible values: major / minor / patch
 git push
 git push --tags
 ```

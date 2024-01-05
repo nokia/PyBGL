@@ -62,3 +62,4 @@
   * Renamed constructor argument to `Constructor`.
   * Bug fix for the empty automaton.
   * `pmap_vlabel` is now optional.
+* Reverted from `poetry-bumpversion` to `bumpversion` (installation issues under debian).
