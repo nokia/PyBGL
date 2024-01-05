@@ -806,8 +806,9 @@ def make_automaton(
         q = map_vertices[qn]
         r = map_vertices[rn]
         g.add_edge(q, r, a)
-    q0 = map_vertices[q0n]
-    g.set_initial(q0)
+    if g.has_vertex():
+        q0 = map_vertices[q0n]
+        g.set_initial(q0)
     for q in g.vertices():
         qn = vertex_names[q]
         if pmap_vfinal[qn]:

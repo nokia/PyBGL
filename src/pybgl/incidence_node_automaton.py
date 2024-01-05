@@ -74,7 +74,7 @@ class IncidenceNodeAutomaton(NodeAutomaton):
 
 def make_incidence_node_automaton(
     transitions: list,
-    pmap_vlabel: ReadPropertyMap,
+    pmap_vlabel: ReadPropertyMap = None,
     q0n: int = 0,
     pmap_vfinal: ReadPropertyMap = None,
     Constructor=IncidenceNodeAutomaton
@@ -126,5 +126,5 @@ def make_incidence_node_automaton(
         pmap_vlabel,
         q0n,
         pmap_vfinal,
-        Constructor=IncidenceNodeAutomaton
+        Constructor=Constructor
     )

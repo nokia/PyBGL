@@ -261,7 +261,7 @@ def edge(u: int, v: int, g: NodeAutomaton) -> tuple:
 
 def make_node_automaton(
     transitions: list,
-    pmap_vlabel: ReadPropertyMap,
+    pmap_vlabel: ReadPropertyMap = None,
     q0n: int = 0,
     pmap_vfinal: ReadPropertyMap = None,
     Constructor=NodeAutomaton
@@ -330,6 +330,7 @@ def make_node_automaton(
         q = map_vertices[qn]
         r = map_vertices[rn]
         g.add_edge(q, r)
-    q0 = map_vertices[q0n]
-    g.set_initial(q0)
+    if g.has_vertex():
+        q0 = map_vertices[q0n]
+        g.set_initial(q0)
     return g

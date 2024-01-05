@@ -263,3 +263,14 @@ def test_make_incidence_node_automaton_finals():
     assert g.symbol(0) is None
     assert g.symbol(1) == "a"
     assert g.symbol(2) == "b"
+
+
+def test_make_incidence_node_automaton_constructor():
+    class MyAutomaton(IncidenceNodeAutomaton):
+        pass
+    g = make_incidence_node_automaton([])
+    assert isinstance(g, IncidenceNodeAutomaton)
+    assert not isinstance(g, MyAutomaton)
+    g = make_incidence_node_automaton([], Constructor=MyAutomaton)
+    assert isinstance(g, IncidenceNodeAutomaton)
+    assert isinstance(g, MyAutomaton)

@@ -220,3 +220,14 @@ def test_automaton_remove_vertex():
 def test_automaton_graphviz():
     svg = graph_to_html(G1)
     assert isinstance(svg, str)
+
+
+def test_make_automaton_constructor():
+    class MyAutomaton(Automaton):
+        pass
+    g = make_automaton([])
+    assert isinstance(g, Automaton)
+    assert not isinstance(g, MyAutomaton)
+    g = make_automaton([], Constructor=MyAutomaton)
+    assert isinstance(g, Automaton)
+    assert isinstance(g, MyAutomaton)
