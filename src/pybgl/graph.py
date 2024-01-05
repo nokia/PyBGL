@@ -56,7 +56,7 @@ class EdgeDescriptor:
 
     def __str__(self) -> str:
         """
-        Converts this py:class:`EdgeDescriptor` instance to its
+        Converts this :py:class:`EdgeDescriptor` instance to its
         string representation when using :py:func:`str`.
 
         Returns:
@@ -66,7 +66,7 @@ class EdgeDescriptor:
 
     def __repr__(self) -> str:
         """
-        Converts this py:class:`EdgeDescriptor` instance to its
+        Converts this :py:class:`EdgeDescriptor` instance to its
         string representation when using :py:func:`repr`.
 
         Returns:
@@ -76,7 +76,7 @@ class EdgeDescriptor:
 
     def __hash__(self) -> int:
         """
-        Computes the hash of this py:class:`EdgeDescriptor` instance.
+        Computes the hash of this :py:class:`EdgeDescriptor` instance.
 
         Returns:
             The corresponding hash.
@@ -85,11 +85,11 @@ class EdgeDescriptor:
 
     def __eq__(self, e) -> bool:
         """
-        Checks whether this py:class:`EdgeDescriptor` instance equals
+        Checks whether this :py:class:`EdgeDescriptor` instance equals
         another one.
 
         Args:
-            e (EdgeDescriptor): The other py:class:`EdgeDescriptor` instance.
+            e (EdgeDescriptor): The other :py:class:`EdgeDescriptor` instance.
 
         Returns:
             ``True`` if ``self`` and ``e`` are equal,
@@ -104,11 +104,11 @@ class EdgeDescriptor:
 
     def __lt__(self, e) -> bool:
         """
-        Checks whether this py:class:`EdgeDescriptor` instance strictly
+        Checks whether this :py:class:`EdgeDescriptor` instance strictly
         preceeds another one.
 
         Args:
-            e (EdgeDescriptor): The other py:class:`EdgeDescriptor` instance.
+            e (EdgeDescriptor): The other :py:class:`EdgeDescriptor` instance.
 
         Returns:
             ``True`` if ``self`` strictly preceeds ``e``,

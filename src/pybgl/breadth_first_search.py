@@ -76,7 +76,7 @@ class DefaultBreadthFirstSearchVisitor:
     def non_tree_edge(self, e: EdgeDescriptor, g: Graph):
         """
         Method invoked (in addition to
-        py:meth:`DefaultBreadthFirstSearchVisitor.examine_edge`)
+        :py:meth:`DefaultBreadthFirstSearchVisitor.examine_edge`)
         if the edge is not a tree edge.
 
         Args:

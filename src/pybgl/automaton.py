@@ -128,7 +128,7 @@ class Automaton(DirectedGraph):
         Raises:
             ``RuntimeError`` as a :py:class:`Automaton` must not
             support this primitive. If you require it, use the
-            py:class:`IncidenceAutomaton` class.
+            :py:class:`IncidenceAutomaton` class.
 
         Returns:
             An iterator over the edges of ``q``.

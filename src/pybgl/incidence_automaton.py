@@ -105,7 +105,7 @@ def make_incidence_automaton(
     See :py:func:`make_automaton` for additional details.
 
     Returns:
-        The corresponding py:class:`IncidenceAutomaton` instance.
+        The corresponding :py:class:`IncidenceAutomaton` instance.
     """
     return make_automaton(
         transitions, q0n, pmap_vfinal,
