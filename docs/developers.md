@@ -66,38 +66,47 @@ poetry run sphinx-build -b html docs/ docs/_build
 ## Publish a release
 ### Initialization
 
-1. Create a token in Pypi.
+* Create a token in Pypi.
 
-2. Configure this token in your GitHub repository (in the settings tab)
-* `PYPI_USERNAME`: `__token__`
-* `PYPI_TOKEN`: `pypi-xxxxxxxxxxxx`
+* Configure this token in your GitHub repository (in the settings tab)
+  * `PYPI_USERNAME`: `__token__`
+  * `PYPI_TOKEN`: `pypi-xxxxxxxxxxxx`
 
-3. Configure this token in poetry so that you can use `poetry publish` in the future
+* Configure this token in poetry so that you can use `poetry publish` in the future.
+
 ```bash
 poetry config pypi-token.pypi pypi-xxxxxxxxxxxx
 ```
 
+* Install `poetry-bumpversion` for future version upgrades.
+
+```bash
+poetry install --with dev
+poetry self add poetry-bumpversion
+```
+
 ### New release
 
-1. Update the changelog `HISTORY.md`, then add and commit this change:
+* Update the changelog `HISTORY.md`, then add and commit this change:
 
 ```bash
 git add README.md
 git commit -m "Updated README.md"
 ```
 
-2. Increase the version number using `bumpversion`:
+* Increase the version number using `poetry-bumpversion`:
 
 ```bash
-poetry version patch --dry-run  # Possible values major / minor / patch
+poetry version patch --dry-run  # Possible values: major / minor / patch
 poetry version patch            # If this is fine
 git push
 git push --tags
 ```
 
-3. Optionnally, in GitHub, create a release for the tag you have created.
-It publishes the package to PyPI (see `.github/workflows/publish_on_pypi.yml`).
-Alternatively, you could run:
+* Publish the release
+  * _Method 1:_ In GitHub, create a release for the tag you have created.
+    It publishes the package to PyPI (see `.github/workflows/publish_on_pypi.yml`).
+  * _Method 2:_ Alternatively, you could run:
 
 ```bash
 poetry publish
@@ -106,11 +115,14 @@ poetry publish
 ## Modifying the project dependencies
 
 Update the `pyproject.toml` file. Then, run:
+
 ```bash
 poetry lock
 poetry install
 ```
+
 You could check the dependencies of your wheels thanks to `pkginfo`:
+
 ```bash
 pkginfo -f requires_dist dist/*whl
 ```
