@@ -76,7 +76,8 @@ def make_incidence_node_automaton(
     transitions: list,
     pmap_vlabel: ReadPropertyMap,
     q0n: int = 0,
-    pmap_vfinal: ReadPropertyMap = None
+    pmap_vfinal: ReadPropertyMap = None,
+    Constructor=IncidenceNodeAutomaton
 ) -> IncidenceNodeAutomaton:
     """
     Specialization of the :py:func:`make_node_automaton` function for
@@ -96,8 +97,8 @@ def make_incidence_node_automaton(
         pmap_vfinal (ReadPropertyMap): A property map
             which maps each state identifier with a boolean indicating
             whether the state is final (``True``) or not (``False``).
-        NodeAutomatonClass: The class use to allocate the automaton.
-            Defaults to :py:class:`NodeAutomaton`.
+        Constructor: The class use to allocate the automaton.
+            Defaults to :py:class:`IncidenceNodeAutomaton`.
 
     Example:
 
@@ -125,5 +126,5 @@ def make_incidence_node_automaton(
         pmap_vlabel,
         q0n,
         pmap_vfinal,
-        NodeAutomatonClass=IncidenceNodeAutomaton
+        Constructor=IncidenceNodeAutomaton
     )

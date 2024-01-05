@@ -751,7 +751,7 @@ def make_automaton(
     transitions: list,
     q0n: int = 0,
     pmap_vfinal: ReadPropertyMap = None,
-    AutomatonClass=Automaton
+    Constructor=Automaton
 ):
     """
     Makes an automaton of type `AutomatonClass`
@@ -771,7 +771,7 @@ def make_automaton(
         pmap_vfinal (ReadPropertyMap): A property map
             which maps each state identifier with a boolean indicating
             whether the state is final (``True``) or not (``False``).
-        AutomatonClass: The class use to allocate the automaton.
+        Constructor: The class use to allocate the automaton.
             Defaults to :py:class:`Automaton`.
 
     Example:
@@ -801,7 +801,7 @@ def make_automaton(
         qn: q
         for (q, qn) in enumerate(vertex_names)
     }
-    g = AutomatonClass(len(vertex_names))
+    g = Constructor(len(vertex_names))
     for (qn, rn, a) in transitions:
         q = map_vertices[qn]
         r = map_vertices[rn]

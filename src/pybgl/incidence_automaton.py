@@ -109,5 +109,5 @@ def make_incidence_automaton(
     """
     return make_automaton(
         transitions, q0n, pmap_vfinal,
-        AutomatonClass=IncidenceAutomaton
+        Constructor=IncidenceAutomaton
     )

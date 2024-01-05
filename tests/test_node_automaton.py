@@ -212,7 +212,7 @@ def test_make_node_automaton():
     g = make_node_automaton(
         edges,
         pmap_vlabel=make_assoc_property_map(map_vlabel),
-        NodeAutomatonClass=MyNodeAutomaton
+        Constructor=MyNodeAutomaton
     )
     assert isinstance(g, MyNodeAutomaton)
     for u in g.vertices():

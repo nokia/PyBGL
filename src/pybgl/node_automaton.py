@@ -264,7 +264,7 @@ def make_node_automaton(
     pmap_vlabel: ReadPropertyMap,
     q0n: int = 0,
     pmap_vfinal: ReadPropertyMap = None,
-    NodeAutomatonClass=NodeAutomaton
+    Constructor=NodeAutomaton
 ) -> NodeAutomaton:
     """
     Makes an automaton of type `NodeAutomatonClass`
@@ -286,7 +286,7 @@ def make_node_automaton(
         pmap_vfinal (ReadPropertyMap): A property map
             which maps each state identifier with a boolean indicating
             whether the state is final (``True``) or not (``False``).
-        NodeAutomatonClass: The class use to allocate the automaton.
+        Constructor: The class use to allocate the automaton.
             Defaults to :py:class:`NodeAutomaton`.
 
     Example:
@@ -320,7 +320,7 @@ def make_node_automaton(
         qn: q
         for (q, qn) in enumerate(vertex_names)
     }
-    g = NodeAutomatonClass(0)
+    g = Constructor(0)
     for vertex_name in vertex_names:
         a = pmap_vlabel[vertex_name]
         u = g.add_vertex(a)
