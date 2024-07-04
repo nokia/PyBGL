@@ -249,8 +249,12 @@ class GraphView:
         Returns:
             The corresponding graphviz string.
         """
+        vs = set(self.vertices())
+        es = set(self.edges())
+        vs_ = kwargs.pop("vs", set())
+        es_ = kwargs.pop("es", set())
         return self.g.to_dot(
-            vs=[u for u in self.vertices()],
-            es=[e for e in self.edges()],
+            vs=(vs & vs_ if vs_ else vs),
+            es=(es & es_ if es_ else es),
             *cls, **kwargs
         )
