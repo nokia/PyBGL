@@ -196,6 +196,15 @@ class Graph:
         # Remove u
         del self.adjacencies[u]
 
+    def clear(self):
+        """
+        Clears every vertex and edge from this
+        :py:class:`Graph` instance.
+        """
+        self.last_vertex_id = 0
+        for u in list(self.vertices()):
+            self.remove_vertex(u)
+
     def vertices(self) -> iter:
         """
         Gets an iterator over the vertices involved in this

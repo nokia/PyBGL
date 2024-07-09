@@ -104,6 +104,18 @@ def test_graph_remove_vertex():
         assert set(g.edges()) == set()
 
 
+def test_graph_clear():
+    for G in [DirectedGraph, UndirectedGraph]:
+        g = G(3)
+        (e1, _) = g.add_edge(0, 1)
+        (e2, _) = g.add_edge(0, 1)
+        (e3, _) = g.add_edge(0, 2)
+        (e4, _) = g.add_edge(0, 2)
+        g.clear()
+        assert set(g.edges()) == set()
+        assert set(g.vertices()) == set()
+
+
 def test_graph_g_directed():
     for G in [DirectedGraph, UndirectedGraph]:
         g = G()
