@@ -251,10 +251,10 @@ class GraphView:
         """
         vs = set(self.vertices())
         es = set(self.edges())
-        vs_ = kwargs.pop("vs", set())
-        es_ = kwargs.pop("es", set())
+        vs_ = kwargs.pop("vs", None)
+        es_ = kwargs.pop("es", None)
         return self.g.to_dot(
-            vs=(vs & vs_ if vs_ else vs),
-            es=(es & es_ if es_ else es),
+            vs=(vs & vs_) if vs_ is not None else vs,
+            es=(es & es_) if es_ is not None else es,
             *cls, **kwargs
         )
