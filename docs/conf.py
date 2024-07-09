@@ -30,6 +30,7 @@ needs_sphinx = "1.4"
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
+    "sphinx_copybutton",
     "sphinx.ext.viewcode",
     "sphinx_mdinclude",  # https://pypi.org/project/sphinx_mdinclude/
     "sphinx.ext.napoleon",
@@ -71,7 +72,7 @@ master_doc = "index"
 project = "pybgl"
 doc_title = project + " documentation"
 module_name = "pybgl"
-copyright = "2023, Nokia"
+copyright = "2024, Nokia"
 author = "Marc-Olivier Buob"
 description = (
     "PyBGL is a pure python3 graph library inspired from the BGL "
@@ -107,6 +108,9 @@ pygments_style = "sphinx"
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
+# See https://sphinx-copybutton.readthedocs.io/en/latest/use.html
+copybutton_prompt_text = r">>> |\.\.\. |\$ |In \[\d*\]: | {2,5}\.\.\.: | {5,8}: "
+copybutton_prompt_is_regexp = True
 
 # -- Options for HTML output -------------------------------------------
 

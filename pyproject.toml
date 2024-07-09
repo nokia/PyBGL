@@ -16,6 +16,11 @@ testpaths = [
     "tests"
 ]
 
+# https://github.com/python-poetry/poetry/issues/9293
+[[tool.poetry.source]]
+name = "pypi-public"
+url = "https://pypi.org/simple/"
+
 [tool.poetry.dependencies]
 python = ">= 3.8, < 4.0"
 ipython = ">= 8.10.0"
@@ -43,7 +48,8 @@ optional = true
 
 [tool.poetry.group.docs.dependencies]
 pydata-sphinx-theme = "*"
-Sphinx = ">=1.4"
+Sphinx = ">=6.0.0"
+sphinx_copybutton = "*"
 sphinx_mdinclude = "*"
 
 [build-system]
