@@ -66,7 +66,8 @@ coverage: ## check code coverage quickly with the default Python
 docs: ## generate Sphinx HTML documentation, including API docs
 	rm -rf docs/_build
 	rm -rf docs/_autosummary
-	poetry run sphinx-apidoc -f -o docs/ src/
+	rm -rf docs/pybgl.*.rst
+	poetry run sphinx-apidoc -f -o docs/ src/ --separate
 	poetry run sphinx-build -b html docs/ docs/_build/html
 	$(BROWSER) docs/_build/html/index.html
 
