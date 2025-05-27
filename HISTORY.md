@@ -74,3 +74,7 @@
   * The API pages are now separated
   * Fixed documentation build
   * Added `sphinx_copybutton`
+
+## 0.11.2 (2025-05-27)
+
+* Fixed documentation build (readthedoc)
