@@ -9,7 +9,7 @@ import sys
 from html.parser import HTMLParser
 from subprocess import Popen, PIPE
 from .graph import Graph, EdgeDescriptor
-from .graphviz_impl import *
+from .graphviz_impl import *  # noqa: F401
 
 
 # ------------------------------------------------------------------
