@@ -29,7 +29,7 @@ class AggregatedVisitor:
         """
         def wrapper(*args, **kwargs):
             for vis in self.visitors:
-                getattr(vis, method_name)(*args)
+                getattr(vis, method_name)(*args, **kwargs)
         return wrapper
 
     @staticmethod
